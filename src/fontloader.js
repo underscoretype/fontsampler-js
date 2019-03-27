@@ -13,13 +13,43 @@ var supportsWoff2 = (function() {
 
     return f.status === 'loading' || f.status === 'loaded';
 })();
-  
-function bestWoff(woff, woff2) {
-    return woff2 && supportsWoff2 ? woff2 : woff
+
+function getExtension(path) {
+    console.log("PATH", path)
+    return path.substring(path.lastIndexOf(".") + 1)
 }
 
-function loadFont(file, callback, errorCallback) {
-    console.log("LOAD FONT", file, file.lastIndexOf("/"))
+function bestWoff(files) {
+    if (typeof(files) !== "object" || !Array.isArray(files)) {
+        return false
+    }
+
+    var woffs = files.filter(function(value, index) {
+            console.log("EXT", getExtension(value))
+            return getExtension(value) === "woff"
+        }),
+        woff2s = files.filter(function(value, index) {
+            return getExtension(value) === "woff2"
+        }),
+        woff, woff2
+
+    if (woffs.length > 1 || woff2s.length > 1) {
+        throw new Error(errors.tooManyFiles + files)
+    }
+
+    if (woff2s.length > 0 && supportsWoff2) {
+        return woff2s.shift()
+    }
+
+    if (woffs.length > 0) {
+        return woffs.shift()
+    }
+
+    return false
+}
+
+function loadFont(file, callback) {
+    console.log("LOAD FONT", file)
     if (!file) {
         return false
     }
@@ -30,7 +60,7 @@ function loadFont(file, callback, errorCallback) {
     console.log("family", family)
 
     var font = new FontFaceObserver(family)
-    font.load().then(function (f) {
+    font.load().then(function(f) {
         if (typeof(callback) === "function") {
             callback(f)
         }
@@ -38,9 +68,9 @@ function loadFont(file, callback, errorCallback) {
 
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
-        ff.load().then(function () {
+        ff.load().then(function() {
             document.fonts.add(ff)
-        }).catch (function () {
+        }).catch(function() {
             throw new Error(errors.fileNotfound + file)
         })
     } else {
@@ -50,10 +80,10 @@ function loadFont(file, callback, errorCallback) {
     }
 }
 
-function fromFiles(files, callback, errorCallback) {
+function fromFiles(files, callback) {
     // TODO bestWoff expects a choice from 2 files, woff and woff2, but this isn't enforced in any way
-    font = bestWoff(files[0], files[1])
-    loadFont(font, callback, errorCallback)
+    font = bestWoff(files)
+    loadFont(font, callback)
 }
 
 module.exports = {

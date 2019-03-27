@@ -29,6 +29,7 @@ function Fontsampler(root, fonts, opt) {
     var defaults = {
         generateDOM: false,
         initialText: "",
+        wrapUIElements: true,
         tester: {
             selector: ".fontsampler-tester",
             editable: true
@@ -121,7 +122,7 @@ function Fontsampler(root, fonts, opt) {
             return false
         }
 
-        for (index in fonts) {
+        for (var index in fonts) {
             if (typeof(fonts[index]) !== "object") {
                 console.error(fonts[index])
                 return false
@@ -136,7 +137,7 @@ function Fontsampler(root, fonts, opt) {
         return true
     }
 
-    function extractFontsFromDOM(selector) {
+    function extractFontsFromDOM() {
         var select = root.querySelector("[data-property='fontfamily']"),
             options = [],
             fonts = []
@@ -149,8 +150,7 @@ function Fontsampler(root, fonts, opt) {
 
         for (i = 0; i < options.length; i++) {
             var opt = options[i],
-                font = {},
-                woff, woff2
+                font = {}
 
             font.name = opt.getAttribute("value")
             font.files = []
@@ -183,15 +183,12 @@ function Fontsampler(root, fonts, opt) {
 
         fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
-        }, function(f) {
-            console.log("Failed to load")
         })
     }
 
     function init() {
         interface.init()
         addEventListeners()
-        console.log("LOAD FIRST")
         loadFont(0)
     }
 

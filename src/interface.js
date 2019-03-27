@@ -14,13 +14,11 @@ function Interface(_root, fonts, options) {
 
         root = _root
 
-        var nodes = root.childNodes
-
-        for (key in types) {
+        for (var key in types) {
             var element = false
 
             if (options.generateDOM) {
-                element = setupElement(options[key], options)
+                element = setupElement(key, options[key])
             } else {
                 element = root.querySelector("[data-property='" + key + "']")
             }
@@ -40,7 +38,7 @@ function Interface(_root, fonts, options) {
                 "autocapitalize": "off",
                 "spellcheck": "false",
             }
-            for (a in attr) {
+            for (var a in attr) {
                 tester.setAttribute(a, attr[a])
             }
             tester.setAttribute("contenteditable", options.tester.editable)
@@ -65,26 +63,30 @@ function Interface(_root, fonts, options) {
         }
     }
 
-    function setupElement(opt) {
+    function setupElement(key, opt) {
         console.log("setupElement", opt)
-        var element = root.querySelector(opt.selector)
+        var element = root.querySelector("[data-property='" + key + "']")
 
         if (element) {
             // TODO validate init values, data-property etc.
             console.log("SKIP EXISTING DOM ELEMENT", key)
         } else {
+            var appendTo = root
+            if (options.wrapUIElements) {
+                appendTo = document.createElement("div")
+                appendTo.className = "fontsampler-ui-element-" + key
+                root.append(appendTo)
+            }
+
+            if (opt.label) {
+                appendTo.append(generateLabel(opt.label, opt.unit, opt.init, key))
+            }
             if (types[key] === "slider") {
-                if (opt["label"]) {
-                    root.append(generateLabel(opt["label"], opt["unit"], opt["init"], key))
-                }
                 element = generateSlider(key, opt)
-                root.append(element)
+                appendTo.append(element)
             } else if (types[key] === "dropdown") {
-                if (opt["label"]) {
-                    root.append(generateLabel(opt["label"], opt["unit"], opt["init"], key))
-                }
                 element = generateDropdown(key, opt)
-                root.append(element)
+                appendTo.append(element)
             }
         }
 
@@ -92,16 +94,28 @@ function Interface(_root, fonts, options) {
     }
 
     function generateLabel(labelText, labelUnit, labelValue, relatedInput) {
-        var label = document.createElement("label")
-        label.setAttribute("for", relatedInput)
-        label.appendChild(document.createTextNode(labelText))
+        var label = document.createElement("label"),
+            text = document.createElement("span"),
+            val, unit
 
-        var display = document.createElement("span")
-        display.className = "value"
+        label.setAttribute("for", relatedInput)
+
+        text.className = "fontsampler-label-text"
+        text.appendChild(document.createTextNode(labelText))
+        label.appendChild(text)
+
         if (labelUnit && labelValue) {
-            display.appendChild(document.createTextNode(labelValue + " " + labelUnit))
+
+            val = document.createElement("span")
+            val.className = "fontsampler-label-value"
+            val.appendChild(document.createTextNode(labelValue))
+            label.appendChild(val)
+
+            unit = document.createElement("span")
+            unit.className = "fontsampler-label-unit"
+            unit.appendChild(document.createTextNode(labelUnit))
+            label.appendChild(unit)
         }
-        label.appendChild(display)
 
         return label
     }
@@ -123,16 +137,13 @@ function Interface(_root, fonts, options) {
         return input
     }
 
-    function generateDropdown(key, opt) {
+    function generateDropdown(key) {
         var dropdown = document.createElement("select")
 
         dropdown.setAttribute("value", name)
-        // dropdown.setAttribute("class", opt.selector)
         dropdown.dataset.property = key
 
-        console.log("DROPDOWN", fonts)
-
-        for (index in fonts) {
+        for (var index in fonts) {
             var option = document.createElement("option")
 
             option.value = fonts[index].name
