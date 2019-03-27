@@ -1,0 +1,16 @@
+{
+    "asi": true,
+    "curly": true,
+    "eqeqeq": true,
+    "freeze": true,
+    "browser": true,
+    "laxbreak": false,
+    "unused": true,
+    "evil": true,
+    "latedef": false,
+    "onevar": true,
+    "trailing": true,
+    "white": false,
+    "indent": 4,
+    "globals": {}
+}

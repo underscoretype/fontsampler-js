@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf8">
+    <script src="../dist/fontsampler.js"></script>
+    <script>
+        window.onload = function(e) {
+            console.log("Fontsampler", Fontsampler)
+            var fs = Fontsampler(document.getElementById("demo"))
+            fs.init()
+            console.log(fs)
+        }
+    </script>
+</head>
+
+<body>
+    <div id="demo" class="fontsampler">
+        <div class="fontsampler-ui">
+            <div class="fontsampler-select">
+                <select autocomplete="off">
+                    <option value="0" data-woff="./alegreya-italic-webfont.woff" data-woff2="./alegreya-italic-webfont.woff2" selected="selected">Alegreya</option>
+                    <option value="1" data-woff="./abrilfatface-regular-webfont.woff">Abril</option>
+                </select>
+            </div>
+            <div class="fontsampler-slider fontsampler-slider-font-size">
+                <label>
+                    <span>size</span>
+                    <span class="label"><span>8</span>px</span>
+                    <div class="range">
+                        <input class="fontsampler-fontsize" autocomplete="off" type="range" data-property="fontsize" 
+                            data-unit="px" min="8" max="96" data-init="480:100,768:120,1280:140">
+                    </div>
+                </label>
+            </div>
+            <div class="fontsampler-slider fontsampler-slider-line-height">
+                <label>
+                    <span>line</span>
+                    <span class="label"><span>120</span>%</span>
+                    <div class="range">
+                        <input autocomplete="off" type="range" data-property="line-height" 
+                            data-unit="%" min="8" max="96" data-init="480:100,768:120,1280:140">
+                    </div>
+                </label>
+            </div>
+        </div>
+        <div class="fontsampler-input no-translate loading" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <span>DEMODEMODEMO</span>
+        </div>
+    </div>
+</body>
+
+</html>

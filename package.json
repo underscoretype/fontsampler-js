@@ -1,0 +1,33 @@
+{
+    "name": "fontsampler-js",
+    "version": "0.0.1",
+    "description": "Render webfont testers",
+    "author": {
+        "name": "Johannes Neumeier",
+        "email": "hello@johannesneumeier.com"
+    },
+    "bugs": {
+        "url": "https://github.com/kontur/fontsampler-js/issues"
+    },
+    "license": "GNU GPLv3",
+    "main": "src/main.js",
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/kontur/fontsampler-js.git"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "http-server",
+        "demo": "open http://localhost:8080/demo/index.html",
+        "js": "watchify src/*.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'"
+    },
+    "dependencies": {
+        "fontfaceobserver": "^2.1.0",
+        "woff2-feature-test": "^1.0.3"
+    },
+    "devDependencies": {
+        "browserify": "^16.2.3",
+        "http-server": "^0.11.1",
+        "uglifyjs": "^2.4.11"
+    }
+}
