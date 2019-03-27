@@ -68,7 +68,7 @@ function Interface(_root, fonts, options) {
         var element = root.querySelector("[data-property='" + key + "']")
 
         if (element) {
-            // TODO validate init values, data-property etc.
+            // TODO validate & set init values, step, etc.
             console.log("SKIP EXISTING DOM ELEMENT", key)
         } else {
             var appendTo = root
@@ -160,10 +160,10 @@ function Interface(_root, fonts, options) {
 
         var property = e.currentTarget.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "changed"),
-            label = root.querySelector("label[for='" + property + "'] .value")
+            label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
 
         if (label) {
-            label.innerText = getCSSValue(property)
+            label.innerText = getValue(property)
         }
 
         root.dispatchEvent(customEvent)

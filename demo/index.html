@@ -31,34 +31,34 @@
         <div>
             <div>
                 <select autocomplete="off" data-property="fontfamily">
-                    <option value="Alegreya" data-woff="./alegreya-italic-webfont.woff" data-woff2="./alegreya-italic-webfont.woff2" selected="selected">Alegreya</option>
-                    <option value="Abril" data-woff="./abrilfatface-regular-webfont.woff">Abril</option>
+                    <option value="Alegreya Regular" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2" selected="selected">Alegreya Regular</option>
+                    <option value="Alegreya Italic" data-woff="./fonts/alegreya/alegreya-v12-latin-italic.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-italic.woff2">Alegreya Italic</option>
                 </select>
             </div>
             <div>
-                <label>
-                    <span>Size</span>
-                    <span class="label"><span class="value">8</span>px</span>
+                <label for="fontsize">
+                    <span class="fontsampler-label-text">Size</span>
+                    <span class="label"><span class="fontsampler-label-value">8</span><span class="fontsampler-label-unit">px</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="fontsize" data-unit="px" min="8" max="96" data-init="48">
+                        <input autocomplete="off" type="range" data-property="fontsize" data-unit="px" min="8" max="96" step="1" data-init="48">
                     </div>
                 </label>
             </div>
             <div>
-                <label>
-                    <span>Leading</span>
-                    <span class="label"><span class="value">120</span>%</span>
+                <label for="lineheight">
+                    <span class="fontsampler-label-text">Leading</span>
+                    <span class="label"><span class="fontsampler-label-value">120</span><span class="fontsampler-label-unit">%</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="lineheight" data-unit="%" min="60" max="200" data-init="120">
+                        <input autocomplete="off" type="range" data-property="lineheight" data-unit="%" min="60" max="200" step="10" data-init="120">
                     </div>
                 </label>
             </div>
             <div>
-                <label>
-                    <span>Letterspacing</span>
-                    <span class="label"><span class="value">120</span>%</span>
+                <label for="letterspacing">
+                    <span class="fontsampler-label-text">Letterspacing</span>
+                    <span class="label"><span class="fontsampler-label-value">120</span><span class="fontsampler-label-unit">%</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="letterspacing" data-unit="em" min="-0.5" max="0.5" data-init="0">
+                        <input autocomplete="off" type="range" data-property="letterspacing" data-unit="em" min="-0.05" max="0.05" step="0.01" data-init="0">
                     </div>
                 </label>
             </div>
@@ -72,7 +72,7 @@
 
             // Demo minimal
             Fontsampler(document.getElementById("demo-minimal"), [
-                { name: "Abril", files: ["./abrilfatface-regular-webfont.woff"] }
+                { name: "IBM Plex Sans Regular", files: ["./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff"] }
             ]).init()
 
             // Demo JS
@@ -109,8 +109,8 @@
                     }
                 },
                 fonts = [
-                    { name: "Alegreya Italic", files: ["./alegreya-italic-webfont.woff", "./alegreya-italic-webfont.woff2"] },
-                    { name: "Abril Fat Face", files: ["./abrilfatface-regular-webfont.woff"] },
+                    { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
+                    { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
                 ]
             Fontsampler(document.getElementById("demo-js"), fonts, options).init()
 
