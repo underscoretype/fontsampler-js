@@ -4,50 +4,120 @@
 <head>
     <meta charset="utf8">
     <script src="../dist/fontsampler.js"></script>
-    <script>
-        window.onload = function(e) {
-            console.log("Fontsampler", Fontsampler)
-            var fs = Fontsampler(document.getElementById("demo"))
-            fs.init()
-            console.log(fs)
+    <style type="text/css">
+        .demo {
+            border: 1px dotted lightgrey;
+            padding: 1rem;
         }
-    </script>
+    </style>
 </head>
 
 <body>
-    <div id="demo" class="fontsampler">
-        <div class="fontsampler-ui">
-            <div class="fontsampler-select">
-                <select autocomplete="off">
-                    <option value="0" data-woff="./alegreya-italic-webfont.woff" data-woff2="./alegreya-italic-webfont.woff2" selected="selected">Alegreya</option>
-                    <option value="1" data-woff="./abrilfatface-regular-webfont.woff">Abril</option>
+    <h1>Fontsampler.js</h1>
+    <p>A configurable standalone webfont type tester for displaying and manipulating sample text.</p>
+
+    <h2>Examples</h2>
+    <p>Fontsampler.js can be configured either through DOM nodes and attributes or setup entirely from Javascript.</p>
+
+    <h3>Bare minimum configuration (JS)</h3>
+    <div id="demo-minimal" class="demo">Demo minimal</div>
+
+
+    <h3>Demo JS configuration</h3>
+    <div id="demo-js" class="demo">Demo JS configuration</div>
+
+    <h3>Demo DOM configuration</h3>
+    <div id="demo-dom" class="demo">
+        <div>
+            <div>
+                <select autocomplete="off" data-property="fontfamily">
+                    <option value="Alegreya" data-woff="./alegreya-italic-webfont.woff" data-woff2="./alegreya-italic-webfont.woff2" selected="selected">Alegreya</option>
+                    <option value="Abril" data-woff="./abrilfatface-regular-webfont.woff">Abril</option>
                 </select>
             </div>
-            <div class="fontsampler-slider fontsampler-slider-font-size">
+            <div>
                 <label>
-                    <span>size</span>
-                    <span class="label"><span>8</span>px</span>
+                    <span>Size</span>
+                    <span class="label"><span class="value">8</span>px</span>
                     <div class="range">
-                        <input class="fontsampler-fontsize" autocomplete="off" type="range" data-property="fontsize" 
-                            data-unit="px" min="8" max="96" data-init="480:100,768:120,1280:140">
+                        <input autocomplete="off" type="range" data-property="fontsize" data-unit="px" min="8" max="96" data-init="48">
                     </div>
                 </label>
             </div>
-            <div class="fontsampler-slider fontsampler-slider-line-height">
+            <div>
                 <label>
-                    <span>line</span>
-                    <span class="label"><span>120</span>%</span>
+                    <span>Leading</span>
+                    <span class="label"><span class="value">120</span>%</span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="line-height" 
-                            data-unit="%" min="8" max="96" data-init="480:100,768:120,1280:140">
+                        <input autocomplete="off" type="range" data-property="lineheight" data-unit="%" min="60" max="200" data-init="120">
+                    </div>
+                </label>
+            </div>
+            <div>
+                <label>
+                    <span>Letterspacing</span>
+                    <span class="label"><span class="value">120</span>%</span>
+                    <div class="range">
+                        <input autocomplete="off" type="range" data-property="letterspacing" data-unit="em" min="-0.5" max="0.5" data-init="0">
                     </div>
                 </label>
             </div>
         </div>
-        <div class="fontsampler-input no-translate loading" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <span>DEMODEMODEMO</span>
+        <div data-property="tester" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <span>Demo from DOM</span>
         </div>
     </div>
+    <script>
+        window.onload = function() {
+
+            // Demo minimal
+            Fontsampler(document.getElementById("demo-minimal"), [
+                { name: "Abril", files: ["./abrilfatface-regular-webfont.woff"] }
+            ]).init()
+
+            // Demo JS
+            var options = {
+                    generateDOM: true,
+                    initialText: "Hello Tester!",
+                    fontsize: {
+                        selector: ".fontsampler-fontsize",
+                        min: "12",
+                        max: "96",
+                        init: "18",
+                        unit: "px",
+                        label: "Size"
+                    },
+                    lineheight: {
+                        selector: ".fontsampler-lineheight",
+                        min: "60",
+                        max: "120",
+                        init: "100",
+                        unit: "%",
+                        label: "Leading"
+                    },
+                    letterspacing: {
+                        selector: ".fontsampler-letterspacing",
+                        min: "-1",
+                        max: "1",
+                        unit: "em",
+                        init: "0",
+                        label: "Letterspacing"
+                    },
+                    fontfamily: {
+                        selector: ".fontsampler-fontfamily",
+                        label: "Fontfamily"
+                    }
+                },
+                fonts = [
+                    { name: "Alegreya Italic", files: ["./alegreya-italic-webfont.woff", "./alegreya-italic-webfont.woff2", "./alegreya-italic-webfont.woff2"] },
+                    { name: "Abril Fat Face", files: ["./abrilfatface-regular-webfont.woff"] },
+                ]
+            Fontsampler(document.getElementById("demo-js"), fonts, options).init()
+
+            // Demo DOM
+            Fontsampler(document.getElementById("demo-dom")).init()
+        }
+    </script>
 </body>
 
 </html>

@@ -1,28 +1,76 @@
-function Interface() {
+function Interface(_root, fonts, options) {
 
     var types = {
-        "fontsize": "slider",
-        "lineheight": "slider",
-        "letterspacing": "slider",
-        "fontfamily": "dropdown"
-    },
-    root = null
+            "fontsize": "slider",
+            "lineheight": "slider",
+            "letterspacing": "slider",
+            "fontfamily": "dropdown"
+        },
+        root = null,
+        tester = null
 
-    function init(_root, options) {
+    function init() {
         console.log("init interface on", root, "with options", options)
 
         root = _root
 
-        for (key in options) {
-            setupElement(options[key], options)
+        var nodes = root.childNodes
+
+        for (key in types) {
+            var element = false
+
+            if (options.generateDOM) {
+                element = setupElement(options[key], options)
+            } else {
+                element = root.querySelector("[data-property='" + key + "']")
+            }
+
+            if (element) {
+                element.addEventListener("change", onChange)
+            }
+        }
+
+        tester = root.querySelector("[data-property='tester']")
+        console.log("TESTER", tester)
+        if (!tester) {
+            tester = document.createElement("div")
+            var attr = {
+                "autocomplete": "off",
+                "autocorrect": "off",
+                "autocapitalize": "off",
+                "spellcheck": "false",
+            }
+            for (a in attr) {
+                tester.setAttribute(a, attr[a])
+            }
+            tester.setAttribute("contenteditable", options.tester.editable)
+
+            tester.dataset.property = "tester"
+
+            // If the original root element was a single DOM element with some text, copy that
+            // text into the tester
+            if (options.initialText) {
+                tester.append(document.createTextNode(options.initialText))
+            } else if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE && !options.initialText) {
+                tester.append(document.createTextNode(root.childNodes[0].textContent))
+            }
+
+            // If the original root element had only a single text node, replace it with the tester
+            // otherwise append the tester element
+            if (root.childNodes.length !== 1) {
+                root.append(tester)
+            } else if (root.childNodes.length === 1) {
+                root.replaceChild(tester, root.childNodes[0])
+            }
         }
     }
 
-    function setupElement(opt, allOpt) {
+    function setupElement(opt) {
+        console.log("setupElement", opt)
         var element = root.querySelector(opt.selector)
 
         if (element) {
-            // TODO determine if to set init values, data-property etc.
+            // TODO validate init values, data-property etc.
             console.log("SKIP EXISTING DOM ELEMENT", key)
         } else {
             if (types[key] === "slider") {
@@ -32,16 +80,15 @@ function Interface() {
                 element = generateSlider(key, opt)
                 root.append(element)
             } else if (types[key] === "dropdown") {
-                element = generateDropdown(key, opt, allOpt.fonts)
+                if (opt["label"]) {
+                    root.append(generateLabel(opt["label"], opt["unit"], opt["init"], key))
+                }
+                element = generateDropdown(key, opt)
                 root.append(element)
             }
         }
 
-        if (element) {
-            element.addEventListener("change", onChange)
-        }
-
-        return false
+        return element
     }
 
     function generateLabel(labelText, labelUnit, labelValue, relatedInput) {
@@ -50,9 +97,11 @@ function Interface() {
         label.appendChild(document.createTextNode(labelText))
 
         var display = document.createElement("span")
-            display.className = "value"
+        display.className = "value"
+        if (labelUnit && labelValue) {
             display.appendChild(document.createTextNode(labelValue + " " + labelUnit))
-            label.appendChild(display)
+        }
+        label.appendChild(display)
 
         return label
     }
@@ -63,18 +112,18 @@ function Interface() {
         input.setAttribute("type", "range")
         input.setAttribute("min", opt.min)
         input.setAttribute("max", opt.max)
-        input.setAttribute("step", 1)
-        // input.setAttribute("class", opt.selector)
+        input.setAttribute("step", opt.step)
         input.dataset.property = key
         input.setAttribute("autocomplete", "off")
-        if (opt.unit) { 
+        input.value = opt.init
+        if (opt.unit) {
             input.dataset.unit = opt.unit
         }
 
         return input
     }
 
-    function generateDropdown(key, opt, fonts) {
+    function generateDropdown(key, opt) {
         var dropdown = document.createElement("select")
 
         dropdown.setAttribute("value", name)
@@ -83,10 +132,11 @@ function Interface() {
 
         console.log("DROPDOWN", fonts)
 
-        for (name in fonts) {
+        for (index in fonts) {
             var option = document.createElement("option")
 
-            option.appendChild(document.createTextNode(name))
+            option.value = fonts[index].name
+            option.appendChild(document.createTextNode(fonts[index].name))
             dropdown.appendChild(option)
         }
 
@@ -121,10 +171,16 @@ function Interface() {
         return element.value + element.dataset.unit
     }
 
+    function setInput(attr, val) {
+        console.log("Fontsampler.interface.setInput", attr, val, tester)
+        tester.style[attr] = val
+    }
+
     return {
         init: init,
         getValue: getValue,
-        getCSSValue: getCSSValue
+        getCSSValue: getCSSValue,
+        setInput: setInput
     }
 }
 

@@ -1,4 +1,123 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fontsampler = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+var hasOwn = Object.prototype.hasOwnProperty;
+var toStr = Object.prototype.toString;
+var defineProperty = Object.defineProperty;
+var gOPD = Object.getOwnPropertyDescriptor;
+
+var isArray = function isArray(arr) {
+	if (typeof Array.isArray === 'function') {
+		return Array.isArray(arr);
+	}
+
+	return toStr.call(arr) === '[object Array]';
+};
+
+var isPlainObject = function isPlainObject(obj) {
+	if (!obj || toStr.call(obj) !== '[object Object]') {
+		return false;
+	}
+
+	var hasOwnConstructor = hasOwn.call(obj, 'constructor');
+	var hasIsPrototypeOf = obj.constructor && obj.constructor.prototype && hasOwn.call(obj.constructor.prototype, 'isPrototypeOf');
+	// Not own constructor property must be Object
+	if (obj.constructor && !hasOwnConstructor && !hasIsPrototypeOf) {
+		return false;
+	}
+
+	// Own properties are enumerated firstly, so to speed up,
+	// if last one is own, then all properties are own.
+	var key;
+	for (key in obj) { /**/ }
+
+	return typeof key === 'undefined' || hasOwn.call(obj, key);
+};
+
+// If name is '__proto__', and Object.defineProperty is available, define __proto__ as an own property on target
+var setProperty = function setProperty(target, options) {
+	if (defineProperty && options.name === '__proto__') {
+		defineProperty(target, options.name, {
+			enumerable: true,
+			configurable: true,
+			value: options.newValue,
+			writable: true
+		});
+	} else {
+		target[options.name] = options.newValue;
+	}
+};
+
+// Return undefined instead of __proto__ if '__proto__' is not an own property
+var getProperty = function getProperty(obj, name) {
+	if (name === '__proto__') {
+		if (!hasOwn.call(obj, name)) {
+			return void 0;
+		} else if (gOPD) {
+			// In early versions of node, obj['__proto__'] is buggy when obj has
+			// __proto__ as an own property. Object.getOwnPropertyDescriptor() works.
+			return gOPD(obj, name).value;
+		}
+	}
+
+	return obj[name];
+};
+
+module.exports = function extend() {
+	var options, name, src, copy, copyIsArray, clone;
+	var target = arguments[0];
+	var i = 1;
+	var length = arguments.length;
+	var deep = false;
+
+	// Handle a deep copy situation
+	if (typeof target === 'boolean') {
+		deep = target;
+		target = arguments[1] || {};
+		// skip the boolean and the target
+		i = 2;
+	}
+	if (target == null || (typeof target !== 'object' && typeof target !== 'function')) {
+		target = {};
+	}
+
+	for (; i < length; ++i) {
+		options = arguments[i];
+		// Only deal with non-null/undefined values
+		if (options != null) {
+			// Extend the base object
+			for (name in options) {
+				src = getProperty(target, name);
+				copy = getProperty(options, name);
+
+				// Prevent never-ending loop
+				if (target !== copy) {
+					// Recurse if we're merging plain objects or arrays
+					if (deep && copy && (isPlainObject(copy) || (copyIsArray = isArray(copy)))) {
+						if (copyIsArray) {
+							copyIsArray = false;
+							clone = src && isArray(src) ? src : [];
+						} else {
+							clone = src && isPlainObject(src) ? src : {};
+						}
+
+						// Never move original objects, clone them
+						setProperty(target, { name: name, newValue: extend(deep, clone, copy) });
+
+					// Don't bring in undefined values
+					} else if (typeof copy !== 'undefined') {
+						setProperty(target, { name: name, newValue: copy });
+					}
+				}
+			}
+		}
+	}
+
+	// Return the modified object
+	return target;
+};
+
+},{}],2:[function(require,module,exports){
 /* Font Face Observer v2.1.0 - © Bram Stein. License: BSD-3-Clause */(function(){function l(a,b){document.addEventListener?a.addEventListener("scroll",b,!1):a.attachEvent("scroll",b)}function m(a){document.body?a():document.addEventListener?document.addEventListener("DOMContentLoaded",function c(){document.removeEventListener("DOMContentLoaded",c);a()}):document.attachEvent("onreadystatechange",function k(){if("interactive"==document.readyState||"complete"==document.readyState)document.detachEvent("onreadystatechange",k),a()})};function t(a){this.a=document.createElement("div");this.a.setAttribute("aria-hidden","true");this.a.appendChild(document.createTextNode(a));this.b=document.createElement("span");this.c=document.createElement("span");this.h=document.createElement("span");this.f=document.createElement("span");this.g=-1;this.b.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.c.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";
 this.f.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.h.style.cssText="display:inline-block;width:200%;height:200%;font-size:16px;max-width:none;";this.b.appendChild(this.h);this.c.appendChild(this.f);this.a.appendChild(this.b);this.a.appendChild(this.c)}
 function u(a,b){a.a.style.cssText="max-width:none;min-width:20px;min-height:20px;display:inline-block;overflow:hidden;position:absolute;width:auto;margin:0;padding:0;top:-999px;white-space:nowrap;font-synthesis:none;font:"+b+";"}function z(a){var b=a.a.offsetWidth,c=b+100;a.f.style.width=c+"px";a.c.scrollLeft=c;a.b.scrollLeft=a.b.scrollWidth+100;return a.g!==b?(a.g=b,!0):!1}function A(a,b){function c(){var a=k;z(a)&&a.a.parentNode&&b(a.g)}var k=a;l(a.b,c);l(a.c,c);z(a)};function B(a,b){var c=b||{};this.family=a;this.style=c.style||"normal";this.weight=c.weight||"normal";this.stretch=c.stretch||"normal"}var C=null,D=null,E=null,F=null;function G(){if(null===D)if(J()&&/Apple/.test(window.navigator.vendor)){var a=/AppleWebKit\/([0-9]+)(?:\.([0-9]+))(?:\.([0-9]+))/.exec(window.navigator.userAgent);D=!!a&&603>parseInt(a[1],10)}else D=!1;return D}function J(){null===F&&(F=!!document.fonts);return F}
@@ -8,8 +127,20 @@ b)}else m(function(){function v(){var b;if(b=-1!=f&&-1!=g||-1!=f&&-1!=h||-1!=g&&
 n+"ms timeout exceeded"));else{var a=document.hidden;if(!0===a||void 0===a)f=e.a.offsetWidth,g=p.a.offsetWidth,h=q.a.offsetWidth,v();r=setTimeout(I,50)}}var e=new t(k),p=new t(k),q=new t(k),f=-1,g=-1,h=-1,w=-1,x=-1,y=-1,d=document.createElement("div");d.dir="ltr";u(e,L(c,"sans-serif"));u(p,L(c,"serif"));u(q,L(c,"monospace"));d.appendChild(e.a);d.appendChild(p.a);d.appendChild(q.a);document.body.appendChild(d);w=e.a.offsetWidth;x=p.a.offsetWidth;y=q.a.offsetWidth;I();A(e,function(a){f=a;v()});u(e,
 L(c,'"'+c.family+'",sans-serif'));A(p,function(a){g=a;v()});u(p,L(c,'"'+c.family+'",serif'));A(q,function(a){h=a;v()});u(q,L(c,'"'+c.family+'",monospace'))})})};"object"===typeof module?module.exports=B:(window.FontFaceObserver=B,window.FontFaceObserver.prototype.load=B.prototype.load);}());
 
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
+
+module.exports = {
+    "noFonts": "Fontsampler: No fonts were passed in.",
+    "initFontFormatting": "Fontsampler: Passed in fonts are not in expected format. Expected [ { name: 'Font Name', files: [ 'fontfile.woff', 'fontfile.woff2' ] }, … ]",
+    "fileNotfound": "Fontsampler: The passed in file could not be found: ",
+    "missingRoot": "Fontsampler: Passed in root element invalid: ",
+}
+
+
+},{}],4:[function(require,module,exports){
 var FontFaceObserver = require("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
+
+var errors = require("./errors")
 
 // supportsWoff2 manually copied from npm woff2-feature-test
 var supportsWoff2 = (function() {
@@ -27,134 +158,244 @@ function bestWoff(woff, woff2) {
     return woff2 && supportsWoff2 ? woff2 : woff
 }
 
-function loadFont(file, callback) {
+function loadFont(file, callback, errorCallback) {
     console.log("LOAD FONT", file, file.lastIndexOf("/"))
     if (!file) {
-        return
+        return false
     }
-    try {
-        var family = file.substring(file.lastIndexOf("/") + 1)
-        family = family.substring(0, family.lastIndexOf("."))
-        family = family.replace(/\W/gm, "")
+    var family = file.substring(file.lastIndexOf("/") + 1)
+    family = family.substring(0, family.lastIndexOf("."))
+    family = family.replace(/\W/gm, "")
 
-        console.log("family", family)
+    console.log("family", family)
 
-        var font = new FontFaceObserver(family)
-        font.load().then(function (f) {
-            console.log("f", f)
-            if (typeof(callback) === "function") {
-                callback(f)
-            }
-        })
-
-        if (FontFace) {
-            var ff = new FontFace(family, "url(" + file + ")")
-            ff.load()
-            document.fonts.add(ff)
-        } else {
-            var newStyle = document.createElement("style");
-            newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
-            document.head.appendChild(newStyle);
-        }
-    } catch (e) {
-        console.log(e)
-    }
-}
-
-function fromFiles(files, callback) {
-    // TODO bestWoff expects a choice from 2 files, woff and woff2, but this isn't enforced in any way
-    font = bestWoff(files[0], files[1])
-    console.log("load font from data", font)
-    loadFont(font, function (f) {
-        if (typeof callback === "function") {
+    var font = new FontFaceObserver(family)
+    font.load().then(function (f) {
+        if (typeof(callback) === "function") {
             callback(f)
         }
     })
+
+    if (FontFace) {
+        var ff = new FontFace(family, "url(" + file + ")")
+        ff.load().then(function () {
+            document.fonts.add(ff)
+        }).catch (function () {
+            throw new Error(errors.fileNotfound + file)
+        })
+    } else {
+        var newStyle = document.createElement("style");
+        newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
+        document.head.appendChild(newStyle);
+    }
 }
 
-// function fromData($element, callback) {
-//     font = bestWoff($element.data("woff"), $element.data("woff2"))
-//     console.log("load font from data", font)
-//     loadFont(font, function (f) {
-//         if (typeof callback === "function") {
-//             callback(f, $element)
-//         }
-//     })
-// }
+function fromFiles(files, callback, errorCallback) {
+    // TODO bestWoff expects a choice from 2 files, woff and woff2, but this isn't enforced in any way
+    font = bestWoff(files[0], files[1])
+    loadFont(font, callback, errorCallback)
+}
 
 module.exports = {
     "loadFont": loadFont,
-    // "fromData": fromData,
     "fromFiles": fromFiles
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":1}],3:[function(require,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],5:[function(require,module,exports){
+/**
+ * Fontsampler.js
+ * 
+ * A configurable standalone webfont type tester for displaying and manipulating sample text.
+ * 
+ * @author Johannes Neumeier <hello@underscoretype.com>
+ * @copyright 2019 Johannes Neumeier
+ * @license GNU GPLv3
+ */
+
 // var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
+var extend = require("../node_modules/extend")
+
 var fontloader = require("./fontloader")
 var Interface = require("./interface")
+var errors = require("./errors")
 
-function Fontsampler($, $elem, options) {
+function Fontsampler(root, fonts, opt) {
 
+    console.log("New Fontsampler", root, fonts, opt)
+
+    // Check for a root element to render to
+    if (!root) {
+        throw new Error(errors.missingRoot + root)
+    }
+
+    // A minimal default setup requiring only passed in font(s) and not generating any
+    // interface elements except a tester input
     var defaults = {
+        generateDOM: false,
+        initialText: "",
+        tester: {
+            selector: ".fontsampler-tester",
+            editable: true
+        },
         fontsize: {
             selector: ".fontsampler-fontsize",
-            min: "12",
-            max: "96",
-            init: "18",
             unit: "px",
+            init: 18,
+            min: 12,
+            max: 96,
+            step: 1,
             label: "Size"
         },
         lineheight: {
             selector: ".fontsampler-lineheight",
-            min: "60",
-            max: "120",
-            init: "100",
             unit: "%",
+            init: 100,
+            min: 60,
+            max: 120,
+            step: 5,
             label: "Leading"
         },
         letterspacing: {
             selector: ".fontsampler-letterspacing",
-            min: "-1",
-            max: "1",
             unit: "em",
-            init: "0",
-            label: false
+            init: 0,
+            min: -1,
+            max: 1,
+            step: 0.05,
+            label: "Letterspacing"
         },
         fontfamily: {
             selector: ".fontsampler-fontfamily",
-            label: false
-        },
-        fonts: {
-            "Alegreya Italic": ["./alegreya-italic-webfont.woff", "./alegreya-italic-webfont.woff2"],
-            "Abril Fat Face": ["./abrilfatface-regular-webfont.woff"]
+            label: "Font"
         }
     }
 
-    var interface = Interface(),
-        root = document.querySelector("#demo"),
-        input = root.querySelector(".fontsampler-input")
+    // Extend or use the default options
+    if (typeof opt === "object") {
+        options = extend(true, defaults, opt)
+    } else {
+        options = defaults
+    }
 
-    interface.init(root, defaults)
 
-    root.addEventListener("fontsampler.onfontsizechanged", function () {
-        var val = interface.getCSSValue("fontsize")
-        console.log("setFontsize", val, input)
-        input.style.fontSize = val
-    })
+    var extractedFonts = extractFontsFromDOM()
+    if (!fonts && extractedFonts) {
+        fonts = extractedFonts
+    }
+    if (!fonts) {
+        throw new Error(errors.noFonts)
+    }
+    if (!validateFontsFormatting(fonts)) {
+        console.error(fonts)
+        throw new Error(errors.initFontFormatting)
+    }
 
-    root.addEventListener("fontsampler.onfontfamilychanged", function () {
-        var val = interface.getValue("fontfamily")
-        console.log("fontFamily", val, "files:", defaults.fonts[val])
-        fontloader.fromFiles(defaults.fonts[val], function (f) {
-            input.style.fontFamily = f.family
+    var interface = Interface(root, fonts, options)
+
+    function addEventListeners() {
+        root.addEventListener("fontsampler.onfontsizechanged", function() {
+            var val = interface.getCSSValue("fontsize")
+            interface.setInput("fontSize", val)
         })
-    })
+        root.addEventListener("fontsampler.onlineheightchanged", function() {
+            var val = interface.getCSSValue("lineheight")
+            interface.setInput("lineHeight", val)
+        })
+        root.addEventListener("fontsampler.onletterspacingchanged", function() {
+            var val = interface.getCSSValue("letterspacing")
+            interface.setInput("letterSpacing", val)
+        })
 
-    //TMP load first font
-    root.querySelector("[data-property='fontfamily']").dispatchEvent(new Event("change"))
-    
+        root.addEventListener("fontsampler.onfontfamilychanged", function() {
+            var val = interface.getValue("fontfamily")
+            loadFont(val)
+        })
+    }
+
+    /**
+     * Check fonts are passed in with correct structure, e.g.
+     * fonts: [ { "Font Name" : [ "fontfile.woff", "fontfile.woff2" ] } ]
+     * 
+     * TODO: Check that at most only one woff and one woff2 is passed in
+     * 
+     * @param {*} fonts 
+     */
+    function validateFontsFormatting(fonts) {
+        if (typeof(fonts) !== "object" || !Array.isArray(fonts)) {
+            return false
+        }
+
+        for (index in fonts) {
+            if (typeof(fonts[index]) !== "object") {
+                console.error(fonts[index])
+                return false
+            }
+
+            if (!fonts[index].name || !fonts[index].files || !Array.isArray(fonts[index].files) || fonts[index].files.length <= 0) {
+                console.error(fonts[index])
+                return false
+            }
+        }
+
+        return true
+    }
+
+    function extractFontsFromDOM(selector) {
+        var select = root.querySelector("[data-property='fontfamily']"),
+            options = [],
+            fonts = []
+
+        if (!select) {
+            return false
+        }
+
+        options = select.querySelectorAll("option")
+
+        for (i = 0; i < options.length; i++) {
+            var opt = options[i],
+                font = {},
+                woff, woff2
+
+            font.name = opt.getAttribute("value")
+            font.files = []
+            if (opt.dataset.woff) {
+                font.files.push(opt.dataset.woff)
+            }
+            if (opt.dataset.woff2) {
+                font.files.push(opt.dataset.woff2)
+            }
+
+            if (font.name && font.files.length > 0) {
+                fonts.push(font)
+            }
+        }
+
+        return fonts
+    }
+
+    function loadFont(indexOrKey) {
+        console.log("Fontsampler.loadFont", indexOrKey, typeof(indexOrKey))
+        files = []
+        if (typeof(indexOrKey) === "string") {
+            files = fonts.filter(function(value, index) {
+                return fonts[index].name === indexOrKey
+            }).pop().files
+            console.log(files)
+        } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
+            files = fonts[indexOrKey].files
+        }
+
+        fontloader.fromFiles(files, function(f) {
+            interface.setInput("fontFamily", f.family)
+        }, function(f) {
+            console.log("Failed to load")
+        })
+    }
 
     function init() {
-        
+        interface.init()
+        addEventListeners()
+        console.log("LOAD FIRST")
+        loadFont(0)
     }
 
     // interface
@@ -164,32 +405,80 @@ function Fontsampler($, $elem, options) {
 }
 
 module.exports = Fontsampler
-},{"./fontloader":2,"./interface":4}],4:[function(require,module,exports){
-function Interface() {
+},{"../node_modules/extend":1,"./errors":3,"./fontloader":4,"./interface":6}],6:[function(require,module,exports){
+function Interface(_root, fonts, options) {
 
     var types = {
-        "fontsize": "slider",
-        "lineheight": "slider",
-        "letterspacing": "slider",
-        "fontfamily": "dropdown"
-    },
-    root = null
+            "fontsize": "slider",
+            "lineheight": "slider",
+            "letterspacing": "slider",
+            "fontfamily": "dropdown"
+        },
+        root = null,
+        tester = null
 
-    function init(_root, options) {
+    function init() {
         console.log("init interface on", root, "with options", options)
 
         root = _root
 
-        for (key in options) {
-            setupElement(options[key], options)
+        var nodes = root.childNodes
+
+        for (key in types) {
+            var element = false
+
+            if (options.generateDOM) {
+                element = setupElement(options[key], options)
+            } else {
+                element = root.querySelector("[data-property='" + key + "']")
+            }
+
+            if (element) {
+                element.addEventListener("change", onChange)
+            }
+        }
+
+        tester = root.querySelector("[data-property='tester']")
+        console.log("TESTER", tester)
+        if (!tester) {
+            tester = document.createElement("div")
+            var attr = {
+                "autocomplete": "off",
+                "autocorrect": "off",
+                "autocapitalize": "off",
+                "spellcheck": "false",
+            }
+            for (a in attr) {
+                tester.setAttribute(a, attr[a])
+            }
+            tester.setAttribute("contenteditable", options.tester.editable)
+
+            tester.dataset.property = "tester"
+
+            // If the original root element was a single DOM element with some text, copy that
+            // text into the tester
+            if (options.initialText) {
+                tester.append(document.createTextNode(options.initialText))
+            } else if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE && !options.initialText) {
+                tester.append(document.createTextNode(root.childNodes[0].textContent))
+            }
+
+            // If the original root element had only a single text node, replace it with the tester
+            // otherwise append the tester element
+            if (root.childNodes.length !== 1) {
+                root.append(tester)
+            } else if (root.childNodes.length === 1) {
+                root.replaceChild(tester, root.childNodes[0])
+            }
         }
     }
 
-    function setupElement(opt, allOpt) {
+    function setupElement(opt) {
+        console.log("setupElement", opt)
         var element = root.querySelector(opt.selector)
 
         if (element) {
-            // TODO determine if to set init values, data-property etc.
+            // TODO validate init values, data-property etc.
             console.log("SKIP EXISTING DOM ELEMENT", key)
         } else {
             if (types[key] === "slider") {
@@ -199,16 +488,15 @@ function Interface() {
                 element = generateSlider(key, opt)
                 root.append(element)
             } else if (types[key] === "dropdown") {
-                element = generateDropdown(key, opt, allOpt.fonts)
+                if (opt["label"]) {
+                    root.append(generateLabel(opt["label"], opt["unit"], opt["init"], key))
+                }
+                element = generateDropdown(key, opt)
                 root.append(element)
             }
         }
 
-        if (element) {
-            element.addEventListener("change", onChange)
-        }
-
-        return false
+        return element
     }
 
     function generateLabel(labelText, labelUnit, labelValue, relatedInput) {
@@ -217,9 +505,11 @@ function Interface() {
         label.appendChild(document.createTextNode(labelText))
 
         var display = document.createElement("span")
-            display.className = "value"
+        display.className = "value"
+        if (labelUnit && labelValue) {
             display.appendChild(document.createTextNode(labelValue + " " + labelUnit))
-            label.appendChild(display)
+        }
+        label.appendChild(display)
 
         return label
     }
@@ -230,18 +520,18 @@ function Interface() {
         input.setAttribute("type", "range")
         input.setAttribute("min", opt.min)
         input.setAttribute("max", opt.max)
-        input.setAttribute("step", 1)
-        // input.setAttribute("class", opt.selector)
+        input.setAttribute("step", opt.step)
         input.dataset.property = key
         input.setAttribute("autocomplete", "off")
-        if (opt.unit) { 
+        input.value = opt.init
+        if (opt.unit) {
             input.dataset.unit = opt.unit
         }
 
         return input
     }
 
-    function generateDropdown(key, opt, fonts) {
+    function generateDropdown(key, opt) {
         var dropdown = document.createElement("select")
 
         dropdown.setAttribute("value", name)
@@ -250,10 +540,11 @@ function Interface() {
 
         console.log("DROPDOWN", fonts)
 
-        for (name in fonts) {
+        for (index in fonts) {
             var option = document.createElement("option")
 
-            option.appendChild(document.createTextNode(name))
+            option.value = fonts[index].name
+            option.appendChild(document.createTextNode(fonts[index].name))
             dropdown.appendChild(option)
         }
 
@@ -288,13 +579,19 @@ function Interface() {
         return element.value + element.dataset.unit
     }
 
+    function setInput(attr, val) {
+        console.log("Fontsampler.interface.setInput", attr, val, tester)
+        tester.style[attr] = val
+    }
+
     return {
         init: init,
         getValue: getValue,
-        getCSSValue: getCSSValue
+        getCSSValue: getCSSValue,
+        setInput: setInput
     }
 }
 
 module.exports = Interface
-},{}]},{},[2,3])(3)
+},{}]},{},[4,5])(5)
 });
