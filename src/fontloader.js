@@ -58,13 +58,22 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
-    })
+    }
+    // , function () {
+    //     console.error("font.load promise failed")
+    // }
+    )
 
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
-        }).catch(function() {
+        }
+        // ,
+        // function () {
+        //     console.error("ff.load() promise failed")
+        // }
+        ).catch(function() {
             throw new Error(errors.fileNotfound + file)
         })
     } else {
@@ -75,7 +84,7 @@ function loadFont(file, callback) {
 }
 
 function fromFiles(files, callback) {
-    // TODO bestWoff expects a choice from 2 files, woff and woff2, but this isn't enforced in any way
+    console.log("Fontsampler.Fontloader.fromFiles", files, callback)
     font = bestWoff(files)
     loadFont(font, callback)
 }

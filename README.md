@@ -1,6 +1,6 @@
 # Fontsampler.js
 
-A configurable standalone webfont type tester for displaying and manipulating sample text.
+A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
 
 ## TODO
@@ -11,8 +11,7 @@ A configurable standalone webfont type tester for displaying and manipulating sa
 * Implement OT toggles & CSS
 * Implement .notdef rendering
 * Implement background/foreground color toggle
-* Implement lazy loading
-* Implement preloading
+* Implement preloading (? needed in addition to lazyloading?)
 
 ### Licenses for fonts included in the demo
 * [Alegreya](https://github.com/huertatipografica/Alegreya/) by [Huerta Tipografica](https://www.huertatipografica.com/) ([License](https://github.com/huertatipografica/Alegreya/blob/master/LICENSE.md))

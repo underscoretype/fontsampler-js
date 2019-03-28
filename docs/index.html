@@ -2,77 +2,25 @@
 <html>
 
 <head>
+    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
     <meta charset="utf8">
     <script src="../dist/fontsampler.js"></script>
-    <style type="text/css">
-        body {
-            margin: 5rem auto;
-            max-width: 50rem;
-            padding: 0 2rem;
-            color: #333;
-        }
-
-        h2, h3 {
-            margin: 4em auto 2em;
-        }
-
-        h2[id]:before, h3[id]:before {
-            content: "#";
-            margin-left: -0.75em;
-            margin-right: 0.25em;
-            font-weight: normal;
-        }
-
-        ul {
-            padding-left: 0.75em;
-        }
-
-        li {
-            padding: 0.25em 0;
-        }
-
-        .demo {
-            border: 1px dotted lightgrey;
-            padding: 1rem;
-            position: relative;
-        }
-        .demo:before {
-            content: "DEMO";
-        }
-
-        code {
-            background: #f9f9f9;
-            border-radius: 0.25rem;
-            display: block;
-            padding: 1rem;
-            position: relative;
-            margin: 1rem auto;
-            white-space: pre;
-            line-height: 1.35em;
-            overflow-x: scroll;
-        }
-        code:before {
-            content: "CODE";
-        }
-
-        code:before, .demo:before {
-            font-family: monospace;
-            position: absolute;
-            top: 0.5em;
-            left: 0;
-            background: inherit;
-            padding: 0.25em 0.5em;
-            transform-origin: left top;
-            transform: rotate(-90deg) translate(-100%, -100%);
-        }
-    </style>
+    <link rel="stylesheet" href="assets/demo.css">
 </head>
 
 <body>
-    <h1>Fontsampler.js</h1>
-    <p>A configurable standalone webfont type tester for displaying and manipulating 
-        sample text.</p>
+    <h1>fontsampler-js</h1>
+    <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
 
+    <p>Fontsampler takes care of, webfont loading, detecting woff(2) support and providing
+        an interface to manipulate type tester.
+    </p>
+
+    <p>Fontsampler aims to be a barebones solution for developers to customize, and you
+        can use your own styles, eventlisteners and layouts to make fully customize 
+        the experience.
+    </p>
+    
     <h2>Content</h2>
     <ul>
         <li><a href="#examples">Examples</a>
@@ -294,6 +242,10 @@ wrapperClass: "fontsampler-ui-wrapper",
 // A string of class attributes applied to the Fontsampler root node whenever
 // a font is loading
 loadingClass: "loading",
+
+// Set true to preloaded all fonts in the Fontsampler in the background
+// instead of only loading them when activated
+lazyload: false,
 
 // Definitions for each UI element
 // Any nested element can be only partially defined, which will make it inherit

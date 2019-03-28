@@ -13,11 +13,18 @@ var extend = require("../node_modules/extend")
 
 var Fontloader = require("./fontloader")
 var Interface = require("./interface")
+var Preloader = require("./preloader")
 var errors = require("./errors")
 
 function Fontsampler(root, fonts, opt) {
 
     console.debug("Fontsampler()", root, fonts, opt)
+
+    var extractedFonts,
+        interface,
+        isInit = false,
+        preloader = new Preloader(),
+        defaults
 
     // Check for a root element to render to
     if (!root) {
@@ -26,13 +33,14 @@ function Fontsampler(root, fonts, opt) {
 
     // A minimal default setup requiring only passed in font(s) and not generating any
     // interface elements except a tester input
-    var defaults = {
+    defaults = {
         initialText: "",
         order: [
             ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
+        lazyload: false,
         ui: {
             tester: {
                 editable: true,
@@ -87,7 +95,7 @@ function Fontsampler(root, fonts, opt) {
         options = defaults
     }
 
-    var extractedFonts = extractFontsFromDOM()
+    extractedFonts = extractFontsFromDOM()
     if (!fonts && extractedFonts) {
         fonts = extractedFonts
     }
@@ -99,7 +107,7 @@ function Fontsampler(root, fonts, opt) {
         throw new Error(errors.initFontFormatting)
     }
 
-    var interface = Interface(root, fonts, options)
+    interface = Interface(root, fonts, options)
 
     function addEventListeners() {
         root.addEventListener("fontsampler.onfontsizechanged", function() {
@@ -203,8 +211,6 @@ function Fontsampler(root, fonts, opt) {
             font.files.push(node.dataset.woff2)
         }
 
-        console.log("extractFontsFromnode", node, font)
-
         if ((font.name || (!font.name && ignoreName)) && font.files.length > 0) {
             return font
         }
@@ -215,9 +221,12 @@ function Fontsampler(root, fonts, opt) {
     function loadFont(indexOrKey) {
         console.debug("Fontsampler.loadFont", indexOrKey)
 
+        preloader.pause()
+
         interface.setLoadingStatus(true)
         files = []
         if (typeof(indexOrKey) === "string") {
+            console.log(fonts)
             files = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop().files
@@ -228,22 +237,30 @@ function Fontsampler(root, fonts, opt) {
         Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
             interface.setLoadingStatus(false)
+
+            preloader.resume()
         })
     }
 
     function init() {
         console.debug("Fontsampler.init()")
         interface.init()
+        preloader.load(fonts)
         addEventListeners()
         loadFont(0)
     }
 
+    function lazyload() {
+        if (isInit && fonts) {
+            preloader.load(fonts)
+        }
+    }
+
     // interface
     return {
-        init: init
+        init: init,
+        lazyload: lazyload
     }
 }
-
-// console.log(Fontsampler, Fontsampler(null, null, null))
 
 module.exports = Fontsampler

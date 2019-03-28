@@ -24,38 +24,13 @@ function Interface(_root, fonts, options) {
         root = _root
         uielements = UIElements(root, fonts, options)
 
+        // Before modifying the root node, detect if it is containing only
+        // text, and if so, store it to the options for later use
         if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE) {
             originalText = root.childNodes[0].textContent
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
-
-        // UI DOM logic
-
-        // UI ordering: each array is a wrapped div, each element corresponds to and item
-
-        // Init with root element
-
-        // Excepted:
-        // - Init on empty root
-
-        // Expected:
-        // - Init on root with DOM controls
-        // - Validate & hook up controls
-        // - Init DOM with option values, if passed in
-
-        // Expected:
-        // - Init on root with DOM controls and options
-        // - Validate & hook up controls
-        // - Init DOM with option values, if passed in
-        // - Generate _missing_ DOM and values as per options
-
-        // Expected:
-        // - Init on empty root with options
-        // - Generate DOM and values as per options
-
-        // All:
-        // - Add Tester
 
         // If no valid UI order is passed in fall back to the ui elements
         // Their order might be random, but it ensures each required element
@@ -71,7 +46,6 @@ function Interface(_root, fonts, options) {
         for (var i = 0; i < options.order.length; i++) {
             var element = parseUIOrderElement(options.order[i])
             if (element) {
-                console.log("APPEND", element)
                 root.appendChild(element)
             }
         }
@@ -91,7 +65,6 @@ function Interface(_root, fonts, options) {
             if (child === true) {
                 // exists
             } else if (child) {
-                console.warn("new child, append", child)
                 return child
             } else {
                 // parsing failed

@@ -199,13 +199,22 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
-    })
+    }
+    // , function () {
+    //     console.error("font.load promise failed")
+    // }
+    )
 
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
-        }).catch(function() {
+        }
+        // ,
+        // function () {
+        //     console.error("ff.load() promise failed")
+        // }
+        ).catch(function() {
             throw new Error(errors.fileNotfound + file)
         })
     } else {
@@ -216,7 +225,7 @@ function loadFont(file, callback) {
 }
 
 function fromFiles(files, callback) {
-    // TODO bestWoff expects a choice from 2 files, woff and woff2, but this isn't enforced in any way
+    console.log("Fontsampler.Fontloader.fromFiles", files, callback)
     font = bestWoff(files)
     loadFont(font, callback)
 }
@@ -241,11 +250,18 @@ var extend = require("../node_modules/extend")
 
 var Fontloader = require("./fontloader")
 var Interface = require("./interface")
+var Preloader = require("./preloader")
 var errors = require("./errors")
 
 function Fontsampler(root, fonts, opt) {
 
     console.debug("Fontsampler()", root, fonts, opt)
+
+    var extractedFonts,
+        interface,
+        isInit = false,
+        preloader = new Preloader(),
+        defaults
 
     // Check for a root element to render to
     if (!root) {
@@ -254,13 +270,14 @@ function Fontsampler(root, fonts, opt) {
 
     // A minimal default setup requiring only passed in font(s) and not generating any
     // interface elements except a tester input
-    var defaults = {
+    defaults = {
         initialText: "",
         order: [
             ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
+        lazyload: false,
         ui: {
             tester: {
                 editable: true,
@@ -315,7 +332,7 @@ function Fontsampler(root, fonts, opt) {
         options = defaults
     }
 
-    var extractedFonts = extractFontsFromDOM()
+    extractedFonts = extractFontsFromDOM()
     if (!fonts && extractedFonts) {
         fonts = extractedFonts
     }
@@ -327,7 +344,7 @@ function Fontsampler(root, fonts, opt) {
         throw new Error(errors.initFontFormatting)
     }
 
-    var interface = Interface(root, fonts, options)
+    interface = Interface(root, fonts, options)
 
     function addEventListeners() {
         root.addEventListener("fontsampler.onfontsizechanged", function() {
@@ -431,8 +448,6 @@ function Fontsampler(root, fonts, opt) {
             font.files.push(node.dataset.woff2)
         }
 
-        console.log("extractFontsFromnode", node, font)
-
         if ((font.name || (!font.name && ignoreName)) && font.files.length > 0) {
             return font
         }
@@ -443,9 +458,12 @@ function Fontsampler(root, fonts, opt) {
     function loadFont(indexOrKey) {
         console.debug("Fontsampler.loadFont", indexOrKey)
 
+        preloader.pause()
+
         interface.setLoadingStatus(true)
         files = []
         if (typeof(indexOrKey) === "string") {
+            console.log(fonts)
             files = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop().files
@@ -456,26 +474,34 @@ function Fontsampler(root, fonts, opt) {
         Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
             interface.setLoadingStatus(false)
+
+            preloader.resume()
         })
     }
 
     function init() {
         console.debug("Fontsampler.init()")
         interface.init()
+        preloader.load(fonts)
         addEventListeners()
         loadFont(0)
     }
 
+    function lazyload() {
+        if (isInit && fonts) {
+            preloader.load(fonts)
+        }
+    }
+
     // interface
     return {
-        init: init
+        init: init,
+        lazyload: lazyload
     }
 }
 
-// console.log(Fontsampler, Fontsampler(null, null, null))
-
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./errors":3,"./fontloader":4,"./interface":6}],6:[function(require,module,exports){
+},{"../node_modules/extend":1,"./errors":3,"./fontloader":4,"./interface":6,"./preloader":7}],6:[function(require,module,exports){
 var UIElements = require("./uielements")
 
 function Interface(_root, fonts, options) {
@@ -502,38 +528,13 @@ function Interface(_root, fonts, options) {
         root = _root
         uielements = UIElements(root, fonts, options)
 
+        // Before modifying the root node, detect if it is containing only
+        // text, and if so, store it to the options for later use
         if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE) {
             originalText = root.childNodes[0].textContent
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
-
-        // UI DOM logic
-
-        // UI ordering: each array is a wrapped div, each element corresponds to and item
-
-        // Init with root element
-
-        // Excepted:
-        // - Init on empty root
-
-        // Expected:
-        // - Init on root with DOM controls
-        // - Validate & hook up controls
-        // - Init DOM with option values, if passed in
-
-        // Expected:
-        // - Init on root with DOM controls and options
-        // - Validate & hook up controls
-        // - Init DOM with option values, if passed in
-        // - Generate _missing_ DOM and values as per options
-
-        // Expected:
-        // - Init on empty root with options
-        // - Generate DOM and values as per options
-
-        // All:
-        // - Add Tester
 
         // If no valid UI order is passed in fall back to the ui elements
         // Their order might be random, but it ensures each required element
@@ -549,7 +550,6 @@ function Interface(_root, fonts, options) {
         for (var i = 0; i < options.order.length; i++) {
             var element = parseUIOrderElement(options.order[i])
             if (element) {
-                console.log("APPEND", element)
                 root.appendChild(element)
             }
         }
@@ -569,7 +569,6 @@ function Interface(_root, fonts, options) {
             if (child === true) {
                 // exists
             } else if (child) {
-                console.warn("new child, append", child)
                 return child
             } else {
                 // parsing failed
@@ -757,7 +756,57 @@ function Interface(_root, fonts, options) {
     }
 }
 module.exports = Interface
-},{"./uielements":7}],7:[function(require,module,exports){
+},{"./uielements":8}],7:[function(require,module,exports){
+var Fontloader = require("./fontloader")
+
+function Preloader() {
+
+    var queue = [],
+        autoload = true
+
+    function load(fonts) {
+        console.debug("Fontsampler.Preloader.load", fonts)
+
+        // clone the fonts array
+        queue = fonts.slice(0)
+
+        loadNext()
+    }
+
+    function pause() {
+        autoload = false
+    }
+
+    function resume() {
+        autoload = true
+        if (queue.length > 0) {
+            loadNext()
+        }
+    }
+
+    function loadNext() {
+        if (queue.length > 0) {
+            Fontloader.fromFiles(queue[0].files, function () {
+                queue.shift()
+                console.log("preload finished", queue.length)
+                
+                if (queue.length > 0) {
+                    loadNext()
+                }
+            })
+        }
+    }
+
+    return {
+        load: load,
+        pause: pause,
+        resume: resume
+    }
+}
+
+
+module.exports = Preloader
+},{"./fontloader":4}],8:[function(require,module,exports){
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 

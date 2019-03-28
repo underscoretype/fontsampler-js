@@ -1,0 +1,63 @@
+/**
+ * Styling for the demo and documentation pages, not the Fontsamplers
+ */
+body {
+    margin: 5rem auto;
+    max-width: 50rem;
+    padding: 0 2rem;
+    color: #333;
+}
+
+h2, h3 {
+    margin: 4em auto 2em;
+}
+
+h2[id]:before, h3[id]:before {
+    content: "#";
+    margin-left: -0.75em;
+    margin-right: 0.25em;
+    font-weight: normal;
+}
+
+ul {
+    padding-left: 0.75em;
+}
+
+li {
+    padding: 0.25em 0;
+}
+
+.demo {
+    border: 1px dotted lightgrey;
+    padding: 1rem;
+    position: relative;
+}
+.demo:before {
+    content: "DEMO";
+}
+
+code {
+    background: #f9f9f9;
+    border-radius: 0.25rem;
+    display: block;
+    padding: 1rem;
+    position: relative;
+    margin: 1rem auto;
+    white-space: pre;
+    line-height: 1.35em;
+    overflow-x: scroll;
+}
+code:before {
+    content: "CODE";
+}
+
+code:before, .demo:before {
+    font-family: monospace;
+    position: absolute;
+    top: 0.5em;
+    left: 0;
+    background: inherit;
+    padding: 0.25em 0.5em;
+    transform-origin: left top;
+    transform: rotate(-90deg) translate(-100%, -100%);
+}
