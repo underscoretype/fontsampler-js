@@ -2,6 +2,10 @@
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
+## Status
+
+Currently work in progress and pre-release. API not stable and likely to change.
+
 
 ## TODO
 * Implement RTL-LTR switch

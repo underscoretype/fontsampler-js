@@ -42,10 +42,15 @@ function Fontsampler(root, fonts, opt) {
         loadingClass: "loading",
         preloadingClass: "preloading",
         lazyload: false,
+        generate: false,
         ui: {
             tester: {
                 editable: true,
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-tester"
+            },
+            fontfamily: {
+                label: "Font",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontfamily"
             },
             fontsize: {
                 unit: "px",
@@ -68,15 +73,17 @@ function Fontsampler(root, fonts, opt) {
             letterspacing: {
                 unit: "em",
                 init: 0,
-                min: -1,
-                max: 1,
-                step: 0.05,
+                min: -0.1,
+                max: 0.1,
+                step: 0.01,
                 label: "Letterspacing",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
             },
-            fontfamily: {
-                label: "Font",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontfamily"
+            alignment: {
+                choices: ["left", "center", "right"],
+                init: "left",
+                label: "Alignment",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-alignment"
             }
         }
     }
@@ -84,9 +91,13 @@ function Fontsampler(root, fonts, opt) {
     // defaults.ui.fontsize.render = false if not passed in
     // etc.
     for (var key in defaults.ui) {
-        defaults.ui[key].render = !!(opt && opt.ui && key in opt.ui)
+        if (opt && "generate" in opt) {
+            defaults.ui[key].render = opt.generate
+        } else {
+            defaults.ui[key].render = !!(opt && opt.ui && key in opt.ui)
+        }
     }
-    // always render a tester by default!
+    // Always render a tester by default!
     defaults.ui.tester.render = true
 
     // Extend or use the default options
@@ -96,6 +107,8 @@ function Fontsampler(root, fonts, opt) {
         options = defaults
     }
 
+    // Extract fonts; Look first on root element, then on select, then in
+    // passed in fonts Array
     extractedFonts = extractFontsFromDOM()
     if (!fonts && extractedFonts) {
         fonts = extractedFonts
@@ -110,6 +123,7 @@ function Fontsampler(root, fonts, opt) {
 
     interface = Interface(root, fonts, options)
 
+    // Setup the interface listeners and delegate events back to the interface
     function addEventListeners() {
         root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
@@ -122,6 +136,10 @@ function Fontsampler(root, fonts, opt) {
         root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
             interface.setInput("letterSpacing", val)
+        })
+        root.addEventListener("fontsampler.onalignmentclicked", function () {
+            var val = interface.getButtongroupValue("alignment")
+            interface.setInput("textAlign", val)
         })
 
         root.addEventListener("fontsampler.onfontfamilychanged", function() {
@@ -249,10 +267,12 @@ function Fontsampler(root, fonts, opt) {
         addEventListeners()
         loadFont(0)
 
-        interface.setStatusClass(options.preloadingClass, true)
-        preloader.load(fonts, function () {
-            interface.setStatusClass(options.preloadingClass, false)
-        })
+        if (options.lazyload) {
+            interface.setStatusClass(options.preloadingClass, true)
+            preloader.load(fonts, function () {
+                interface.setStatusClass(options.preloadingClass, false)
+            })
+        }
     }
 
     function lazyload() {

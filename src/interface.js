@@ -1,4 +1,5 @@
 var UIElements = require("./uielements")
+var Helpers = require("./helpers")
 
 function Interface(_root, fonts, options) {
 
@@ -8,13 +9,13 @@ function Interface(_root, fonts, options) {
             lineheight: "slider",
             letterspacing: "slider",
             fontfamily: "dropdown",
-            // "alignment": "buttons",
-            // "direction": "toggle",
-            // "language": "dropdown",
-            // "opentype": "checkboxes"
+            alignment: "buttongroup",
+            // direction: "buttongroup",
+            // language: "dropdown",
+            // opentype: "checkboxes"
         },
         root = null,
-        uielements = null,
+        uifactory = null,
         uinodes = {},
         originalText = ""
 
@@ -22,7 +23,7 @@ function Interface(_root, fonts, options) {
         console.log("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
-        uielements = UIElements(root, fonts, options)
+        uifactory = UIElements(root, fonts, options)
 
         // Before modifying the root node, detect if it is containing only
         // text, and if so, store it to the options for later use
@@ -42,11 +43,22 @@ function Interface(_root, fonts, options) {
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
         // · UI elements defined via options but missing from the DOM will be created
-        // · Items neither in the DOM not in options are skipped
+        // · UI elements defined in ui option but not in order option will be 
+        //   appended in the end
+        // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var element = parseUIOrderElement(options.order[i])
             if (element) {
                 root.appendChild(element)
+            }
+        }
+        for (var key in options.ui) {
+            if (!key in uinodes) {
+                console.log("STILL MISSING", key)
+                var element = parseUIOrderElement(options.ui[key])
+                if (element) {
+                    root.appendChild(element)
+                }
             }
         }
     }
@@ -94,8 +106,7 @@ function Interface(_root, fonts, options) {
      * @return node || boolean (true = in DOM, false = invalid item)
      */
     function parseUIElement(item) {
-        console.debug("Fontsampler.Interface.parseUIElement", item, options)
-        console.debug("RENDER?", item, options.ui[item].render)
+        console.debug("Fontsampler.Interface.parseUIElement", item, options, "RENDER?", options.ui[item].render)
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
@@ -104,10 +115,14 @@ function Interface(_root, fonts, options) {
             initNode(node, options.ui[item])
             uinodes[item] = node
 
+            console.log("NODES", uinodes)
+            
             return true
         } else if (options.ui[item].render && item in ui) {
             node = createNode(item, options.ui[item])
             uinodes[item] = node
+            
+            console.log("NODES", uinodes)
 
             return node
         }
@@ -123,7 +138,7 @@ function Interface(_root, fonts, options) {
      */
     function createNode(item, opt) {
         console.debug("Fontsampler.Interface.createNode", item, opt)
-        var node = uielements[ui[item]](item, opt),
+        var node = uifactory[ui[item]](item, opt),
             wrapper
 
         initNode(node, opt)
@@ -132,7 +147,7 @@ function Interface(_root, fonts, options) {
         wrapper.className = opt.wrapperClass
 
         if (opt.label) {
-            wrapper.append(uielements.label(opt.label, opt.unit, opt.init, item))
+            wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
         }
         wrapper.append(node)
 
@@ -163,6 +178,7 @@ function Interface(_root, fonts, options) {
         // TODO set values if passed in an different on node
 
         node.addEventListener("change", onChange)
+        node.addEventListener("click", onClick)
 
         return true
     }
@@ -185,9 +201,6 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        console.log("change", e)
-        console.log(e.currentTarget.dataset.property)
-
         var property = e.currentTarget.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "changed"),
             label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
@@ -199,13 +212,27 @@ function Interface(_root, fonts, options) {
         root.dispatchEvent(customEvent)
     }
 
+    function onClick(e) {
+        var property = e.currentTarget.dataset.property,
+            customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
+            buttons = e.currentTarget.childNodes,
+            currentClass = "selected"
+        
+        for (var b = 0; b < buttons.length; b++) {
+            buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
+        }
+        e.target.className = Helpers.addClass(currentClass, e.target.className)
+
+        root.dispatchEvent(customEvent)
+    }
+
     /**
      * Get a UI element value
      * @param {*} property 
      */
     function getValue(property) {
         console.log("getValue", property)
-        var element = root.querySelector("[data-property='" + property + "']")
+        var element = getUIItem(propert)
 
         return element.value
     }
@@ -215,9 +242,21 @@ function Interface(_root, fonts, options) {
      * @param {*} property 
      */
     function getCSSValue(property) {
-        var element = root.querySelector("[data-property='" + property + "']")
+        var element = getUIItem(property)
 
         return element.value + element.dataset.unit
+    }
+
+    function getButtongroupValue(property) {
+        var element = getUIItem(property),
+            selected = element.querySelector(".selected")
+
+        console.log("selected", element, selected)
+        if (selected) {
+            return selected.dataset.choice
+        } else {
+            return null
+        }
     }
 
     /**
@@ -230,6 +269,7 @@ function Interface(_root, fonts, options) {
         uinodes.tester.style[attr] = val
     }
 
+    // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
         var classes = root.className.split(" "),
             classIndex = classes.indexOf(classString)
@@ -247,6 +287,7 @@ function Interface(_root, fonts, options) {
         init: init,
         getValue: getValue,
         getCSSValue: getCSSValue,
+        getButtongroupValue: getButtongroupValue,
         setInput: setInput,
         setStatusClass: setStatusClass
     }

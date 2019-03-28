@@ -6,6 +6,33 @@
     <meta charset="utf8">
     <script src="../dist/fontsampler.js"></script>
     <link rel="stylesheet" href="assets/demo.css">
+    <style type="text/css">
+    /* The bare minimum styling applied to all demo Fontsamplers */
+    .demo > div {
+        display: flex;
+        justify-content: space-between;
+    }
+    .demo .fontsampler-ui-element {
+        box-sizing: border-box;
+        padding: 5px;
+        width: 100%;
+    }
+    .demo .fontsampler-ui-element input[type="range"] {
+        display: block;
+        width: 100%;
+    }
+    .demo .fontsampler-ui-element label {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+    }
+    .demo .fontsampler-ui-element label span:first-child {
+        margin-right: auto;
+    }
+    .demo [contenteditable] {
+        outline: none;
+    }
+    </style>
 </head>
 
 <body>
@@ -18,8 +45,10 @@
 
     <p>Fontsampler aims to be a barebones solution for developers to customize, and you
         can use your own styles, eventlisteners and layouts to create a fully customized 
-        experience.
+        experience. This is what a full-feature Fontsampler looks like with (almost) no styling:
     </p>
+
+    <div id="demo-full" class="demo" style="margin-top:3rem;">This is a Fontsampler! Type here to test this this webfont…</div>
     
     <h2>Content</h2>
     <ul>
@@ -251,6 +280,10 @@ preloadingClass: "preloading",
 // instead of only loading them when activated
 lazyload: false,
 
+// Set true to generate any UI elements in the order attribute that are
+// not explicitly defined in the ui attribute or present in the DOM
+generate: false,
+
 // Definitions for each UI element
 // Any nested element can be only partially defined, which will make it inherit
 // the rest of its configuration from the defaults
@@ -312,6 +345,19 @@ ui: {
 
     <script>
         window.onload = function() {
+
+            // Demo full
+            var alegreyaFonts = [
+                { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]},
+                { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]},
+                { name: "Alegreya Bold", files: ["./fonts/alegreya/alegreya-v12-latin-700.woff", "./fonts/alegreya/alegreya-v12-latin-700.woff2"]},
+                { name: "Alegreya Bold Italic", files: ["./fonts/alegreya/alegreya-v12-latin-700italic.woff", "./fonts/alegreya/alegreya-v12-latin-700italic.woff2"]},
+            ],
+            optionsFull = {
+                order: [ ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment"], ["tester"] ],
+                generate: true
+            }
+            Fontsampler(document.getElementById("demo-full"), alegreyaFonts, optionsFull).init()
 
             // Demo minimal
             Fontsampler(document.getElementById("demo-minimal")).init()
