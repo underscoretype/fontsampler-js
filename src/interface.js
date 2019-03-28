@@ -15,13 +15,20 @@ function Interface(_root, fonts, options) {
         },
         root = null,
         uielements = null,
-        uinodes = {}
+        uinodes = {},
+        originalText = ""
 
     function init() {
         console.log("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
         uielements = UIElements(root, fonts, options)
+
+        if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE) {
+            originalText = root.childNodes[0].textContent
+            root.removeChild(root.childNodes[0])
+        }
+        options.originalText = originalText
 
         // UI DOM logic
 
@@ -61,18 +68,13 @@ function Interface(_root, fonts, options) {
         // · Existing DOM nodes will be validated and initiated
         // · UI elements defined via options but missing from the DOM will be created
         // · Items neither in the DOM not in options are skipped
-        console.log("len", options.order.length)
         for (var i = 0; i < options.order.length; i++) {
-            console.debug("I", i)
-            console.debug("Fontsampler.Interface.init", options.order[i])
             var element = parseUIOrderElement(options.order[i])
             if (element) {
+                console.log("APPEND", element)
                 root.appendChild(element)
             }
-            console.log("after", i)
         }
-
-        console.log("INIT END")
     }
 
     /**
@@ -86,20 +88,29 @@ function Interface(_root, fonts, options) {
 
         if (typeof(item) === "string") {
             child = parseUIElement(item)
-            if (child) {
+            if (child === true) {
+                // exists
+            } else if (child) {
+                console.warn("new child, append", child)
                 return child
+            } else {
+                // parsing failed
             }
         } else if (Array.isArray(item)) {
             wrapper = document.createElement("div")
+            wrapper.className = options.wrapperClass
+
             for (var i = 0; i < item.length; i++) {
                 child = parseUIOrderElement(item[i])
                 if (child) {
                     wrapper.appendChild(child)
                 }
             }
+
             return wrapper
         } else {
-            console.warn("skipping", item)
+            console.debug("skipping not defined UI element", item)
+
             return false
         }
     }
@@ -107,22 +118,24 @@ function Interface(_root, fonts, options) {
     /**
      * Parse an UI element from DOM or options
      * @param string item 
-     * @return node || false
+     * @return node || boolean (true = in DOM, false = invalid item)
      */
     function parseUIElement(item) {
-        console.debug("Fontsampler.Interface.parseUIElement", item, parent)
+        console.debug("Fontsampler.Interface.parseUIElement", item, options)
+        console.debug("RENDER?", item, options.ui[item].render)
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
         if (node) {
-            validateNode(node, options[item])
-            initNode(node, options[item])
-        } else if (item in options) {
-            node = createNode(item, options[item])
-        }
-
-        if (node) {
+            validateNode(node, options.ui[item])
+            initNode(node, options.ui[item])
             uinodes[item] = node
+
+            return true
+        } else if (options.ui[item].render && item in ui) {
+            node = createNode(item, options.ui[item])
+            uinodes[item] = node
+
             return node
         }
 
@@ -143,7 +156,7 @@ function Interface(_root, fonts, options) {
         initNode(node, opt)
 
         wrapper = document.createElement("div")
-        wrapper.className = "fontsampler-ui-element-" + item
+        wrapper.className = opt.wrapperClass
 
         if (opt.label) {
             wrapper.append(uielements.label(opt.label, opt.unit, opt.init, item))
@@ -161,7 +174,7 @@ function Interface(_root, fonts, options) {
      * @return boolean
      */
     function validateNode(node, opt) {
-        console.debug("Fontsampler.Interface.validateNode", node, opt)
+        // console.debug("Fontsampler.Interface.validateNode", node, opt)
 
         return true
     }
@@ -173,7 +186,7 @@ function Interface(_root, fonts, options) {
      * @return boolean
      */
     function initNode(node, opt) {
-        console.debug("Fontsampler.Interface.initNode", node, opt)
+        // console.debug("Fontsampler.Interface.initNode", node, opt)
         // TODO set values if passed in an different on node
 
         node.addEventListener("change", onChange)
@@ -193,59 +206,11 @@ function Interface(_root, fonts, options) {
         return root.querySelector("[data-property='" + item + "']")
     }
 
-    // function foo() {
-    //     for (var ui in types) {
-    //         var element = false
-
-    //         if (options.generate) {
-    //             element = setupElement(key, options[key])
-    //         } else {
-    //             element = root.querySelector("[data-property='" + key + "']")
-    //         }
-
-    //         if (element) {
-    //             element.addEventListener("change", onChange)
-    //         }
-    //     }
-
-    //     tester = root.querySelector("[data-property='tester']")
-    //     console.log("TESTER", tester)
-    //     if (!tester) {
-
-    //     }
-    // }
-
-    function setupElement(key, opt) {
-        console.log("setupElement", opt)
-        var element = root.querySelector("[data-property='" + key + "']")
-        console.log("ELEMENT", element)
-
-        if (element) {
-            // TODO validate & set init values, step, etc.
-            console.log("SKIP EXISTING DOM ELEMENT", key)
-        } else {
-            var appendTo = root
-            if (options.wrapUIElements) {
-                appendTo = document.createElement("div")
-                appendTo.className = "fontsampler-ui-element-" + key
-                root.append(appendTo)
-            }
-
-            if (opt.label) {
-                appendTo.append(generateLabel(opt.label, opt.unit, opt.init, key))
-            }
-            if (types[key] === "slider") {
-                element = generateSlider(key, opt)
-                appendTo.append(element)
-            } else if (types[key] === "dropdown") {
-                element = generateDropdown(key, opt)
-                appendTo.append(element)
-            }
-        }
-
-        return element
-    }
-
+    /**
+     * Catch-all UI element event listener firing a scoped CustomEvent based
+     * on the element’s property
+     * @param {*} e 
+     */
     function onChange(e) {
         console.log("change", e)
         console.log(e.currentTarget.dataset.property)
@@ -261,6 +226,10 @@ function Interface(_root, fonts, options) {
         root.dispatchEvent(customEvent)
     }
 
+    /**
+     * Get a UI element value
+     * @param {*} property 
+     */
     function getValue(property) {
         console.log("getValue", property)
         var element = root.querySelector("[data-property='" + property + "']")
@@ -268,22 +237,45 @@ function Interface(_root, fonts, options) {
         return element.value
     }
 
+    /**
+     * Get a UI element value with CSS unit
+     * @param {*} property 
+     */
     function getCSSValue(property) {
         var element = root.querySelector("[data-property='" + property + "']")
 
         return element.value + element.dataset.unit
     }
 
+    /**
+     * Set the tester’s text
+     * @param {*} attr 
+     * @param {*} val 
+     */
     function setInput(attr, val) {
-        console.log("Fontsampler.interface.setInput", attr, val, tester)
+        console.log("Fontsampler.interface.setInput", attr, val)
         uinodes.tester.style[attr] = val
+    }
+
+    function setLoadingStatus(status) {
+        var classes = root.className.split(" "),
+            classIndex = classes.indexOf(options.loadingClass)
+
+        if (status && classIndex === -1) {
+            classes.push(options.loadingClass)
+        } else if (!status && classIndex !== -1) {
+            classes.splice(classIndex, 1)
+        }
+
+        root.className = classes.join(" ")
     }
 
     return {
         init: init,
         getValue: getValue,
         getCSSValue: getCSSValue,
-        setInput: setInput
+        setInput: setInput,
+        setLoadingStatus: setLoadingStatus
     }
 }
 module.exports = Interface

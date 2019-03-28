@@ -1,15 +1,11 @@
-
-
-
 /**
- * Wrapper to provide global root, options and fonts to all methods (Elements)
+ * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
  * @param {*} root 
  * @param {*} options 
  * @param {*} fonts 
  */
 function UIElements(root, fonts, options) {
-
 
     function label(labelText, labelUnit, labelValue, relatedInput) {
         var label = document.createElement("label"),
@@ -57,12 +53,13 @@ function UIElements(root, fonts, options) {
     
     function dropdown(key, options) {
         console.debug("Fontsampler.UIElements.dropdown", key, options)
+
         var dropdown = document.createElement("select")
     
         dropdown.setAttribute("value", name)
         dropdown.dataset.property = key
     
-        for (var index in this.fonts) {
+        for (var index in fonts) {
             var option = document.createElement("option")
     
             option.value = fonts[index].name
@@ -84,7 +81,7 @@ function UIElements(root, fonts, options) {
             for (var a in attr) {
                 tester.setAttribute(a, attr[a])
             }
-            tester.setAttribute("contenteditable", options.tester.editable)
+            tester.setAttribute("contenteditable", opt.editable)
     
             tester.dataset.property = key
     
@@ -92,17 +89,18 @@ function UIElements(root, fonts, options) {
             // text into the tester
             if (options.initialText) {
                 tester.append(document.createTextNode(options.initialText))
-            } else if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE && !options.initialText) {
-                tester.append(document.createTextNode(root.childNodes[0].textContent))
+            } else if (!options.initialText && options.originalText) {
+                tester.append(document.createTextNode(options.originalText))
             }
     
             // If the original root element had only a single text node, replace it with the tester
             // otherwise append the tester element
-            if (root.childNodes.length !== 1) {
-                root.append(tester)
-            } else if (root.childNodes.length === 1) {
-                root.replaceChild(tester, root.childNodes[0])
-            }
+            // if (root.childNodes.length !== 1) {
+            //     root.append(tester)
+            // } else if (root.childNodes.length === 1) {
+            //     root.replaceChild(tester, root.childNodes[0])
+            // }
+
         return tester
     }
 

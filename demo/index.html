@@ -22,7 +22,6 @@
     <h3>Bare minimum configuration (JS)</h3>
     <div id="demo-minimal" class="demo">Demo minimal</div>
 
-
     <h3>Demo JS configuration</h3>
     <div id="demo-js" class="demo">Demo JS configuration</div>
 
@@ -73,45 +72,60 @@
             // Demo minimal
             Fontsampler(document.getElementById("demo-minimal"), [
                 { name: "IBM Plex Sans Regular", files: ["./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff"] }
-            ], { initialText:"FOObar"}).init()
+            ]).init()
 
-            // // Demo JS
-            // var options = {
-            //         generate: true,
-            //         initialText: "Hello Tester!",
-            //         fontsize: {
-            //             min: "12",
-            //             max: "96",
-            //             init: "18",
-            //             unit: "px",
-            //             label: "Size"
-            //         },
-            //         lineheight: {
-            //             min: "60",
-            //             max: "120",
-            //             init: "100",
-            //             unit: "%",
-            //             label: "Leading"
-            //         },
-            //         letterspacing: {
-            //             min: "-1",
-            //             max: "1",
-            //             unit: "em",
-            //             init: "0",
-            //             label: "Letterspacing"
-            //         },
-            //         fontfamily: {
-            //             label: "Fontfamily"
-            //         }
-            //     },
-            //     fonts = [
-            //         { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
-            //         { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
-            //     ]
-            // Fontsampler(document.getElementById("demo-js"), fonts, options).init()
+            // Demo JS
+            var options = {
+                    initialText: "Hello Tester!",
+                    // NOTE: If supplying order, any ui elements not present in it will not be rendered
+                    // NOTE: Use nested arrays to group DOM elements together
+                    order: ["tester", ["fontsize", "fontfamily"]],
+                    ui: {
+                        fontsize: {
+                            // NOTE: you can leave some attributes undefined to use defaults
+                            // and overwrite those you want to set explicitly
+
+                            // min: 12,
+                            // max: 96,
+                            init: 18,
+                            step: 1,
+                            unit: "px",
+                            // label: "Size"
+                        },
+                        lineheight: {
+                            min: 60,
+                            max: 120,
+                            // NOTE: you can leave some attributes undefined to use defaults
+                            // and overwrite those you want to set explicitly
+
+                            // init: 100,
+                            // step: 5,
+                            // unit: "%",
+                            // label: "Leading"
+                        },
+                        // NOTE: leaving out one of the ui elements makes it not render
+
+                        // letterspacing: {
+                        //     min: -1,
+                        //     max: 1,
+                        //     init: 0,
+                        //     step: 0.01,
+                        //     unit: "em",
+                        //     label: "Letterspacing"
+                        // },
+                        fontfamily: {
+                            label: "Fontfamily"
+                        }
+                    }
+                },
+                fonts = [
+                    { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
+                    { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
+                ]
+            Fontsampler(document.getElementById("demo-js"), fonts, options).init()
 
             // Demo DOM
-            // Fontsampler(document.getElementById("demo-dom")).init()
+            Fontsampler(document.getElementById("demo-dom")).init()
         }
     </script>
 </body>

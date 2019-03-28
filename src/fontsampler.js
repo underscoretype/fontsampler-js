@@ -28,42 +28,55 @@ function Fontsampler(root, fonts, opt) {
     // interface elements except a tester input
     var defaults = {
         initialText: "",
-        wrapUIElements: true,
         order: [["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"],
-        tester: {
-            editable: true
-        },
-        fontsize: {
-            unit: "px",
-            init: 18,
-            min: 12,
-            max: 96,
-            step: 1,
-            label: "Size"
-        },
-        lineheight: {
-            unit: "%",
-            init: 100,
-            min: 60,
-            max: 120,
-            step: 5,
-            label: "Leading"
-        },
-        letterspacing: {
-            unit: "em",
-            init: 0,
-            min: -1,
-            max: 1,
-            step: 0.05,
-            label: "Letterspacing"
-        },
-        fontfamily: {
-            label: "Font"
+        wrapperClass: "fontsampler-ui-wrapper",
+        loadingClass: "loading",
+        ui: {
+            tester: {
+                editable: true,
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-tester"
+            },
+            fontsize: {
+                unit: "px",
+                init: 18,
+                min: 12,
+                max: 96,
+                step: 1,
+                label: "Size",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontsize"
+            },
+            lineheight: {
+                unit: "%",
+                init: 100,
+                min: 60,
+                max: 120,
+                step: 5,
+                label: "Leading",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-lineheight"
+            },
+            letterspacing: {
+                unit: "em",
+                init: 0,
+                min: -1,
+                max: 1,
+                step: 0.05,
+                label: "Letterspacing",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
+            },
+            fontfamily: {
+                label: "Font",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontfamily"
+            }
         }
     }
 
-    // defaults.fontsize.generate = false if not passed in
+    // defaults.ui.fontsize.render = false if not passed in
     // etc.
+    for (var key in defaults.ui) {
+        defaults.ui[key].render = !!(opt && opt.ui && key in opt.ui)
+    }
+    // always render a tester by default!
+    defaults.ui.tester.render = true
 
     // Extend or use the default options
     if (typeof opt === "object") {
@@ -103,12 +116,6 @@ function Fontsampler(root, fonts, opt) {
         root.addEventListener("fontsampler.onfontfamilychanged", function() {
             var val = interface.getValue("fontfamily")
             loadFont(val)
-        })
-
-        root.addEventListener("fontsampler.ontesterchanged", function() {
-            // var val = interface.getValue("fontfamily")
-            // loadFont(val)
-            console.log("typing")
         })
     }
 
@@ -174,6 +181,8 @@ function Fontsampler(root, fonts, opt) {
 
     function loadFont(indexOrKey) {
         console.debug("Fontsampler.loadFont", indexOrKey)
+
+        interface.setLoadingStatus(true)
         files = []
         if (typeof(indexOrKey) === "string") {
             files = fonts.filter(function(value, index) {
@@ -185,6 +194,7 @@ function Fontsampler(root, fonts, opt) {
 
         Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
+            interface.setLoadingStatus(false)
         })
     }
 
