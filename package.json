@@ -18,7 +18,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "http-server",
-        "demo": "open http://localhost:8080/demo/index.html",
+        "demo": "open http://localhost:8080/docs/index.html",
         "js": "watchify src/fontsampler.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'"
     },
     "dependencies": {

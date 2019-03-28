@@ -28,7 +28,9 @@ function Fontsampler(root, fonts, opt) {
     // interface elements except a tester input
     var defaults = {
         initialText: "",
-        order: [["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"],
+        order: [
+            ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
+        ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
         ui: {
@@ -152,31 +154,62 @@ function Fontsampler(root, fonts, opt) {
             options = [],
             fonts = []
 
+        // First try to get and data-woff/2 on the root element
+        // If such are found, return them
+        var rootFonts = extractFontsFromNode(root, true)
+        if (rootFonts) {
+            fonts.push(rootFonts)
+            return fonts
+        }
+
+        // Otherwise check if there is a dropdown with options that have
+        // data-woff/2 elements
         if (!select) {
             return false
         }
 
         options = select.querySelectorAll("option")
-
         for (i = 0; i < options.length; i++) {
             var opt = options[i],
-                font = {}
+                font = extractFontsFromNode(opt, false)
 
-            font.name = opt.getAttribute("value")
-            font.files = []
-            if (opt.dataset.woff) {
-                font.files.push(opt.dataset.woff)
-            }
-            if (opt.dataset.woff2) {
-                font.files.push(opt.dataset.woff2)
-            }
-
-            if (font.name && font.files.length > 0) {
+            if (font) {
                 fonts.push(font)
             }
         }
 
-        return fonts
+        if (fonts) {
+            return fonts
+        }
+
+        return false
+    }
+
+    function extractFontsFromNode(node, ignoreName) {
+        var font = {
+            name: "default",
+            files: []
+        }
+
+        if (node.dataset.fontname) {
+            font.name = node.dataset.fontname
+        }
+
+        if (node.dataset.woff) {
+            font.files.push(node.dataset.woff)
+        }
+
+        if (node.dataset.woff2) {
+            font.files.push(node.dataset.woff2)
+        }
+
+        console.log("extractFontsFromnode", node, font)
+
+        if ((font.name || (!font.name && ignoreName)) && font.files.length > 0) {
+            return font
+        }
+
+        return false
     }
 
     function loadFont(indexOrKey) {
