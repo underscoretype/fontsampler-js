@@ -15,7 +15,6 @@ var supportsWoff2 = (function() {
 })();
 
 function getExtension(path) {
-    console.log("PATH", path)
     return path.substring(path.lastIndexOf(".") + 1)
 }
 
@@ -24,14 +23,12 @@ function bestWoff(files) {
         return false
     }
 
-    var woffs = files.filter(function(value, index) {
-            console.log("EXT", getExtension(value))
+    var woffs = files.filter(function(value) {
             return getExtension(value) === "woff"
         }),
-        woff2s = files.filter(function(value, index) {
+        woff2s = files.filter(function(value) {
             return getExtension(value) === "woff2"
-        }),
-        woff, woff2
+        })
 
     if (woffs.length > 1 || woff2s.length > 1) {
         throw new Error(errors.tooManyFiles + files)
@@ -49,15 +46,12 @@ function bestWoff(files) {
 }
 
 function loadFont(file, callback) {
-    console.log("LOAD FONT", file)
     if (!file) {
         return false
     }
     var family = file.substring(file.lastIndexOf("/") + 1)
     family = family.substring(0, family.lastIndexOf("."))
     family = family.replace(/\W/gm, "")
-
-    console.log("family", family)
 
     var font = new FontFaceObserver(family)
     font.load().then(function(f) {

@@ -11,13 +11,13 @@
 // var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
 var extend = require("../node_modules/extend")
 
-var fontloader = require("./fontloader")
+var Fontloader = require("./fontloader")
 var Interface = require("./interface")
 var errors = require("./errors")
 
 function Fontsampler(root, fonts, opt) {
 
-    console.log("New Fontsampler", root, fonts, opt)
+    console.debug("Fontsampler()", root, fonts, opt)
 
     // Check for a root element to render to
     if (!root) {
@@ -27,15 +27,13 @@ function Fontsampler(root, fonts, opt) {
     // A minimal default setup requiring only passed in font(s) and not generating any
     // interface elements except a tester input
     var defaults = {
-        generateDOM: false,
         initialText: "",
         wrapUIElements: true,
+        order: [["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"],
         tester: {
-            selector: ".fontsampler-tester",
             editable: true
         },
         fontsize: {
-            selector: ".fontsampler-fontsize",
             unit: "px",
             init: 18,
             min: 12,
@@ -44,7 +42,6 @@ function Fontsampler(root, fonts, opt) {
             label: "Size"
         },
         lineheight: {
-            selector: ".fontsampler-lineheight",
             unit: "%",
             init: 100,
             min: 60,
@@ -53,7 +50,6 @@ function Fontsampler(root, fonts, opt) {
             label: "Leading"
         },
         letterspacing: {
-            selector: ".fontsampler-letterspacing",
             unit: "em",
             init: 0,
             min: -1,
@@ -62,10 +58,12 @@ function Fontsampler(root, fonts, opt) {
             label: "Letterspacing"
         },
         fontfamily: {
-            selector: ".fontsampler-fontfamily",
             label: "Font"
         }
     }
+
+    // defaults.fontsize.generate = false if not passed in
+    // etc.
 
     // Extend or use the default options
     if (typeof opt === "object") {
@@ -73,7 +71,6 @@ function Fontsampler(root, fonts, opt) {
     } else {
         options = defaults
     }
-
 
     var extractedFonts = extractFontsFromDOM()
     if (!fonts && extractedFonts) {
@@ -106,6 +103,12 @@ function Fontsampler(root, fonts, opt) {
         root.addEventListener("fontsampler.onfontfamilychanged", function() {
             var val = interface.getValue("fontfamily")
             loadFont(val)
+        })
+
+        root.addEventListener("fontsampler.ontesterchanged", function() {
+            // var val = interface.getValue("fontfamily")
+            // loadFont(val)
+            console.log("typing")
         })
     }
 
@@ -170,23 +173,23 @@ function Fontsampler(root, fonts, opt) {
     }
 
     function loadFont(indexOrKey) {
-        console.log("Fontsampler.loadFont", indexOrKey, typeof(indexOrKey))
+        console.debug("Fontsampler.loadFont", indexOrKey)
         files = []
         if (typeof(indexOrKey) === "string") {
             files = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop().files
-            console.log(files)
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             files = fonts[indexOrKey].files
         }
 
-        fontloader.fromFiles(files, function(f) {
+        Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
         })
     }
 
     function init() {
+        console.debug("Fontsampler.init()")
         interface.init()
         addEventListeners()
         loadFont(0)
@@ -197,5 +200,7 @@ function Fontsampler(root, fonts, opt) {
         init: init
     }
 }
+
+// console.log(Fontsampler, Fontsampler(null, null, null))
 
 module.exports = Fontsampler

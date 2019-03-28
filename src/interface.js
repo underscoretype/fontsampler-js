@@ -1,71 +1,224 @@
+var UIElements = require("./uielements")
+
 function Interface(_root, fonts, options) {
 
-    var types = {
-            "fontsize": "slider",
-            "lineheight": "slider",
-            "letterspacing": "slider",
-            "fontfamily": "dropdown"
+    var ui = {
+            tester: "textfield",
+            fontsize: "slider",
+            lineheight: "slider",
+            letterspacing: "slider",
+            fontfamily: "dropdown",
+            // "alignment": "buttons",
+            // "direction": "toggle",
+            // "language": "dropdown",
+            // "opentype": "checkboxes"
         },
         root = null,
-        tester = null
+        uielements = null,
+        uinodes = {}
 
     function init() {
-        console.log("init interface on", root, "with options", options)
+        console.log("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
+        uielements = UIElements(root, fonts, options)
 
-        for (var key in types) {
-            var element = false
+        // UI DOM logic
 
-            if (options.generateDOM) {
-                element = setupElement(key, options[key])
-            } else {
-                element = root.querySelector("[data-property='" + key + "']")
-            }
+        // UI ordering: each array is a wrapped div, each element corresponds to and item
 
-            if (element) {
-                element.addEventListener("change", onChange)
-            }
+        // Init with root element
+
+        // Excepted:
+        // - Init on empty root
+
+        // Expected:
+        // - Init on root with DOM controls
+        // - Validate & hook up controls
+        // - Init DOM with option values, if passed in
+
+        // Expected:
+        // - Init on root with DOM controls and options
+        // - Validate & hook up controls
+        // - Init DOM with option values, if passed in
+        // - Generate _missing_ DOM and values as per options
+
+        // Expected:
+        // - Init on empty root with options
+        // - Generate DOM and values as per options
+
+        // All:
+        // - Add Tester
+
+        // If no valid UI order is passed in fall back to the ui elements
+        // Their order might be random, but it ensures each required element
+        // is at least present
+        if (!options.order || !Array.isArray(options.order)) {
+            options.order = Object.keys(ui)
         }
 
-        tester = root.querySelector("[data-property='tester']")
-        console.log("TESTER", tester)
-        if (!tester) {
-            tester = document.createElement("div")
-            var attr = {
-                "autocomplete": "off",
-                "autocorrect": "off",
-                "autocapitalize": "off",
-                "spellcheck": "false",
+        // Process the possible nested arrays in order one by one
+        // · Existing DOM nodes will be validated and initiated
+        // · UI elements defined via options but missing from the DOM will be created
+        // · Items neither in the DOM not in options are skipped
+        console.log("len", options.order.length)
+        for (var i = 0; i < options.order.length; i++) {
+            console.debug("I", i)
+            console.debug("Fontsampler.Interface.init", options.order[i])
+            var element = parseUIOrderElement(options.order[i])
+            if (element) {
+                root.appendChild(element)
             }
-            for (var a in attr) {
-                tester.setAttribute(a, attr[a])
-            }
-            tester.setAttribute("contenteditable", options.tester.editable)
+            console.log("after", i)
+        }
 
-            tester.dataset.property = "tester"
+        console.log("INIT END")
+    }
 
-            // If the original root element was a single DOM element with some text, copy that
-            // text into the tester
-            if (options.initialText) {
-                tester.append(document.createTextNode(options.initialText))
-            } else if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE && !options.initialText) {
-                tester.append(document.createTextNode(root.childNodes[0].textContent))
-            }
+    /**
+     * Recursively go through an element in the options.order
+     * @param string item
+     * @param node parent
+     */
+    function parseUIOrderElement(item) {
+        console.debug("Fontsampler.Interface.parseUIOrderElement", item)
+        var child, wrapper
 
-            // If the original root element had only a single text node, replace it with the tester
-            // otherwise append the tester element
-            if (root.childNodes.length !== 1) {
-                root.append(tester)
-            } else if (root.childNodes.length === 1) {
-                root.replaceChild(tester, root.childNodes[0])
+        if (typeof(item) === "string") {
+            child = parseUIElement(item)
+            if (child) {
+                return child
             }
+        } else if (Array.isArray(item)) {
+            wrapper = document.createElement("div")
+            for (var i = 0; i < item.length; i++) {
+                child = parseUIOrderElement(item[i])
+                if (child) {
+                    wrapper.appendChild(child)
+                }
+            }
+            return wrapper
+        } else {
+            console.warn("skipping", item)
+            return false
         }
     }
+
+    /**
+     * Parse an UI element from DOM or options
+     * @param string item 
+     * @return node || false
+     */
+    function parseUIElement(item) {
+        console.debug("Fontsampler.Interface.parseUIElement", item, parent)
+        // check if in DOM
+        // validate and hook up
+        var node = getUIItem(item)
+        if (node) {
+            validateNode(node, options[item])
+            initNode(node, options[item])
+        } else if (item in options) {
+            node = createNode(item, options[item])
+        }
+
+        if (node) {
+            uinodes[item] = node
+            return node
+        }
+
+        return false
+    }
+
+    /**
+     * Create a new UI element 
+     * @param string item 
+     * @param object opt 
+     * @return node
+     */
+    function createNode(item, opt) {
+        console.debug("Fontsampler.Interface.createNode", item, opt)
+        var node = uielements[ui[item]](item, opt),
+            wrapper
+
+        initNode(node, opt)
+
+        wrapper = document.createElement("div")
+        wrapper.className = "fontsampler-ui-element-" + item
+
+        if (opt.label) {
+            wrapper.append(uielements.label(opt.label, opt.unit, opt.init, item))
+        }
+        wrapper.append(node)
+
+        return wrapper
+
+    }
+
+    /**
+     * Validate a UI element (as found in the DOM)
+     * @param node node 
+     * @param object opt 
+     * @return boolean
+     */
+    function validateNode(node, opt) {
+        console.debug("Fontsampler.Interface.validateNode", node, opt)
+
+        return true
+    }
+
+    /**
+     * Init a UI element with values (update DOM to options)
+     * @param node node 
+     * @param object opt 
+     * @return boolean
+     */
+    function initNode(node, opt) {
+        console.debug("Fontsampler.Interface.initNode", node, opt)
+        // TODO set values if passed in an different on node
+
+        node.addEventListener("change", onChange)
+
+        return true
+    }
+
+    /**
+     * Convenience helper to return a DOM element fetching one of the Fontsampler
+     * UI elements
+     * 
+     * @param string item 
+     * @return node
+     */
+    function getUIItem(item) {
+        console.debug("Fontsampler.Interface.getUIItem", item)
+        return root.querySelector("[data-property='" + item + "']")
+    }
+
+    // function foo() {
+    //     for (var ui in types) {
+    //         var element = false
+
+    //         if (options.generate) {
+    //             element = setupElement(key, options[key])
+    //         } else {
+    //             element = root.querySelector("[data-property='" + key + "']")
+    //         }
+
+    //         if (element) {
+    //             element.addEventListener("change", onChange)
+    //         }
+    //     }
+
+    //     tester = root.querySelector("[data-property='tester']")
+    //     console.log("TESTER", tester)
+    //     if (!tester) {
+
+    //     }
+    // }
 
     function setupElement(key, opt) {
         console.log("setupElement", opt)
         var element = root.querySelector("[data-property='" + key + "']")
+        console.log("ELEMENT", element)
 
         if (element) {
             // TODO validate & set init values, step, etc.
@@ -91,67 +244,6 @@ function Interface(_root, fonts, options) {
         }
 
         return element
-    }
-
-    function generateLabel(labelText, labelUnit, labelValue, relatedInput) {
-        var label = document.createElement("label"),
-            text = document.createElement("span"),
-            val, unit
-
-        label.setAttribute("for", relatedInput)
-
-        text.className = "fontsampler-label-text"
-        text.appendChild(document.createTextNode(labelText))
-        label.appendChild(text)
-
-        if (labelUnit && labelValue) {
-
-            val = document.createElement("span")
-            val.className = "fontsampler-label-value"
-            val.appendChild(document.createTextNode(labelValue))
-            label.appendChild(val)
-
-            unit = document.createElement("span")
-            unit.className = "fontsampler-label-unit"
-            unit.appendChild(document.createTextNode(labelUnit))
-            label.appendChild(unit)
-        }
-
-        return label
-    }
-
-    function generateSlider(key, opt) {
-        var input = document.createElement("input")
-
-        input.setAttribute("type", "range")
-        input.setAttribute("min", opt.min)
-        input.setAttribute("max", opt.max)
-        input.setAttribute("step", opt.step)
-        input.dataset.property = key
-        input.setAttribute("autocomplete", "off")
-        input.value = opt.init
-        if (opt.unit) {
-            input.dataset.unit = opt.unit
-        }
-
-        return input
-    }
-
-    function generateDropdown(key) {
-        var dropdown = document.createElement("select")
-
-        dropdown.setAttribute("value", name)
-        dropdown.dataset.property = key
-
-        for (var index in fonts) {
-            var option = document.createElement("option")
-
-            option.value = fonts[index].name
-            option.appendChild(document.createTextNode(fonts[index].name))
-            dropdown.appendChild(option)
-        }
-
-        return dropdown
     }
 
     function onChange(e) {
@@ -184,7 +276,7 @@ function Interface(_root, fonts, options) {
 
     function setInput(attr, val) {
         console.log("Fontsampler.interface.setInput", attr, val, tester)
-        tester.style[attr] = val
+        uinodes.tester.style[attr] = val
     }
 
     return {
@@ -194,5 +286,4 @@ function Interface(_root, fonts, options) {
         setInput: setInput
     }
 }
-
 module.exports = Interface

@@ -19,7 +19,7 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "http-server",
         "demo": "open http://localhost:8080/demo/index.html",
-        "js": "watchify src/*.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'"
+        "js": "watchify src/fontsampler.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'"
     },
     "dependencies": {
         "extend": "^3.0.2",

@@ -73,49 +73,45 @@
             // Demo minimal
             Fontsampler(document.getElementById("demo-minimal"), [
                 { name: "IBM Plex Sans Regular", files: ["./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff"] }
-            ]).init()
+            ], { initialText:"FOObar"}).init()
 
-            // Demo JS
-            var options = {
-                    generateDOM: true,
-                    initialText: "Hello Tester!",
-                    fontsize: {
-                        selector: ".fontsampler-fontsize",
-                        min: "12",
-                        max: "96",
-                        init: "18",
-                        unit: "px",
-                        label: "Size"
-                    },
-                    lineheight: {
-                        selector: ".fontsampler-lineheight",
-                        min: "60",
-                        max: "120",
-                        init: "100",
-                        unit: "%",
-                        label: "Leading"
-                    },
-                    letterspacing: {
-                        selector: ".fontsampler-letterspacing",
-                        min: "-1",
-                        max: "1",
-                        unit: "em",
-                        init: "0",
-                        label: "Letterspacing"
-                    },
-                    fontfamily: {
-                        selector: ".fontsampler-fontfamily",
-                        label: "Fontfamily"
-                    }
-                },
-                fonts = [
-                    { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
-                    { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
-                ]
-            Fontsampler(document.getElementById("demo-js"), fonts, options).init()
+            // // Demo JS
+            // var options = {
+            //         generate: true,
+            //         initialText: "Hello Tester!",
+            //         fontsize: {
+            //             min: "12",
+            //             max: "96",
+            //             init: "18",
+            //             unit: "px",
+            //             label: "Size"
+            //         },
+            //         lineheight: {
+            //             min: "60",
+            //             max: "120",
+            //             init: "100",
+            //             unit: "%",
+            //             label: "Leading"
+            //         },
+            //         letterspacing: {
+            //             min: "-1",
+            //             max: "1",
+            //             unit: "em",
+            //             init: "0",
+            //             label: "Letterspacing"
+            //         },
+            //         fontfamily: {
+            //             label: "Fontfamily"
+            //         }
+            //     },
+            //     fonts = [
+            //         { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
+            //         { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
+            //     ]
+            // Fontsampler(document.getElementById("demo-js"), fonts, options).init()
 
             // Demo DOM
-            Fontsampler(document.getElementById("demo-dom")).init()
+            // Fontsampler(document.getElementById("demo-dom")).init()
         }
     </script>
 </body>
