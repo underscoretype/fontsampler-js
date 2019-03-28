@@ -58,22 +58,13 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
-    }
-    // , function () {
-    //     console.error("font.load promise failed")
-    // }
-    )
+    })
 
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
-        }
-        // ,
-        // function () {
-        //     console.error("ff.load() promise failed")
-        // }
-        ).catch(function() {
+        }).catch(function() {
             throw new Error(errors.fileNotfound + file)
         })
     } else {

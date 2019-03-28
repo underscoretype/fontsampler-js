@@ -230,12 +230,12 @@ function Interface(_root, fonts, options) {
         uinodes.tester.style[attr] = val
     }
 
-    function setLoadingStatus(status) {
+    function setStatusClass(classString, status) {
         var classes = root.className.split(" "),
-            classIndex = classes.indexOf(options.loadingClass)
+            classIndex = classes.indexOf(classString)
 
         if (status && classIndex === -1) {
-            classes.push(options.loadingClass)
+            classes.push(classString)
         } else if (!status && classIndex !== -1) {
             classes.splice(classIndex, 1)
         }
@@ -248,7 +248,7 @@ function Interface(_root, fonts, options) {
         getValue: getValue,
         getCSSValue: getCSSValue,
         setInput: setInput,
-        setLoadingStatus: setLoadingStatus
+        setStatusClass: setStatusClass
     }
 }
 module.exports = Interface

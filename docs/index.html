@@ -12,13 +12,13 @@
     <h1>fontsampler-js</h1>
     <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
 
-    <p>Fontsampler takes care of, webfont loading, detecting woff(2) support and providing
+    <p>Fontsampler takes care of, webfont (pre) loading, detecting woff(2) support and providing
         an interface to manipulate type tester.
     </p>
 
     <p>Fontsampler aims to be a barebones solution for developers to customize, and you
-        can use your own styles, eventlisteners and layouts to make fully customize 
-        the experience.
+        can use your own styles, eventlisteners and layouts to create a fully customized 
+        experience.
     </p>
     
     <h2>Content</h2>
@@ -242,6 +242,10 @@ wrapperClass: "fontsampler-ui-wrapper",
 // A string of class attributes applied to the Fontsampler root node whenever
 // a font is loading
 loadingClass: "loading",
+
+// A string of class attributes applied to the Fontsampler root node while
+// fontsampler fonts are loading in the background
+preloadingClass: "preloading",
 
 // Set true to preloaded all fonts in the Fontsampler in the background
 // instead of only loading them when activated

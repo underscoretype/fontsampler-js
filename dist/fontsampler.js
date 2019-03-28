@@ -199,22 +199,13 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
-    }
-    // , function () {
-    //     console.error("font.load promise failed")
-    // }
-    )
+    })
 
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
-        }
-        // ,
-        // function () {
-        //     console.error("ff.load() promise failed")
-        // }
-        ).catch(function() {
+        }).catch(function() {
             throw new Error(errors.fileNotfound + file)
         })
     } else {
@@ -277,6 +268,7 @@ function Fontsampler(root, fonts, opt) {
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
+        preloadingClass: "preloading",
         lazyload: false,
         ui: {
             tester: {
@@ -460,7 +452,7 @@ function Fontsampler(root, fonts, opt) {
 
         preloader.pause()
 
-        interface.setLoadingStatus(true)
+        interface.setStatusClass(options.loadingClass, true)
         files = []
         if (typeof(indexOrKey) === "string") {
             console.log(fonts)
@@ -473,7 +465,7 @@ function Fontsampler(root, fonts, opt) {
 
         Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
-            interface.setLoadingStatus(false)
+            interface.setStatusClass(options.loadingClass, false)
 
             preloader.resume()
         })
@@ -482,9 +474,13 @@ function Fontsampler(root, fonts, opt) {
     function init() {
         console.debug("Fontsampler.init()")
         interface.init()
-        preloader.load(fonts)
         addEventListeners()
         loadFont(0)
+
+        interface.setStatusClass(options.preloadingClass, true)
+        preloader.load(fonts, function () {
+            interface.setStatusClass(options.preloadingClass, false)
+        })
     }
 
     function lazyload() {
@@ -734,12 +730,12 @@ function Interface(_root, fonts, options) {
         uinodes.tester.style[attr] = val
     }
 
-    function setLoadingStatus(status) {
+    function setStatusClass(classString, status) {
         var classes = root.className.split(" "),
-            classIndex = classes.indexOf(options.loadingClass)
+            classIndex = classes.indexOf(classString)
 
         if (status && classIndex === -1) {
-            classes.push(options.loadingClass)
+            classes.push(classString)
         } else if (!status && classIndex !== -1) {
             classes.splice(classIndex, 1)
         }
@@ -752,7 +748,7 @@ function Interface(_root, fonts, options) {
         getValue: getValue,
         getCSSValue: getCSSValue,
         setInput: setInput,
-        setLoadingStatus: setLoadingStatus
+        setStatusClass: setStatusClass
     }
 }
 module.exports = Interface
@@ -762,13 +758,19 @@ var Fontloader = require("./fontloader")
 function Preloader() {
 
     var queue = [],
-        autoload = true
+        autoload = true,
+        finishedCallback = null
 
-    function load(fonts) {
+    function load(fonts, callback) {
         console.debug("Fontsampler.Preloader.load", fonts)
 
         // clone the fonts array
         queue = fonts.slice(0)
+        autoload = true
+
+        if (typeof(callback) === "function") {
+            finishedCallback = callback
+        }
 
         loadNext()
     }
@@ -781,16 +783,25 @@ function Preloader() {
         autoload = true
         if (queue.length > 0) {
             loadNext()
+        } else {
+            if (finishedCallback) {
+                finishedCallback()
+            }
         }
     }
 
     function loadNext() {
-        if (queue.length > 0) {
+        if (queue.length > 0 && autoload) {
             Fontloader.fromFiles(queue[0].files, function () {
                 queue.shift()
-                console.log("preload finished", queue.length)
+                console.debug("Fontsampler.Preloader.loadNext, preloading file finished, remaining queue length", 
+                    queue.length)
+
+                if (queue.length === 0 && finishedCallback) {
+                    finishedCallback()
+                }
                 
-                if (queue.length > 0) {
+                if (queue.length > 0 && autoload) {
                     loadNext()
                 }
             })

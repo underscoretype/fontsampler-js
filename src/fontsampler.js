@@ -40,6 +40,7 @@ function Fontsampler(root, fonts, opt) {
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
+        preloadingClass: "preloading",
         lazyload: false,
         ui: {
             tester: {
@@ -223,7 +224,7 @@ function Fontsampler(root, fonts, opt) {
 
         preloader.pause()
 
-        interface.setLoadingStatus(true)
+        interface.setStatusClass(options.loadingClass, true)
         files = []
         if (typeof(indexOrKey) === "string") {
             console.log(fonts)
@@ -236,7 +237,7 @@ function Fontsampler(root, fonts, opt) {
 
         Fontloader.fromFiles(files, function(f) {
             interface.setInput("fontFamily", f.family)
-            interface.setLoadingStatus(false)
+            interface.setStatusClass(options.loadingClass, false)
 
             preloader.resume()
         })
@@ -245,9 +246,13 @@ function Fontsampler(root, fonts, opt) {
     function init() {
         console.debug("Fontsampler.init()")
         interface.init()
-        preloader.load(fonts)
         addEventListeners()
         loadFont(0)
+
+        interface.setStatusClass(options.preloadingClass, true)
+        preloader.load(fonts, function () {
+            interface.setStatusClass(options.preloadingClass, false)
+        })
     }
 
     function lazyload() {
