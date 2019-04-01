@@ -1,5 +1,4 @@
 function pruneClass(className, classNames) {
-    console.log("pruneClass", className, "from", classNames)
     if (!classNames) {
         return ""
     }
@@ -27,7 +26,6 @@ function pruneClass(className, classNames) {
 }
 
 function addClass(className, classNames) {
-    console.log("addClass", className, classNames)
     if (!classNames) {
         classNames = ""
     }

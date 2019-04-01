@@ -36,7 +36,8 @@ function Fontsampler(root, fonts, opt) {
     defaults = {
         initialText: "",
         order: [
-            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction", "language"], "tester"
+            ["fontsize", "lineheight", "letterspacing"],
+            ["fontfamily", "alignment", "direction", "language", "opentype"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
@@ -55,8 +56,8 @@ function Fontsampler(root, fonts, opt) {
             },
             fontsize: {
                 unit: "px",
-                init: 18,
-                min: 12,
+                init: 36,
+                min: 8,
                 max: 96,
                 step: 1,
                 label: "Size",
@@ -97,6 +98,12 @@ function Fontsampler(root, fonts, opt) {
                 init: "enGb",
                 label: "Language",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
+            },
+            opentype: {
+                choices: ["liga|Ligatures", "frac|Fractions"],
+                init: ["liga"],
+                label: "Opentype features",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-opentype"
             }
         }
     }
@@ -152,25 +159,29 @@ function Fontsampler(root, fonts, opt) {
             interface.setInputCss("letterSpacing", val)
         })
 
+        // checkbox
+        root.addEventListener("fontsampler.onopentypechanged", function() {
+            var val = interface.getOpentype()
+            interface.setInputOpentype(val)
+        })
+
         // dropdowns
         root.addEventListener("fontsampler.onfontfamilychanged", function() {
             var val = interface.getValue("fontfamily")
             loadFont(val)
         })
-        root.addEventListener("fontsampler.onlanguagechanged", function () {
+        root.addEventListener("fontsampler.onlanguagechanged", function() {
             var val = interface.getValue("language")
-            console.log("lang", val)
             interface.setInputAttr("lang", val)
         })
 
         // buttongroups
-        root.addEventListener("fontsampler.onalignmentclicked", function () {
+        root.addEventListener("fontsampler.onalignmentclicked", function() {
             var val = interface.getButtongroupValue("alignment")
             interface.setInputCss("textAlign", val)
         })
-        root.addEventListener("fontsampler.ondirectionclicked", function () {
+        root.addEventListener("fontsampler.ondirectionclicked", function() {
             var val = interface.getButtongroupValue("direction")
-            console.log("direction", val)
             interface.setInputAttr("dir", val)
         })
     }
@@ -190,12 +201,10 @@ function Fontsampler(root, fonts, opt) {
 
         for (var index in fonts) {
             if (typeof(fonts[index]) !== "object") {
-                console.error(fonts[index])
                 return false
             }
 
             if (!fonts[index].name || !fonts[index].files || !Array.isArray(fonts[index].files) || fonts[index].files.length <= 0) {
-                console.error(fonts[index])
                 return false
             }
         }
@@ -272,7 +281,6 @@ function Fontsampler(root, fonts, opt) {
         interface.setStatusClass(options.loadingClass, true)
         files = []
         if (typeof(indexOrKey) === "string") {
-            console.log(fonts)
             files = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop().files
@@ -296,7 +304,7 @@ function Fontsampler(root, fonts, opt) {
 
         if (options.lazyload) {
             interface.setStatusClass(options.preloadingClass, true)
-            preloader.load(fonts, function () {
+            preloader.load(fonts, function() {
                 interface.setStatusClass(options.preloadingClass, false)
             })
         }

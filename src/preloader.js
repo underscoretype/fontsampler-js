@@ -7,7 +7,6 @@ function Preloader() {
         finishedCallback = null
 
     function load(fonts, callback) {
-        console.debug("Fontsampler.Preloader.load", fonts)
 
         // clone the fonts array
         queue = fonts.slice(0)
@@ -39,8 +38,6 @@ function Preloader() {
         if (queue.length > 0 && autoload) {
             Fontloader.fromFiles(queue[0].files, function () {
                 queue.shift()
-                // console.debug("Fontsampler.Preloader.loadNext, preloading file finished, remaining queue length", 
-                    // queue.length)
 
                 if (queue.length === 0 && finishedCallback) {
                     finishedCallback()

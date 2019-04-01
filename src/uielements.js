@@ -51,15 +51,13 @@ function UIElements(root, options) {
         return input
     }
 
-    function dropdown(key, options) {
-        console.debug("Fontsampler.UIElements.dropdown", key, options)
-
+    function dropdown(key, opt) {
         var dropdown = document.createElement("select")
         dropdown.dataset.property = key
 
-        for (var o in options.choices) {
+        for (var o in opt.choices) {
             var option = document.createElement("option"),
-                choice = splitChoice(options.choices[o])
+                choice = parseChoice(opt.choices[o])
 
             option.value = choice.val
             option.appendChild(document.createTextNode(choice.text))
@@ -96,13 +94,11 @@ function UIElements(root, options) {
     }
 
     function buttongroup(key, opt) {
-        console.log(key, opt)
         var group = document.createElement("div")
 
         for (var o in opt.choices) {
-            var c = opt.choices[o],
-                button = document.createElement("button"),
-                choice = splitChoice(c)
+            var button = document.createElement("button"),
+                choice = parseChoice(opt.choices[o])
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
@@ -117,6 +113,29 @@ function UIElements(root, options) {
         return group
     }
 
+    function checkboxes(key, opt) {
+        var group = document.createElement("div")
+            
+        group.dataset.property = key
+
+        for (var o in opt.choices) {
+            var choice = parseChoice(opt.choices[o]),
+                label = document.createElement("label"),
+                checkbox = document.createElement("input")
+
+
+            checkbox.setAttribute("type", "checkbox")
+            checkbox.dataset.feature = choice.val
+
+            label.appendChild(checkbox)
+            label.appendChild(document.createTextNode(choice.text))
+
+            group.append(label)
+        }
+
+        return group
+    }
+
     /**
      * Split an input choice into value and text or return only the value as 
      * both if no separator is used to provide a readable label
@@ -125,7 +144,7 @@ function UIElements(root, options) {
      * @param string choice 
      * @return obj {val, text}
      */
-    function splitChoice(choice) {
+    function parseChoice(choice) {
         var parts, val, text
 
         if (choice.indexOf("|") !== -1) {
@@ -148,7 +167,8 @@ function UIElements(root, options) {
         slider: slider,
         label: label,
         textfield: textfield,
-        buttongroup: buttongroup
+        buttongroup: buttongroup,
+        checkboxes: checkboxes
     }
 }
 

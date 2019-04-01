@@ -75,7 +75,6 @@ function loadFont(file, callback) {
 }
 
 function fromFiles(files, callback) {
-    // console.log("Fontsampler.Fontloader.fromFiles", files, callback)
     font = bestWoff(files)
     loadFont(font, callback)
 }
