@@ -1,5 +1,6 @@
 var UIElements = require("./uielements")
 var Helpers = require("./helpers")
+var errors = require("./errors")
 
 function Interface(_root, fonts, options) {
 
@@ -10,7 +11,7 @@ function Interface(_root, fonts, options) {
             letterspacing: "slider",
             fontfamily: "dropdown",
             alignment: "buttongroup",
-            // direction: "buttongroup",
+            direction: "buttongroup",
             // language: "dropdown",
             // opentype: "checkboxes"
         },
@@ -107,6 +108,12 @@ function Interface(_root, fonts, options) {
      */
     function parseUIElement(item) {
         console.debug("Fontsampler.Interface.parseUIElement", item, options, "RENDER?", options.ui[item].render)
+
+        // console.warn(item, item in ui)
+        if (item in ui === false) {
+            throw new Error(errors.invalidUIItem + item)
+        }
+
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
@@ -114,15 +121,11 @@ function Interface(_root, fonts, options) {
             validateNode(node, options.ui[item])
             initNode(node, options.ui[item])
             uinodes[item] = node
-
-            console.log("NODES", uinodes)
             
             return true
         } else if (options.ui[item].render && item in ui) {
             node = createNode(item, options.ui[item])
             uinodes[item] = node
-            
-            console.log("NODES", uinodes)
 
             return node
         }
@@ -180,6 +183,7 @@ function Interface(_root, fonts, options) {
         node.addEventListener("change", onChange)
         node.addEventListener("click", onClick)
 
+
         return true
     }
 
@@ -216,7 +220,7 @@ function Interface(_root, fonts, options) {
         var property = e.currentTarget.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
             buttons = e.currentTarget.childNodes,
-            currentClass = "selected"
+            currentClass = "fontsampler-buttongroup-selected"
         
         for (var b = 0; b < buttons.length; b++) {
             buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
@@ -249,9 +253,10 @@ function Interface(_root, fonts, options) {
 
     function getButtongroupValue(property) {
         var element = getUIItem(property),
-            selected = element.querySelector(".selected")
+            selected = element.querySelector(".fontsampler-buttongroup-selected")
 
         console.log("selected", element, selected)
+
         if (selected) {
             return selected.dataset.choice
         } else {
@@ -267,6 +272,10 @@ function Interface(_root, fonts, options) {
     function setInput(attr, val) {
         console.log("Fontsampler.interface.setInput", attr, val)
         uinodes.tester.style[attr] = val
+    }
+
+    function setInputAttr(attr, val) {
+        uinodes.tester.setAttribute(attr, val)
     }
 
     // TODO use helper.pruneClass
@@ -289,6 +298,7 @@ function Interface(_root, fonts, options) {
         getCSSValue: getCSSValue,
         getButtongroupValue: getButtongroupValue,
         setInput: setInput,
+        setInputAttr: setInputAttr,
         setStatusClass: setStatusClass
     }
 }

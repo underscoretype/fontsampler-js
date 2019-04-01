@@ -36,7 +36,7 @@ function Fontsampler(root, fonts, opt) {
     defaults = {
         initialText: "",
         order: [
-            ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
+            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
@@ -80,10 +80,16 @@ function Fontsampler(root, fonts, opt) {
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
             },
             alignment: {
-                choices: ["left", "center", "right"],
+                choices: ["left|Left", "center|Centered", "right|Right"],
                 init: "left",
                 label: "Alignment",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-alignment"
+            },
+            direction: {
+                choices: ["ltr|Left to right", "rtl|Right to left"],
+                init: "ltr",
+                label: "Direction",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
             }
         }
     }
@@ -140,6 +146,11 @@ function Fontsampler(root, fonts, opt) {
         root.addEventListener("fontsampler.onalignmentclicked", function () {
             var val = interface.getButtongroupValue("alignment")
             interface.setInput("textAlign", val)
+        })
+        root.addEventListener("fontsampler.ondirectionclicked", function () {
+            var val = interface.getButtongroupValue("direction")
+            console.log("direction", val)
+            interface.setInputAttr("dir", val)
         })
 
         root.addEventListener("fontsampler.onfontfamilychanged", function() {

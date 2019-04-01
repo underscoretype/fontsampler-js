@@ -5,5 +5,6 @@ module.exports = {
     "fileNotfound": "Fontsampler: The passed in file could not be found: ",
     "missingRoot": "Fontsampler: Passed in root element invalid: ",
     "tooManyFiles": "Fontsampler: Supplied more than one woff or woff2 for a font: ",
+    "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
 }
 

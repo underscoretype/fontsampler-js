@@ -101,9 +101,26 @@ function UIElements(root, fonts, options) {
         var group = document.createElement("div")
 
         for (var o in opt.choices) {
-            var button = document.createElement("button")
-            button.dataset.choice = opt.choices[o]
-            button.appendChild(document.createTextNode(opt.choices[o]))
+            var c = opt.choices[o],
+                button = document.createElement("button"),
+                choice,
+                text,
+                parts
+                
+            if (c.indexOf("|") !== -1) {
+                parts = c.split("|")
+                choice = parts[0]
+                text = parts[1]
+            } else {
+                choices = c
+                text = c
+            }
+
+            button.dataset.choice = choice
+            button.appendChild(document.createTextNode(text))
+            if (opt.init === choice) {
+                button.className = "fontsampler-buttongroup-selected"
+            }
             group.appendChild(button)
         }
 

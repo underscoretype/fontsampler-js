@@ -135,6 +135,7 @@ module.exports = {
     "fileNotfound": "Fontsampler: The passed in file could not be found: ",
     "missingRoot": "Fontsampler: Passed in root element invalid: ",
     "tooManyFiles": "Fontsampler: Supplied more than one woff or woff2 for a font: ",
+    "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
 }
 
 
@@ -264,7 +265,7 @@ function Fontsampler(root, fonts, opt) {
     defaults = {
         initialText: "",
         order: [
-            ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
+            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
@@ -308,10 +309,16 @@ function Fontsampler(root, fonts, opt) {
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
             },
             alignment: {
-                choices: ["left", "center", "right"],
+                choices: ["left|Left", "center|Centered", "right|Right"],
                 init: "left",
                 label: "Alignment",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-alignment"
+            },
+            direction: {
+                choices: ["ltr|Left to right", "rtl|Right to left"],
+                init: "ltr",
+                label: "Direction",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
             }
         }
     }
@@ -368,6 +375,11 @@ function Fontsampler(root, fonts, opt) {
         root.addEventListener("fontsampler.onalignmentclicked", function () {
             var val = interface.getButtongroupValue("alignment")
             interface.setInput("textAlign", val)
+        })
+        root.addEventListener("fontsampler.ondirectionclicked", function () {
+            var val = interface.getButtongroupValue("direction")
+            console.log("direction", val)
+            interface.setInputAttr("dir", val)
         })
 
         root.addEventListener("fontsampler.onfontfamilychanged", function() {
@@ -535,19 +547,13 @@ function pruneClass(className, classNames) {
     var classes = classNames.split(" "),
         classIndex = classes.indexOf(className)
 
-    console.log("search for", className, "in", classNames, "result", classIndex)
-
     if (classIndex !== -1) {
-        console.log("remove from array")
         classes.splice(classIndex, 1)
     }
-    console.log("after", classes)
 
     if (classes.length > 0) {
-        console.log("return joined classes", classes)
         return classes.join(" ")
     } else {
-        console.log("return empty className")
         return ""
     }
 }
@@ -585,6 +591,7 @@ module.exports = {
 },{}],7:[function(require,module,exports){
 var UIElements = require("./uielements")
 var Helpers = require("./helpers")
+var errors = require("./errors")
 
 function Interface(_root, fonts, options) {
 
@@ -595,7 +602,7 @@ function Interface(_root, fonts, options) {
             letterspacing: "slider",
             fontfamily: "dropdown",
             alignment: "buttongroup",
-            // direction: "buttongroup",
+            direction: "buttongroup",
             // language: "dropdown",
             // opentype: "checkboxes"
         },
@@ -692,6 +699,12 @@ function Interface(_root, fonts, options) {
      */
     function parseUIElement(item) {
         console.debug("Fontsampler.Interface.parseUIElement", item, options, "RENDER?", options.ui[item].render)
+
+        // console.warn(item, item in ui)
+        if (item in ui === false) {
+            throw new Error(errors.invalidUIItem + item)
+        }
+
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
@@ -699,15 +712,11 @@ function Interface(_root, fonts, options) {
             validateNode(node, options.ui[item])
             initNode(node, options.ui[item])
             uinodes[item] = node
-
-            console.log("NODES", uinodes)
             
             return true
         } else if (options.ui[item].render && item in ui) {
             node = createNode(item, options.ui[item])
             uinodes[item] = node
-            
-            console.log("NODES", uinodes)
 
             return node
         }
@@ -765,6 +774,7 @@ function Interface(_root, fonts, options) {
         node.addEventListener("change", onChange)
         node.addEventListener("click", onClick)
 
+
         return true
     }
 
@@ -801,7 +811,7 @@ function Interface(_root, fonts, options) {
         var property = e.currentTarget.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
             buttons = e.currentTarget.childNodes,
-            currentClass = "selected"
+            currentClass = "fontsampler-buttongroup-selected"
         
         for (var b = 0; b < buttons.length; b++) {
             buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
@@ -834,9 +844,10 @@ function Interface(_root, fonts, options) {
 
     function getButtongroupValue(property) {
         var element = getUIItem(property),
-            selected = element.querySelector(".selected")
+            selected = element.querySelector(".fontsampler-buttongroup-selected")
 
         console.log("selected", element, selected)
+
         if (selected) {
             return selected.dataset.choice
         } else {
@@ -852,6 +863,10 @@ function Interface(_root, fonts, options) {
     function setInput(attr, val) {
         console.log("Fontsampler.interface.setInput", attr, val)
         uinodes.tester.style[attr] = val
+    }
+
+    function setInputAttr(attr, val) {
+        uinodes.tester.setAttribute(attr, val)
     }
 
     // TODO use helper.pruneClass
@@ -874,11 +889,12 @@ function Interface(_root, fonts, options) {
         getCSSValue: getCSSValue,
         getButtongroupValue: getButtongroupValue,
         setInput: setInput,
+        setInputAttr: setInputAttr,
         setStatusClass: setStatusClass
     }
 }
 module.exports = Interface
-},{"./helpers":6,"./uielements":9}],8:[function(require,module,exports){
+},{"./errors":3,"./helpers":6,"./uielements":9}],8:[function(require,module,exports){
 var Fontloader = require("./fontloader")
 
 function Preloader() {
@@ -1047,9 +1063,26 @@ function UIElements(root, fonts, options) {
         var group = document.createElement("div")
 
         for (var o in opt.choices) {
-            var button = document.createElement("button")
-            button.dataset.choice = opt.choices[o]
-            button.appendChild(document.createTextNode(opt.choices[o]))
+            var c = opt.choices[o],
+                button = document.createElement("button"),
+                choice,
+                text,
+                parts
+                
+            if (c.indexOf("|") !== -1) {
+                parts = c.split("|")
+                choice = parts[0]
+                text = parts[1]
+            } else {
+                choices = c
+                text = c
+            }
+
+            button.dataset.choice = choice
+            button.appendChild(document.createTextNode(text))
+            if (opt.init === choice) {
+                button.className = "fontsampler-buttongroup-selected"
+            }
             group.appendChild(button)
         }
 

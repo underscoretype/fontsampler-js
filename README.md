@@ -8,9 +8,7 @@ Currently work in progress and pre-release. API not stable and likely to change.
 
 
 ## TODO
-* Implement RTL-LTR switch
 * Implement Language switch
-* Implement Alignment switch
 * Implement multiline/singleline force
 * Implement OT toggles & CSS
 * Implement .notdef rendering

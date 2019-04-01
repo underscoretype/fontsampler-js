@@ -15,19 +15,13 @@ function pruneClass(className, classNames) {
     var classes = classNames.split(" "),
         classIndex = classes.indexOf(className)
 
-    console.log("search for", className, "in", classNames, "result", classIndex)
-
     if (classIndex !== -1) {
-        console.log("remove from array")
         classes.splice(classIndex, 1)
     }
-    console.log("after", classes)
 
     if (classes.length > 0) {
-        console.log("return joined classes", classes)
         return classes.join(" ")
     } else {
-        console.log("return empty className")
         return ""
     }
 }
