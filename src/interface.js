@@ -16,6 +16,11 @@ function Interface(_root, fonts, options) {
             language: "dropdown",
             opentype: "checkboxes"
         },
+        keyToCss = {
+            "fontsize": "fontSize",
+            "lineheight": "lineHeight",
+            "letterspacing": "letterSpacing"
+        },
         root = null,
         uifactory = null,
         uinodes = {},
@@ -62,6 +67,13 @@ function Interface(_root, fonts, options) {
                 }
             }
         }
+
+        // after all nodes are instantiated, update the tester to reflect
+        // the current state
+        for (var key in uinodes) {
+            initNode(key, uinodes[key], options.ui[key])
+        }
+
 
 
         // prevent line breaks on single line instances
@@ -146,7 +158,7 @@ function Interface(_root, fonts, options) {
         var node = getUIItem(item)
         if (node) {
             validateNode(node, options.ui[item])
-            initNode(node, options.ui[item])
+            // initNode(item, node, options.ui[item])
             uinodes[item] = node
             
             return true
@@ -179,7 +191,7 @@ function Interface(_root, fonts, options) {
         var node = uifactory[ui[item]](item, opt),
             wrapper
 
-        initNode(node, opt)
+        // initNode(item, node, opt)
 
         wrapper = document.createElement("div")
         wrapper.className = opt.wrapperClass
@@ -210,12 +222,20 @@ function Interface(_root, fonts, options) {
      * @param object opt 
      * @return boolean
      */
-    function initNode(node, opt) {
+    function initNode(key, node, opt) {
         // TODO set values if passed in an different on node
 
         node.addEventListener("change", onChange)
         node.addEventListener("click", onClick)
 
+        if (ui[key] === "slider") {
+            node.val = opt.init
+            setInputCss(keyToCss[key], opt.init + opt.unit)
+        } else if (ui[key] === "dropdown") {
+            // TODO
+        } else if (ui[key] === "buttongroup") {
+            // TODO
+        }
 
         return true
     }
@@ -334,6 +354,14 @@ function Interface(_root, fonts, options) {
         }
     }
 
+    function getCssAttrForKey(key) {
+        if (key in keyToCss) {
+            return keyToCss[key]
+        }
+
+        return false
+    }
+
     /**
      * Set the tester’s text
      * @param {*} attr 
@@ -379,6 +407,7 @@ function Interface(_root, fonts, options) {
         getCSSValue: getCSSValue,
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,
+        getCssAttrForKey: getCssAttrForKey,
         setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,

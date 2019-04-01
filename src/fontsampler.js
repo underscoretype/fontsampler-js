@@ -148,15 +148,15 @@ function Fontsampler(root, fonts, opt) {
         // sliders
         root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
-            interface.setInputCss("fontSize", val)
+            interface.setInputCss(getCssAttrForKey("fontsize"), val)
         })
         root.addEventListener("fontsampler.onlineheightchanged", function() {
             var val = interface.getCSSValue("lineheight")
-            interface.setInputCss("lineHeight", val)
+            interface.setInputCss(getCssAttrForKey("lineheight"), val)
         })
         root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
-            interface.setInputCss("letterSpacing", val)
+            interface.setInputCss(getCssAttrForKey("letterspacing"), val)
         })
 
         // checkbox
