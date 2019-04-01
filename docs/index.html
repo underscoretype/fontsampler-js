@@ -61,6 +61,12 @@
         </li>
         <li><a href="#fonts">Fonts</a></li>
         <li><a href="#options">Options</a></li>
+        <li><a href="#styling">Styling</a></li>
+        <li><a href="#more-examples">More examples</a>
+            <ul>
+                <li><a href="#lazyloading">Lazyloading (preloading) fonts</a></li>
+            </ul>
+        </li>
     </ul>
 
     <h2 id="examples">Examples</h2>
@@ -241,10 +247,12 @@ Fontsampler(document.getElementById("demo"), fonts)
     </code>
     <p>Fonts on the root element:</p>
     <code>
-&lt;div id="demo" data-woff="path/to/font-name.woff" 
-data-woff2="path/to/font-name.woff2"&gt;Demo minimal
-<!-- data-fontname is optional when no font dropdown is rendered-->
-data-fontname="My font name"&lt;/div&gt;
+&lt;div id="demo" 
+    data-woff="path/to/font-name.woff" 
+    data-woff2="path/to/font-name.woff2"
+    data-fontname="My font name"&gt;
+    Demo minimal
+&lt;/div&gt;
 …
 Fontsampler(document.getElementById("demo"))
     </code>
@@ -268,11 +276,11 @@ order: [
 // A string of class attributes applied to the Fontsampler root node
 wrapperClass: "fontsampler-ui-wrapper",
 
-// A string of class attributes applied to the Fontsampler root node whenever
+// A class string applied to the Fontsampler root node whenever
 // a font is loading
 loadingClass: "loading",
 
-// A string of class attributes applied to the Fontsampler root node while
+// A class string applied to the Fontsampler root node while
 // fontsampler fonts are loading in the background
 preloadingClass: "preloading",
 
@@ -342,6 +350,84 @@ ui: {
     }
 }        
     </code>
+
+    <h2 id="styling">Styling</h2>
+    <p>You can use some default CSS classes to style Fontsampler or pass in
+        custom classes to use instead.
+    </p>
+    <code>
+&lt;style type="text/css"&gt;
+/* Fontsampler provides classes for when a font is loading (e.g. to display 
+a spinner or fade out the text tester while the font is loading) */
+#your-root-element.loading {}
+
+/* If you use the lazyload option you can use this class to change appearance
+while some fonts are still loading in the background */
+#your-root-element.preloading {}
+
+/* When Fontsampler groups items together as per the definitions (nested arrays)
+in the options attribute, those wrappers will have this class */
+.fontsampler-ui-wrapper {}
+
+/* Any UI element (controls, tester input) */
+.fontsampler-ui-element {}
+
+/* All UI elements have their key as class */
+.fontsampler-ui-element-fontsize,
+.fontsampler-ui-element.tester,
+… {}
+
+/* UI elements with labels have markup for the label and it’s content */
+.fontsampler-ui-element-fontsize label[for=fontsize] {}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-text {}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-value {}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-unit {}
+&lt;/style&gt;
+    </code>
+    <p>You can overwrite many classes by passing in an options object.</p>
+    <code>
+&lt;script&gt;
+var options = {
+    …
+    wrapperClass: "fontsampler-ui-wrapper",
+    loadingClass: "loading",
+    preloadingClass: "preloading",
+    ui: {
+        tester: {
+            wrapperClass: "fontsampler-ui-element-tester"
+        },
+        fontsize: {
+            wrapperClass: "fontsampler-ui-element-tester"
+        },
+        …
+    }        
+}
+&lt;/script&gt;
+    </code>
+
+    <h2 id="more-examples">Preloading</h2>
+    <p>By default Fontsamplers only load the fonts on display as needed, always
+        initiating with the first font. If a Fontsampler has more than one fonts,
+        the other fonts are only loaded when a user selects them.
+    </p>
+    <h3 id="lazyloading">Lazyloading</h3>
+    <p>Setting the lazyload option to true Fontsampler will initiate with the first
+        font and then preload any other fonts in the Fontsampler in the background.
+        If the font is switched before all fonts have loaded the requested font will
+        be the next to be loaded and displayed.
+    </p>
+    <code>
+&lt;script&gt;
+    var options = {
+        lazyload: true
+    }
+    var fonts = {
+        …
+    }
+    Fontsampler(document.getElementById("demo"), fonts, options).init()
+&lt;/script&gt;
+    </code>
+    <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser network throttling and network tool to see what’s going on).</p>
 
     <script>
         window.onload = function() {

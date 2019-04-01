@@ -6,10 +6,27 @@
     <meta charset="utf8">
     <script src="../dist/fontsampler.js"></script>
     <link rel="stylesheet" href="assets/demo.css">
+    <style type="text/css">
+        #demo-lazyload.loading .fontsampler-ui-element-tester:after {
+            background: limegreen;
+            content: "Loading a font now";
+            display: block;
+        }
+        #demo-lazyload:after {
+            background: lightcyan;
+            content: "Done preloading fonts";
+            display: block;
+        }
+        #demo-lazyload.preloading:after {
+            background: orange;
+            content: "Preloading fonts";
+            display: block;
+        }
+        </style>
 </head>
 
 <body>
-    <h1>fontsampler-js</h1>
+    <h1><a href="./index.html">fontsampler-js</a></h1>
     <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
     
     <h2>Lazyload demo</h2>
@@ -20,6 +37,32 @@
         will be loaded first and then the rest of the fonts will be queued to preload.</p>
 
     <code>
+&lt;style type="text/css"&gt;
+#demo.loading:after {
+    background: limegreen;
+    content: "Loading a font now";
+    display: block;
+}
+#demo.preloading:after {
+    background: orange;
+    content: "Preloading fonts";
+    display: block;
+}
+#demo:after {
+    background: lightcyan;
+    content: "Done preloading fonts"
+    display: block;
+}
+&lt;/style&gt;
+&lt;script&gt;
+var fonts = {
+    …
+}
+var options = {
+    lazyload: true
+}
+Fontsampler(document.getElementById("demo"), fonts, options).init()
+&lt;/script&gt;
     </code>
 
     <div id="demo-lazyload" class="demo">Lazyloading all 18 styles of IBM Plex Sans in the background…</div>
