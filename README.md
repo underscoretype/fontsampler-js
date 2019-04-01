@@ -2,6 +2,7 @@
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
+
 ## Status
 
 Currently work in progress and pre-release. API not stable and likely to change.
@@ -9,9 +10,14 @@ Currently work in progress and pre-release. API not stable and likely to change.
 
 ## TODO
 * Implement OT toggles & CSS
-* Implement .notdef rendering
-* Implement background/foreground color toggle
-* Implement preloading (? needed in addition to lazyloading?)
+* Implement public event interface (change, click, init, loading, loaded)
+* Implement API on main object (set/get, set/get option, destroy, reset)
+* Implement per-font options (e.g. one font ltr other rtl etc)
+
+
+## Licence
+
+Licensed under GNU GPL-3
 
 ### Licenses for fonts included in the demo
 * [Alegreya](https://github.com/huertatipografica/Alegreya/) by [Huerta Tipografica](https://www.huertatipografica.com/) ([License](https://github.com/huertatipografica/Alegreya/blob/master/LICENSE.md))

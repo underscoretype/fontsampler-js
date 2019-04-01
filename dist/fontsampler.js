@@ -662,8 +662,7 @@ function Interface(_root, fonts, options) {
             }
         }
         for (var key in options.ui) {
-            if (!key in uinodes) {
-                console.log("STILL MISSING", key)
+            if (key in uinodes === false) {
                 var element = parseUIOrderElement(options.ui[key])
                 if (element) {
                     root.appendChild(element)
@@ -676,25 +675,7 @@ function Interface(_root, fonts, options) {
         if (!options.multiline) {
             var typeEvents = ["keypress", "keyup", "change", "paste"]
             for (var e in typeEvents) {
-                uinodes.tester.addEventListener(typeEvents[e], function (event) {
-                    if (event.type === "keypress") {
-                        // for keypress events immediately block pressing enter for line break
-                        if (event.keyCode === 13) {
-                            event.preventDefault()
-                            return false;
-                        }
-                    } else {
-                        // allow other events, filter any html with $.text() and replace linebreaks
-                        // TODO fix paste event from setting the caret to the front of the non-input non-textarea
-                        var text = uinodes.tester.textContent,
-                            hasLinebreaks = text.indexOf("\n")
-
-                        if (-1 !== hasLinebreaks) {
-                            uinodes.tester.innerHTML(text.replace('/\n/gi', ''));
-                            selection.setCaret(uinodes.tester, uinodes.tester.textContent.length, 0);
-                        }
-                    }
-                })
+                uinodes.tester.addEventListener(typeEvents[e], onKey)
             }
         }
 
@@ -803,7 +784,7 @@ function Interface(_root, fonts, options) {
         // are the fonts passed in. let’s make this transformation behind
         // the scenes so we can use the re-usable "dropdown" ui
         if (item === "fontfamily") {
-            opt.choices = fonts.map(function (value, index) {
+            opt.choices = fonts.map(function (value) {
                 return value.name
             })
         }
@@ -899,6 +880,26 @@ function Interface(_root, fonts, options) {
             root.dispatchEvent(customEvent)
         } else if (property in ui && ui[property] === "textfield") {
             console.log("text onClick")
+        }
+    }
+
+    function onKey(event) {
+        if (event.type === "keypress") {
+            // for keypress events immediately block pressing enter for line break
+            if (event.keyCode === 13) {
+                event.preventDefault()
+                return false;
+            }
+        } else {
+            // allow other events, filter any html with $.text() and replace linebreaks
+            // TODO fix paste event from setting the caret to the front of the non-input non-textarea
+            var text = uinodes.tester.textContent,
+                hasLinebreaks = text.indexOf("\n")
+
+            if (-1 !== hasLinebreaks) {
+                uinodes.tester.innerHTML(text.replace('/\n/gi', ''));
+                selection.setCaret(uinodes.tester, uinodes.tester.textContent.length, 0);
+            }
         }
     }
 
