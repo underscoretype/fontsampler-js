@@ -1,6 +1,7 @@
 var UIElements = require("./uielements")
 var Helpers = require("./helpers")
 var errors = require("./errors")
+var selection = require("./selection")
 
 function Interface(_root, fonts, options) {
 
@@ -62,6 +63,55 @@ function Interface(_root, fonts, options) {
                 }
             }
         }
+
+
+        // prevent line breaks on single line instances
+        if (!options.multiline) {
+            var typeEvents = ["keypress", "keyup", "change", "paste"]
+            for (var e in typeEvents) {
+                uinodes.tester.addEventListener(typeEvents[e], function (event) {
+                    if (event.type === "keypress") {
+                        // for keypress events immediately block pressing enter for line break
+                        if (event.keyCode === 13) {
+                            event.preventDefault()
+                            return false;
+                        }
+                    } else {
+                        // allow other events, filter any html with $.text() and replace linebreaks
+                        // TODO fix paste event from setting the caret to the front of the non-input non-textarea
+                        var text = uinodes.tester.textContent,
+                            hasLinebreaks = text.indexOf("\n")
+
+                        if (-1 !== hasLinebreaks) {
+                            uinodes.tester.innerHTML(text.replace('/\n/gi', ''));
+                            selection.setCaret(uinodes.tester, uinodes.tester.textContent.length, 0);
+                        }
+                    }
+                })
+            }
+        }
+
+
+        // prevent pasting styled content
+        uinodes.tester.addEventListener('paste', function(e) {
+            e.preventDefault();
+            var text = '';
+            if (e.clipboardData || e.originalEvent.clipboardData) {
+                text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            } else if (window.clipboardData) {
+                text = window.clipboardData.getData('Text');
+            }
+
+            if (!options.multiline) {
+                text = text.replace(/(?:\r\n|\r|\n|<br>)/g, ' ')
+            }
+
+            if (document.queryCommandSupported('insertText')) {
+                document.execCommand('insertText', false, text);
+            } else {
+                document.execCommand('paste', false, text);
+            }
+        });
     }
 
     /**
@@ -231,13 +281,18 @@ function Interface(_root, fonts, options) {
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
             buttons = e.currentTarget.childNodes,
             currentClass = "fontsampler-buttongroup-selected"
-        
-        for (var b = 0; b < buttons.length; b++) {
-            buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
-        }
-        e.target.className = Helpers.addClass(currentClass, e.target.className)
 
-        root.dispatchEvent(customEvent)
+        console.log("onClick", property, property in ui, ui[property])
+        if (property in ui && ui[property] === "buttongroup") {    
+            for (var b = 0; b < buttons.length; b++) {
+                buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
+            }
+            e.target.className = Helpers.addClass(currentClass, e.target.className)
+
+            root.dispatchEvent(customEvent)
+        } else if (property in ui && ui[property] === "textfield") {
+            console.log("text onClick")
+        }
     }
 
     /**

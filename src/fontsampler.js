@@ -41,6 +41,7 @@ function Fontsampler(root, fonts, opt) {
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
         preloadingClass: "preloading",
+        multiline: true,
         lazyload: false,
         generate: false,
         ui: {

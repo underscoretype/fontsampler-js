@@ -12,6 +12,9 @@
         display: flex;
         justify-content: space-between;
     }
+    .demo .fontsampler-ui-element-tester {
+        display: block;
+    }
     .demo .fontsampler-ui-element {
         box-sizing: border-box;
         padding: 5px;
@@ -283,6 +286,9 @@ loadingClass: "loading",
 // A class string applied to the Fontsampler root node while
 // fontsampler fonts are loading in the background
 preloadingClass: "preloading",
+
+// Set false to force single line input
+multiline: true,
 
 // Set true to preloaded all fonts in the Fontsampler in the background
 // instead of only loading them when activated

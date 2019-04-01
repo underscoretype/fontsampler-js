@@ -270,6 +270,7 @@ function Fontsampler(root, fonts, opt) {
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
         preloadingClass: "preloading",
+        multiline: true,
         lazyload: false,
         generate: false,
         ui: {
@@ -607,6 +608,7 @@ module.exports = {
 var UIElements = require("./uielements")
 var Helpers = require("./helpers")
 var errors = require("./errors")
+var selection = require("./selection")
 
 function Interface(_root, fonts, options) {
 
@@ -668,6 +670,55 @@ function Interface(_root, fonts, options) {
                 }
             }
         }
+
+
+        // prevent line breaks on single line instances
+        if (!options.multiline) {
+            var typeEvents = ["keypress", "keyup", "change", "paste"]
+            for (var e in typeEvents) {
+                uinodes.tester.addEventListener(typeEvents[e], function (event) {
+                    if (event.type === "keypress") {
+                        // for keypress events immediately block pressing enter for line break
+                        if (event.keyCode === 13) {
+                            event.preventDefault()
+                            return false;
+                        }
+                    } else {
+                        // allow other events, filter any html with $.text() and replace linebreaks
+                        // TODO fix paste event from setting the caret to the front of the non-input non-textarea
+                        var text = uinodes.tester.textContent,
+                            hasLinebreaks = text.indexOf("\n")
+
+                        if (-1 !== hasLinebreaks) {
+                            uinodes.tester.innerHTML(text.replace('/\n/gi', ''));
+                            selection.setCaret(uinodes.tester, uinodes.tester.textContent.length, 0);
+                        }
+                    }
+                })
+            }
+        }
+
+
+        // prevent pasting styled content
+        uinodes.tester.addEventListener('paste', function(e) {
+            e.preventDefault();
+            var text = '';
+            if (e.clipboardData || e.originalEvent.clipboardData) {
+                text = (e.originalEvent || e).clipboardData.getData('text/plain');
+            } else if (window.clipboardData) {
+                text = window.clipboardData.getData('Text');
+            }
+
+            if (!options.multiline) {
+                text = text.replace(/(?:\r\n|\r|\n|<br>)/g, ' ')
+            }
+
+            if (document.queryCommandSupported('insertText')) {
+                document.execCommand('insertText', false, text);
+            } else {
+                document.execCommand('paste', false, text);
+            }
+        });
     }
 
     /**
@@ -837,13 +888,18 @@ function Interface(_root, fonts, options) {
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
             buttons = e.currentTarget.childNodes,
             currentClass = "fontsampler-buttongroup-selected"
-        
-        for (var b = 0; b < buttons.length; b++) {
-            buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
-        }
-        e.target.className = Helpers.addClass(currentClass, e.target.className)
 
-        root.dispatchEvent(customEvent)
+        console.log("onClick", property, property in ui, ui[property])
+        if (property in ui && ui[property] === "buttongroup") {    
+            for (var b = 0; b < buttons.length; b++) {
+                buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
+            }
+            e.target.className = Helpers.addClass(currentClass, e.target.className)
+
+            root.dispatchEvent(customEvent)
+        } else if (property in ui && ui[property] === "textfield") {
+            console.log("text onClick")
+        }
     }
 
     /**
@@ -919,7 +975,7 @@ function Interface(_root, fonts, options) {
     }
 }
 module.exports = Interface
-},{"./errors":3,"./helpers":6,"./uielements":9}],8:[function(require,module,exports){
+},{"./errors":3,"./helpers":6,"./selection":9,"./uielements":10}],8:[function(require,module,exports){
 var Fontloader = require("./fontloader")
 
 function Preloader() {
@@ -985,6 +1041,94 @@ function Preloader() {
 
 module.exports = Preloader
 },{"./fontloader":4}],9:[function(require,module,exports){
+/**
+ * Helper module to deal with caret position
+ */
+function Selection () {
+
+    // from https://stackoverflow.com/a/4812022/999162
+    var setSelectionByCharacterOffsets = null;
+
+    if (window.getSelection && document.createRange) {
+        setSelectionByCharacterOffsets = function (containerEl, start, end) {
+            var charIndex = 0,
+                range = document.createRange();
+            range.setStart(containerEl, 0);
+            range.collapse(true);
+            var nodeStack = [containerEl],
+                node, foundStart = false,
+                stop = false;
+
+            while (!stop && (node = nodeStack.pop())) {
+                if (node.nodeType == 3) {
+                    var nextCharIndex = charIndex + node.length;
+                    if (!foundStart && start >= charIndex && start <= nextCharIndex) {
+                        range.setStart(node, start - charIndex);
+                        foundStart = true;
+                    }
+                    if (foundStart && end >= charIndex && end <= nextCharIndex) {
+                        range.setEnd(node, end - charIndex);
+                        stop = true;
+                    }
+                    charIndex = nextCharIndex;
+                } else {
+                    var i = node.childNodes.length;
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i]);
+                    }
+                }
+            }
+
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        };
+    } else if (document.selection) {
+        setSelectionByCharacterOffsets = function (containerEl, start, end) {
+            var textRange = document.body.createTextRange();
+            textRange.moveToElementText(containerEl);
+            textRange.collapse(true);
+            textRange.moveEnd("character", end);
+            textRange.moveStart("character", start);
+            textRange.select();
+        };
+    }
+
+
+    // From https://stackoverflow.com/a/4812022/999162
+    function getCaretCharacterOffsetWithin(element) {
+        var caretOffset = 0;
+        var doc = element.ownerDocument || element.document;
+        var win = doc.defaultView || doc.parentWindow;
+        var sel;
+        if (typeof win.getSelection != "undefined") {
+            sel = win.getSelection();
+            if (sel.rangeCount > 0) {
+                var range = win.getSelection().getRangeAt(0);
+                var preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(element);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                caretOffset = preCaretRange.toString().length;
+            }
+        } else if ((sel = doc.selection) && sel.type != "Control") {
+            var textRange = sel.createRange();
+            var preCaretTextRange = doc.body.createTextRange();
+            preCaretTextRange.moveToElementText(element);
+            preCaretTextRange.setEndPoint("EndToEnd", textRange);
+            caretOffset = preCaretTextRange.text.length;
+        }
+        return caretOffset;
+    }
+
+    return {
+        setCaret: setSelectionByCharacterOffsets,
+        getCaret: getCaretCharacterOffsetWithin
+    };
+
+}
+
+module.exports = Selection
+},{}],10:[function(require,module,exports){
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
