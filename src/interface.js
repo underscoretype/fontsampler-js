@@ -12,7 +12,7 @@ function Interface(_root, fonts, options) {
             fontfamily: "dropdown",
             alignment: "buttongroup",
             direction: "buttongroup",
-            // language: "dropdown",
+            language: "dropdown",
             // opentype: "checkboxes"
         },
         root = null,
@@ -24,7 +24,7 @@ function Interface(_root, fonts, options) {
         console.log("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
-        uifactory = UIElements(root, fonts, options)
+        uifactory = UIElements(root, options)
 
         // Before modifying the root node, detect if it is containing only
         // text, and if so, store it to the options for later use
@@ -141,6 +141,16 @@ function Interface(_root, fonts, options) {
      */
     function createNode(item, opt) {
         console.debug("Fontsampler.Interface.createNode", item, opt)
+
+        // The fontfamily is just being defined without the options, which
+        // are the fonts passed in. let’s make this transformation behind
+        // the scenes so we can use the re-usable "dropdown" ui
+        if (item === "fontfamily") {
+            opt.choices = fonts.map(function (value, index) {
+                return value.name
+            })
+        }
+
         var node = uifactory[ui[item]](item, opt),
             wrapper
 
@@ -236,7 +246,7 @@ function Interface(_root, fonts, options) {
      */
     function getValue(property) {
         console.log("getValue", property)
-        var element = getUIItem(propert)
+        var element = getUIItem(property)
 
         return element.value
     }
@@ -269,7 +279,7 @@ function Interface(_root, fonts, options) {
      * @param {*} attr 
      * @param {*} val 
      */
-    function setInput(attr, val) {
+    function setInputCss(attr, val) {
         console.log("Fontsampler.interface.setInput", attr, val)
         uinodes.tester.style[attr] = val
     }
@@ -297,7 +307,7 @@ function Interface(_root, fonts, options) {
         getValue: getValue,
         getCSSValue: getCSSValue,
         getButtongroupValue: getButtongroupValue,
-        setInput: setInput,
+        setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setStatusClass: setStatusClass
     }

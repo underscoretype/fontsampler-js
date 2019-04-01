@@ -8,7 +8,6 @@ Currently work in progress and pre-release. API not stable and likely to change.
 
 
 ## TODO
-* Implement Language switch
 * Implement multiline/singleline force
 * Implement OT toggles & CSS
 * Implement .notdef rendering

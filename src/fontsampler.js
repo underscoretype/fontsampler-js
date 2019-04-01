@@ -36,7 +36,7 @@ function Fontsampler(root, fonts, opt) {
     defaults = {
         initialText: "",
         order: [
-            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction"], "tester"
+            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction", "language"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
@@ -90,6 +90,12 @@ function Fontsampler(root, fonts, opt) {
                 init: "ltr",
                 label: "Direction",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
+            },
+            language: {
+                choices: ["enGB|Engish", "deDe|Deutsch", "nlNL|Dutch"],
+                init: "enGb",
+                label: "Language",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
             }
         }
     }
@@ -131,31 +137,40 @@ function Fontsampler(root, fonts, opt) {
 
     // Setup the interface listeners and delegate events back to the interface
     function addEventListeners() {
+        // sliders
         root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
-            interface.setInput("fontSize", val)
+            interface.setInputCss("fontSize", val)
         })
         root.addEventListener("fontsampler.onlineheightchanged", function() {
             var val = interface.getCSSValue("lineheight")
-            interface.setInput("lineHeight", val)
+            interface.setInputCss("lineHeight", val)
         })
         root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
-            interface.setInput("letterSpacing", val)
+            interface.setInputCss("letterSpacing", val)
         })
+
+        // dropdowns
+        root.addEventListener("fontsampler.onfontfamilychanged", function() {
+            var val = interface.getValue("fontfamily")
+            loadFont(val)
+        })
+        root.addEventListener("fontsampler.onlanguagechanged", function () {
+            var val = interface.getValue("language")
+            console.log("lang", val)
+            interface.setInputAttr("lang", val)
+        })
+
+        // buttongroups
         root.addEventListener("fontsampler.onalignmentclicked", function () {
             var val = interface.getButtongroupValue("alignment")
-            interface.setInput("textAlign", val)
+            interface.setInputCss("textAlign", val)
         })
         root.addEventListener("fontsampler.ondirectionclicked", function () {
             var val = interface.getButtongroupValue("direction")
             console.log("direction", val)
             interface.setInputAttr("dir", val)
-        })
-
-        root.addEventListener("fontsampler.onfontfamilychanged", function() {
-            var val = interface.getValue("fontfamily")
-            loadFont(val)
         })
     }
 
@@ -265,7 +280,7 @@ function Fontsampler(root, fonts, opt) {
         }
 
         Fontloader.fromFiles(files, function(f) {
-            interface.setInput("fontFamily", f.family)
+            interface.setInputCss("fontFamily", f.family)
             interface.setStatusClass(options.loadingClass, false)
 
             preloader.resume()

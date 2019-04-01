@@ -265,7 +265,7 @@ function Fontsampler(root, fonts, opt) {
     defaults = {
         initialText: "",
         order: [
-            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction"], "tester"
+            ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment", "direction", "language"], "tester"
         ],
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
@@ -319,6 +319,12 @@ function Fontsampler(root, fonts, opt) {
                 init: "ltr",
                 label: "Direction",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
+            },
+            language: {
+                choices: ["enGB|Engish", "deDe|Deutsch", "nlNL|Dutch"],
+                init: "enGb",
+                label: "Language",
+                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
             }
         }
     }
@@ -360,31 +366,40 @@ function Fontsampler(root, fonts, opt) {
 
     // Setup the interface listeners and delegate events back to the interface
     function addEventListeners() {
+        // sliders
         root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
-            interface.setInput("fontSize", val)
+            interface.setInputCss("fontSize", val)
         })
         root.addEventListener("fontsampler.onlineheightchanged", function() {
             var val = interface.getCSSValue("lineheight")
-            interface.setInput("lineHeight", val)
+            interface.setInputCss("lineHeight", val)
         })
         root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
-            interface.setInput("letterSpacing", val)
+            interface.setInputCss("letterSpacing", val)
         })
+
+        // dropdowns
+        root.addEventListener("fontsampler.onfontfamilychanged", function() {
+            var val = interface.getValue("fontfamily")
+            loadFont(val)
+        })
+        root.addEventListener("fontsampler.onlanguagechanged", function () {
+            var val = interface.getValue("language")
+            console.log("lang", val)
+            interface.setInputAttr("lang", val)
+        })
+
+        // buttongroups
         root.addEventListener("fontsampler.onalignmentclicked", function () {
             var val = interface.getButtongroupValue("alignment")
-            interface.setInput("textAlign", val)
+            interface.setInputCss("textAlign", val)
         })
         root.addEventListener("fontsampler.ondirectionclicked", function () {
             var val = interface.getButtongroupValue("direction")
             console.log("direction", val)
             interface.setInputAttr("dir", val)
-        })
-
-        root.addEventListener("fontsampler.onfontfamilychanged", function() {
-            var val = interface.getValue("fontfamily")
-            loadFont(val)
         })
     }
 
@@ -494,7 +509,7 @@ function Fontsampler(root, fonts, opt) {
         }
 
         Fontloader.fromFiles(files, function(f) {
-            interface.setInput("fontFamily", f.family)
+            interface.setInputCss("fontFamily", f.family)
             interface.setStatusClass(options.loadingClass, false)
 
             preloader.resume()
@@ -603,7 +618,7 @@ function Interface(_root, fonts, options) {
             fontfamily: "dropdown",
             alignment: "buttongroup",
             direction: "buttongroup",
-            // language: "dropdown",
+            language: "dropdown",
             // opentype: "checkboxes"
         },
         root = null,
@@ -615,7 +630,7 @@ function Interface(_root, fonts, options) {
         console.log("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
-        uifactory = UIElements(root, fonts, options)
+        uifactory = UIElements(root, options)
 
         // Before modifying the root node, detect if it is containing only
         // text, and if so, store it to the options for later use
@@ -732,6 +747,16 @@ function Interface(_root, fonts, options) {
      */
     function createNode(item, opt) {
         console.debug("Fontsampler.Interface.createNode", item, opt)
+
+        // The fontfamily is just being defined without the options, which
+        // are the fonts passed in. let’s make this transformation behind
+        // the scenes so we can use the re-usable "dropdown" ui
+        if (item === "fontfamily") {
+            opt.choices = fonts.map(function (value, index) {
+                return value.name
+            })
+        }
+
         var node = uifactory[ui[item]](item, opt),
             wrapper
 
@@ -827,7 +852,7 @@ function Interface(_root, fonts, options) {
      */
     function getValue(property) {
         console.log("getValue", property)
-        var element = getUIItem(propert)
+        var element = getUIItem(property)
 
         return element.value
     }
@@ -860,7 +885,7 @@ function Interface(_root, fonts, options) {
      * @param {*} attr 
      * @param {*} val 
      */
-    function setInput(attr, val) {
+    function setInputCss(attr, val) {
         console.log("Fontsampler.interface.setInput", attr, val)
         uinodes.tester.style[attr] = val
     }
@@ -888,7 +913,7 @@ function Interface(_root, fonts, options) {
         getValue: getValue,
         getCSSValue: getCSSValue,
         getButtongroupValue: getButtongroupValue,
-        setInput: setInput,
+        setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setStatusClass: setStatusClass
     }
@@ -967,7 +992,7 @@ module.exports = Preloader
  * @param {*} options 
  * @param {*} fonts 
  */
-function UIElements(root, fonts, options) {
+function UIElements(root, options) {
 
     function label(labelText, labelUnit, labelValue, relatedInput) {
         var label = document.createElement("label"),
@@ -1017,15 +1042,14 @@ function UIElements(root, fonts, options) {
         console.debug("Fontsampler.UIElements.dropdown", key, options)
 
         var dropdown = document.createElement("select")
-
-        dropdown.setAttribute("value", name)
         dropdown.dataset.property = key
 
-        for (var index in fonts) {
-            var option = document.createElement("option")
+        for (var o in options.choices) {
+            var option = document.createElement("option"),
+                choice = splitChoice(options.choices[o])
 
-            option.value = fonts[index].name
-            option.appendChild(document.createTextNode(fonts[index].name))
+            option.value = choice.val
+            option.appendChild(document.createTextNode(choice.text))
             dropdown.appendChild(option)
         }
 
@@ -1065,22 +1089,11 @@ function UIElements(root, fonts, options) {
         for (var o in opt.choices) {
             var c = opt.choices[o],
                 button = document.createElement("button"),
-                choice,
-                text,
-                parts
-                
-            if (c.indexOf("|") !== -1) {
-                parts = c.split("|")
-                choice = parts[0]
-                text = parts[1]
-            } else {
-                choices = c
-                text = c
-            }
+                choice = splitChoice(c)
 
-            button.dataset.choice = choice
-            button.appendChild(document.createTextNode(text))
-            if (opt.init === choice) {
+            button.dataset.choice = choice.val
+            button.appendChild(document.createTextNode(choice.text))
+            if (opt.init === choice.val) {
                 button.className = "fontsampler-buttongroup-selected"
             }
             group.appendChild(button)
@@ -1089,6 +1102,32 @@ function UIElements(root, fonts, options) {
         group.dataset.property = key
 
         return group
+    }
+
+    /**
+     * Split an input choice into value and text or return only the value as 
+     * both if no separator is used to provide a readable label
+     * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
+     * but: "left" becomes { val: "left", text: "left"}
+     * @param string choice 
+     * @return obj {val, text}
+     */
+    function splitChoice(choice) {
+        var parts, val, text
+
+        if (choice.indexOf("|") !== -1) {
+            parts = choice.split("|")
+            val = parts[0]
+            text = parts[1]
+        } else {
+            val = choice
+            text = choice
+        }
+
+        return {
+            val: val,
+            text: text
+        }
     }
 
     return {

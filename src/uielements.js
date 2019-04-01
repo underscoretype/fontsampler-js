@@ -5,7 +5,7 @@
  * @param {*} options 
  * @param {*} fonts 
  */
-function UIElements(root, fonts, options) {
+function UIElements(root, options) {
 
     function label(labelText, labelUnit, labelValue, relatedInput) {
         var label = document.createElement("label"),
@@ -55,15 +55,14 @@ function UIElements(root, fonts, options) {
         console.debug("Fontsampler.UIElements.dropdown", key, options)
 
         var dropdown = document.createElement("select")
-
-        dropdown.setAttribute("value", name)
         dropdown.dataset.property = key
 
-        for (var index in fonts) {
-            var option = document.createElement("option")
+        for (var o in options.choices) {
+            var option = document.createElement("option"),
+                choice = splitChoice(options.choices[o])
 
-            option.value = fonts[index].name
-            option.appendChild(document.createTextNode(fonts[index].name))
+            option.value = choice.val
+            option.appendChild(document.createTextNode(choice.text))
             dropdown.appendChild(option)
         }
 
@@ -103,22 +102,11 @@ function UIElements(root, fonts, options) {
         for (var o in opt.choices) {
             var c = opt.choices[o],
                 button = document.createElement("button"),
-                choice,
-                text,
-                parts
-                
-            if (c.indexOf("|") !== -1) {
-                parts = c.split("|")
-                choice = parts[0]
-                text = parts[1]
-            } else {
-                choices = c
-                text = c
-            }
+                choice = splitChoice(c)
 
-            button.dataset.choice = choice
-            button.appendChild(document.createTextNode(text))
-            if (opt.init === choice) {
+            button.dataset.choice = choice.val
+            button.appendChild(document.createTextNode(choice.text))
+            if (opt.init === choice.val) {
                 button.className = "fontsampler-buttongroup-selected"
             }
             group.appendChild(button)
@@ -127,6 +115,32 @@ function UIElements(root, fonts, options) {
         group.dataset.property = key
 
         return group
+    }
+
+    /**
+     * Split an input choice into value and text or return only the value as 
+     * both if no separator is used to provide a readable label
+     * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
+     * but: "left" becomes { val: "left", text: "left"}
+     * @param string choice 
+     * @return obj {val, text}
+     */
+    function splitChoice(choice) {
+        var parts, val, text
+
+        if (choice.indexOf("|") !== -1) {
+            parts = choice.split("|")
+            val = parts[0]
+            text = parts[1]
+        } else {
+            val = choice
+            text = choice
+        }
+
+        return {
+            val: val,
+            text: text
+        }
     }
 
     return {

@@ -13,7 +13,7 @@ h2, h3 {
 }
 
 h2[id]:before, h3[id]:before {
-    content: "#";
+    content: "⁋";
     margin-left: -0.75em;
     margin-right: 0.25em;
     font-weight: normal;
@@ -45,7 +45,6 @@ code {
     margin: 1rem auto;
     white-space: pre;
     line-height: 1.35em;
-    overflow-x: scroll;
 }
 code:before {
     content: "CODE";
