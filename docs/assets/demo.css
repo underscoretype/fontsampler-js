@@ -8,11 +8,13 @@ body {
     color: #333;
 }
 
-h2, h3 {
+h2,
+h3 {
     margin: 4em auto 2em;
 }
 
-h2[id]:before, h3[id]:before {
+h2[id]:before,
+h3[id]:before {
     content: "⁋";
     margin-left: -0.75em;
     margin-right: 0.25em;
@@ -28,10 +30,13 @@ li {
 }
 
 .demo {
-    border: 1px dotted lightgrey;
-    padding: 1rem;
+    border: 2px solid #DE2543;
+    box-shadow: 0 0 5px #dcdcdc;
+    padding: 2rem;
+    margin: 2rem auto;
     position: relative;
 }
+
 .demo:before {
     content: "DEMO";
 }
@@ -42,15 +47,17 @@ code {
     display: block;
     padding: 1rem;
     position: relative;
-    margin: 1rem auto;
+    margin: 2rem auto;
     white-space: pre;
     line-height: 1.35em;
 }
+
 code:before {
     content: "CODE";
 }
 
-code:before, .demo:before {
+code:before,
+.demo:before {
     font-family: monospace;
     position: absolute;
     top: 0.5em;
@@ -59,4 +66,15 @@ code:before, .demo:before {
     padding: 0.25em 0.5em;
     transform-origin: left top;
     transform: rotate(-90deg) translate(-100%, -100%);
+}
+
+
+.fontsampler {
+    transition: opacity 0.2s ease-out;
+    opacity: 0;
+}
+
+.fontsampler.fontsampler-initialized {
+    opacity: 1;
+    display: block;
 }

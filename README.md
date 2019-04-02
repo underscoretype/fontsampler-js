@@ -9,7 +9,6 @@ Currently work in progress and pre-release. API not stable and likely to change.
 
 
 ## TODO
-* Implement OT toggles & CSS
 * Implement public event interface (change, click, init, loading, loaded)
 * Implement API on main object (set/get, set/get option, destroy, reset)
 * Implement per-font options (e.g. one font ltr other rtl etc)

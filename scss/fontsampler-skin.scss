@@ -1,0 +1,51 @@
+$baseColor: #333;
+$accentColor: #0AF;
+$bgColor: #FDFDFD;
+$bgColorHover: darken($bgColor, 5%);
+
+$borderRadius: 2px;
+$borderWidth: 1px;
+$borderColor: #CCC;
+
+$sliderBarWidth: 1px;
+$sliderHandleSize: 10px;
+
+$elementPadding: 0 5px;
+$elementMargin: 5px;
+
+// Scope all styles for fontsamplers with skin only
+.fontsampler.fontsampler-skin {
+
+    // Handle basic loading states to avoid flash of unstyle text
+    transition: opacity 0.2s ease-out;
+    opacity: 0;
+
+    // Show fontsampler when initialized
+    &.fontsampler-initialized {
+        opacity: 1;
+        display: block;
+    }
+
+
+    .fontsampler-ui-element-tester {
+        transition: opacity 0.2s ease-out;
+        opacity: 1;
+    }
+
+    &.loading .fontsampler-ui-element-tester {
+        opacity: 0;
+    }
+
+
+    // A sensible baseline layout
+    @import "_fontsampler.layout";
+
+    // UI element types
+    @import "_fontsampler.buttongroup";
+    @import "_fontsampler.checkboxes";
+
+    // Overwrite included libraries’ and polyfill’s styling
+    @import "_choices";
+    @import "_rangeslider";
+
+    }

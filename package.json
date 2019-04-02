@@ -19,11 +19,16 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "http-server",
         "demo": "open http://localhost:8080/docs/index.html",
-        "js": "watchify src/fontsampler.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'"
+        "js": "watchify src/fontsampler.js -o 'dist/fontsampler.js' -v -s 'Fontsampler'",
+        "js-skin": "watchify src/skin.js -o 'dist/fontsampler-skin.js' -v -s 'FontsamplerSkin'",
+        "scss": "sass --watch --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.css",
+        "scss-compressed": "sass --watch --style compressed --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css"
     },
     "dependencies": {
+        "choices.js": "^7.0.0",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
+        "rangeslider-pure": "^0.4.7",
         "woff2-feature-test": "^1.0.3"
     },
     "devDependencies": {

@@ -4,7 +4,7 @@
 <head>
     <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
     <meta charset="utf8">
-    <script src="../dist/fontsampler.js"></script>
+    <!-- Just some styling for this documentaiton page -->
     <link rel="stylesheet" href="assets/demo.css">
     <style type="text/css">
         #demo-lazyload.loading .fontsampler-ui-element-tester:after {
@@ -12,174 +12,185 @@
             content: "Loading a font now";
             display: block;
         }
+
         #demo-lazyload:after {
             background: lightcyan;
             content: "Done preloading fonts";
             display: block;
         }
+
         #demo-lazyload.preloading:after {
             background: orange;
             content: "Preloading fonts";
             display: block;
         }
-        </style>
+    </style>
+
+    <!-- Fontsampler -->
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <!-- /Fontsampler -->
 </head>
 
 <body>
     <h1><a href="./index.html">fontsampler-js</a></h1>
     <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
-    
+
     <h2>Lazyload demo</h2>
     <p>By default Fontsampler will load webfonts when they are selected. To preload
         all webfonts of a Fontsampler in the background you can use the lazyload option.
-        This will load all fonts in the Fontsampler until all fonts are preloaded. 
+        This will load all fonts in the Fontsampler until all fonts are preloaded.
         If fonts are switched while preloading is still in progress, the selected font
         will be loaded first and then the rest of the fonts will be queued to preload.</p>
 
     <code>
 &lt;style type="text/css"&gt;
 #demo.loading:after {
-    background: limegreen;
-    content: "Loading a font now";
-    display: block;
+background: limegreen;
+content: "Loading a font now";
+display: block;
 }
 #demo.preloading:after {
-    background: orange;
-    content: "Preloading fonts";
-    display: block;
+background: orange;
+content: "Preloading fonts";
+display: block;
 }
 #demo:after {
-    background: lightcyan;
-    content: "Done preloading fonts"
-    display: block;
+background: lightcyan;
+content: "Done preloading fonts"
+display: block;
 }
 &lt;/style&gt;
 &lt;script&gt;
 var fonts = {
-    …
+…
 }
 var options = {
     lazyload: true
 }
-Fontsampler(document.getElementById("demo"), fonts, options).init()
+new Fontsampler(document.getElementById("demo"), fonts, options).init()
 &lt;/script&gt;
     </code>
 
     <div id="demo-lazyload" class="demo">Lazyloading all 18 styles of IBM Plex Sans in the background…</div>
     <script>
-    window.onload = function () {
-        var fonts = [
-            { 
-                name: "IBM Plex Sans ExtraLight", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLight-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLight-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans ExtraLightItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLightItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLightItalic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Light", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans LightItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-LightItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-LightItalic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Thin", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Thin-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Thin-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans ThinItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ThinItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-ThinItalic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Text", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Text-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Text-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans TextItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-TextItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-TextItalic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Regular", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Italic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Italic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Italic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Medium", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Medium-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Medium-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans MediumItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-MediumItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-MediumItalic-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans Bold", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Bold-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-Bold-Latin1.woff2"
-                ]
-            },
-            { 
-                name: "IBM Plex Sans BoldItalic", 
-                files: [
-                    "./fonts/ibm-plex-sans/IBMPlexSans-BoldItalic-Latin1.woff",
-                    "./fonts/ibm-plex-sans/IBMPlexSans-BoldItalic-Latin1.woff2"
-                ]
-            },
-        ],
-        options = {
-            lazyload: true,
-            order: ["fontfamily", "tester"],
-            ui: {
-                fontfamily: {
+        window.onload = function() {
+            var fonts = [{
+                        name: "IBM Plex Sans ExtraLight",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLight-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLight-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans ExtraLightItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLightItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ExtraLightItalic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Light",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans LightItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-LightItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-LightItalic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Thin",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Thin-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Thin-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans ThinItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ThinItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-ThinItalic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Text",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Text-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Text-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans TextItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-TextItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-TextItalic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Regular",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Regular-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Italic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Italic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Italic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Medium",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Medium-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Medium-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans MediumItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-MediumItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-MediumItalic-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans Bold",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Bold-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-Bold-Latin1.woff2"
+                        ]
+                    },
+                    {
+                        name: "IBM Plex Sans BoldItalic",
+                        files: [
+                            "./fonts/ibm-plex-sans/IBMPlexSans-BoldItalic-Latin1.woff",
+                            "./fonts/ibm-plex-sans/IBMPlexSans-BoldItalic-Latin1.woff2"
+                        ]
+                    },
+                ],
+                options = {
+                    lazyload: true,
+                    order: ["fontfamily", "tester"],
+                    ui: {
+                        fontfamily: {
 
+                        }
+                    }
                 }
-            }
+            var fs = new Fontsampler(document.getElementById("demo-lazyload"), fonts, options)
+            FontsamplerSkin(fs)
+            fs.init()
         }
-        Fontsampler(document.getElementById("demo-lazyload"), fonts, options).init()
-    }
-    </script>   
+    </script>
 
 </body>
+
 </html>

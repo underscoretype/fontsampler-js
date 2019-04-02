@@ -1,0 +1,86 @@
+/**
+ * A customized and trimmed down version of the rangeSlider.js SCSS
+ */
+.rangeSlider {
+    margin: 0.5em auto;
+}
+
+.rangeSlider,
+.rangeSlider__fill {
+    display: block;
+    border-radius: $borderRadius;
+}
+
+.rangeSlider {
+    position: relative;
+    background: $borderColor;
+}
+
+.rangeSlider__horizontal {
+    height: $sliderBarWidth;
+    width: 100%;
+}
+
+.rangeSlider--disabled {
+    filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+    opacity: 0.4;
+}
+
+.rangeSlider__fill {
+    background: $borderColor;
+    position: absolute;
+}
+
+.rangeSlider__fill__horizontal {
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.rangeSlider__handle {
+    cursor: pointer;
+    display: inline-block;
+    width: $sliderHandleSize;
+    height: $sliderHandleSize;
+    position: absolute;
+    background: $baseColor;
+    border-radius: 50%;
+}
+
+.rangeSlider__handle__horizontal {
+    top: (-$sliderHandleSize + $sliderBarWidth) / 2;
+}
+
+// A transparent round blob under the actual handle to make it easier to
+// slide small handles
+.rangeSlider__handle:after {
+    content: "";
+    display: block;
+    // just some touch-size defaults
+    width: 20px;
+    height: 20px;
+    margin: auto;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0%);
+    background: transparent;
+    // background: rgba(255, 0, 0, 0.5);
+    border-radius: 50%;
+}
+
+.rangeSlider__handle:active {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.12));
+}
+
+input[type="range"]:focus + .rangeSlider .rangeSlider__handle {}
+
+.rangeSlider__buffer {
+    position: absolute;
+    top: 3px;
+    height: 14px;
+    background: #2c3e50;
+    border-radius: 10px;
+}

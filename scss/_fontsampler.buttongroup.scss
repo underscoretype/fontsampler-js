@@ -1,0 +1,37 @@
+.fontsampler-ui-type-buttongroup {
+    
+    & > [data-property] {
+        display: flex;
+    }
+
+    button {
+        background: $bgColor;
+        border: $borderWidth solid $borderColor;
+        cursor: pointer;
+        flex-grow: 1;
+        font-family: inherit;
+        font-size: inherit;
+        font-style: inherit;
+        line-height: 2em;
+        padding: 0.25em 0.5em;
+
+        &:hover,
+        &:focus {
+            background: $bgColorHover;
+        }
+
+        &:first-of-type {
+            border-top-left-radius: $borderRadius;
+            border-bottom-left-radius: $borderRadius;
+        }
+
+        &:last-of-type {
+            border-top-right-radius: $borderRadius;
+            border-bottom-right-radius: $borderRadius;
+        }
+    }
+
+    button+button {
+        margin-left: -$borderWidth;
+    }
+}

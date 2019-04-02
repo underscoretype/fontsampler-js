@@ -136,10 +136,18 @@ module.exports = {
     "missingRoot": "Fontsampler: Passed in root element invalid: ",
     "tooManyFiles": "Fontsampler: Supplied more than one woff or woff2 for a font: ",
     "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
+    "invalidEvent": "Fontsampler: Invalid event type. You can only register Fontsampler events on the Fontsampler instance.",
+    "newInit": "Fontsampler: Instantiated Fontsampler without 'new' keyword. Create Fontsamplers using new Fontsampler(…)"
 }
 
 
 },{}],4:[function(require,module,exports){
+var events = {
+    "init": "fontsampler.events.init"
+}
+
+module.exports = events
+},{}],5:[function(require,module,exports){
 var FontFaceObserver = require("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
 
 var errors = require("./errors")
@@ -225,7 +233,7 @@ module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],5:[function(require,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],6:[function(require,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -243,17 +251,24 @@ var Fontloader = require("./fontloader")
 var Interface = require("./interface")
 var Preloader = require("./preloader")
 var errors = require("./errors")
+var events = require("./events")
+var helpers = require("./helpers")
 
 function Fontsampler(root, fonts, opt) {
 
-    console.debug("Fontsampler()", root, fonts, opt)
+    console.debug("Fontsampler()", root, fonts, opt, this)
+
+    if (this === window) {
+        throw new Error(errors.newInit)
+    }
 
     var extractedFonts,
         interface,
-        isInit = false,
         preloader = new Preloader(),
         defaults
-
+        
+    this.initialized = false
+    
     // Check for a root element to render to
     if (!root) {
         throw new Error(errors.missingRoot + root)
@@ -265,8 +280,11 @@ function Fontsampler(root, fonts, opt) {
         initialText: "",
         order: [
             ["fontsize", "lineheight", "letterspacing"],
-            ["fontfamily", "alignment", "direction", "language", "opentype"], "tester"
+            ["fontfamily", "language"],
+            ["alignment", "direction", "opentype"], 
+            "tester"
         ],
+        rootClass: "fontsampler",
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
         preloadingClass: "preloading",
@@ -322,7 +340,7 @@ function Fontsampler(root, fonts, opt) {
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
             },
             language: {
-                choices: ["enGB|Engish", "deDe|Deutsch", "nlNL|Dutch"],
+                choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
                 init: "enGb",
                 label: "Language",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
@@ -335,6 +353,8 @@ function Fontsampler(root, fonts, opt) {
             }
         }
     }
+
+    this.root = root
 
     // defaults.ui.fontsize.render = false if not passed in
     // etc.
@@ -355,6 +375,11 @@ function Fontsampler(root, fonts, opt) {
         options = defaults
     }
 
+    // A passed in UI order superseeds, not extends!, the default
+    if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
+        options.order = opt.order
+    }
+
     // Extract fonts; Look first on root element, then on select, then in
     // passed in fonts Array
     extractedFonts = extractFontsFromDOM()
@@ -372,43 +397,43 @@ function Fontsampler(root, fonts, opt) {
     interface = Interface(root, fonts, options)
 
     // Setup the interface listeners and delegate events back to the interface
-    function addEventListeners() {
+    function setupUIEvents() {
         // sliders
-        root.addEventListener("fontsampler.onfontsizechanged", function() {
+        this.root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
-            interface.setInputCss(getCssAttrForKey("fontsize"), val)
+            interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
         })
-        root.addEventListener("fontsampler.onlineheightchanged", function() {
+        this.root.addEventListener("fontsampler.onlineheightchanged", function() {
             var val = interface.getCSSValue("lineheight")
-            interface.setInputCss(getCssAttrForKey("lineheight"), val)
+            interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
         })
-        root.addEventListener("fontsampler.onletterspacingchanged", function() {
+        this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
-            interface.setInputCss(getCssAttrForKey("letterspacing"), val)
+            interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
         })
 
         // checkbox
-        root.addEventListener("fontsampler.onopentypechanged", function() {
+        this.root.addEventListener("fontsampler.onopentypechanged", function() {
             var val = interface.getOpentype()
             interface.setInputOpentype(val)
         })
 
         // dropdowns
-        root.addEventListener("fontsampler.onfontfamilychanged", function() {
+        this.root.addEventListener("fontsampler.onfontfamilychanged", function() {
             var val = interface.getValue("fontfamily")
             loadFont(val)
         })
-        root.addEventListener("fontsampler.onlanguagechanged", function() {
+        this.root.addEventListener("fontsampler.onlanguagechanged", function() {
             var val = interface.getValue("language")
             interface.setInputAttr("lang", val)
         })
 
         // buttongroups
-        root.addEventListener("fontsampler.onalignmentclicked", function() {
+        this.root.addEventListener("fontsampler.onalignmentclicked", function() {
             var val = interface.getButtongroupValue("alignment")
             interface.setInputCss("textAlign", val)
         })
-        root.addEventListener("fontsampler.ondirectionclicked", function() {
+        this.root.addEventListener("fontsampler.ondirectionclicked", function() {
             var val = interface.getButtongroupValue("direction")
             interface.setInputAttr("dir", val)
         })
@@ -524,10 +549,14 @@ function Fontsampler(root, fonts, opt) {
         })
     }
 
-    function init() {
-        console.debug("Fontsampler.init()")
+    /**
+     * PUBLIC API
+     */
+
+    this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
         interface.init()
-        addEventListeners()
+        setupUIEvents.call(this)
         loadFont(0)
 
         if (options.lazyload) {
@@ -536,23 +565,42 @@ function Fontsampler(root, fonts, opt) {
                 interface.setStatusClass(options.preloadingClass, false)
             })
         }
+
+        this.initalized = true
+        root.className = helpers.addClass("fontsampler-initialized", root.className)
+
+
+        root.dispatchEvent(new CustomEvent(events.init))
+
+        // For convenience also have the init method return the instance
+        // This way you can create the object and init it, e.g.
+        // var fs = new Fontsampler().init()
+        return this
     }
 
-    function lazyload() {
-        if (isInit && fonts) {
+    this.lazyload = function() {
+        if (this.initialized && fonts) {
             preloader.load(fonts)
         }
     }
 
-    // interface
-    return {
-        init: init,
-        lazyload: lazyload
+    this.registerEventhandler = function(event, callback) {
+        // Validate that only fontsampler.events.… are passed in
+        if (Object.values(events).indexOf(event) === -1) {
+            throw new Error(errors.invalidEvent)
+        }
+
+        // Only act if there is a valid callback
+        if (typeof(callback) === "function") {
+            root.addEventListener(event, callback)
+        }
     }
+
+    return this
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./errors":3,"./fontloader":4,"./interface":7,"./preloader":8}],6:[function(require,module,exports){
+},{"../node_modules/extend":1,"./errors":3,"./events":4,"./fontloader":5,"./helpers":7,"./interface":8,"./preloader":9}],7:[function(require,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -609,7 +657,7 @@ module.exports = {
     pruneClass: pruneClass,
     addClass: addClass
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var UIElements = require("./uielements")
 var Helpers = require("./helpers")
 var errors = require("./errors")
@@ -642,6 +690,7 @@ function Interface(_root, fonts, options) {
         console.debug("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
+        root.className = Helpers.addClass(options.rootClass, root.className)
         uifactory = UIElements(root, options)
 
         // Before modifying the root node, detect if it is containing only
@@ -666,36 +715,39 @@ function Interface(_root, fonts, options) {
         //   appended in the end
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
-            var element = parseUIOrderElement(options.order[i])
-            if (element) {
-                root.appendChild(element)
+            var elementA = parseUIOrderElement(options.order[i])
+            if (elementA) {
+                root.appendChild(elementA)
             }
         }
-        for (var key in options.ui) {
-            if (key in uinodes === false) {
-                var element = parseUIOrderElement(options.ui[key])
-                if (element) {
-                    root.appendChild(element)
+        for (var keyB in options.ui) {
+            if (options.ui.hasOwnProperty(keyB)) {
+                if (keyB in uinodes === false) {
+                    var elementB = parseUIOrderElement(options.ui[keyB])
+                    if (elementB) {
+                        root.appendChild(elementB)
+                    }
                 }
             }
         }
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
-        for (var key in uinodes) {
-            initNode(key, uinodes[key], options.ui[key])
+        for (var keyC in uinodes) {
+            if (uinodes.hasOwnProperty(keyC)) {
+                initNode(keyC, uinodes[keyC], options.ui[keyC])
+            }
         }
-
-
 
         // prevent line breaks on single line instances
         if (!options.multiline) {
             var typeEvents = ["keypress", "keyup", "change", "paste"]
             for (var e in typeEvents) {
-                uinodes.tester.addEventListener(typeEvents[e], onKey)
+                if (typeEvents.hasOwnProperty(e)) {
+                    uinodes.tester.addEventListener(typeEvents[e], onKey)
+                }
             }
         }
-
 
         // prevent pasting styled content
         uinodes.tester.addEventListener('paste', function(e) {
@@ -774,7 +826,7 @@ function Interface(_root, fonts, options) {
             uinodes[item] = node
             
             return true
-        } else if (options.ui[item].render && item in ui) {
+        } else if (options.ui[item].render && item in ui === true && item in uinodes === false) {
             node = createNode(item, options.ui[item])
             uinodes[item] = node
 
@@ -806,7 +858,7 @@ function Interface(_root, fonts, options) {
         // initNode(item, node, opt)
 
         wrapper = document.createElement("div")
-        wrapper.className = opt.wrapperClass
+        wrapper.className = opt.wrapperClass + " " + "fontsampler-ui-type-" + ui[item]
 
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
@@ -823,7 +875,7 @@ function Interface(_root, fonts, options) {
      * @param object opt 
      * @return boolean
      */
-    function validateNode(node, opt) {
+    function validateNode(/*node, opt*/) {
         // TODO
         return true
     }
@@ -869,21 +921,21 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        var property = e.currentTarget.dataset.property,
-            customEvent = new CustomEvent("fontsampler.on" + property + "changed"),
-            label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
+        var property = e.target.dataset.property,
+            customEvent = new CustomEvent("fontsampler.on" + property + "changed")
+        //     label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
 
-        if (label) {
-            label.innerText = getValue(property)
-        }
+        // if (label) {
+        //     label.innerText = getValue(property)
+        // }
 
         root.dispatchEvent(customEvent)
     }
 
     function onClick(e) {
-        var property = e.currentTarget.dataset.property,
+        var property = e.target.parentNode.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
-            buttons = e.currentTarget.childNodes,
+            buttons = e.target.parentNode.childNodes,
             currentClass = "fontsampler-buttongroup-selected"
 
         if (property in ui && ui[property] === "buttongroup") {    
@@ -1027,7 +1079,7 @@ function Interface(_root, fonts, options) {
     }
 }
 module.exports = Interface
-},{"./errors":3,"./helpers":6,"./selection":9,"./uielements":10}],8:[function(require,module,exports){
+},{"./errors":3,"./helpers":7,"./selection":10,"./uielements":11}],9:[function(require,module,exports){
 var Fontloader = require("./fontloader")
 
 function Preloader() {
@@ -1089,7 +1141,7 @@ function Preloader() {
 
 
 module.exports = Preloader
-},{"./fontloader":4}],9:[function(require,module,exports){
+},{"./fontloader":5}],10:[function(require,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1177,7 +1229,7 @@ function Selection () {
 }
 
 module.exports = Selection
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
@@ -1301,14 +1353,17 @@ function UIElements(root, options) {
         for (var o in opt.choices) {
             var choice = parseChoice(opt.choices[o]),
                 label = document.createElement("label"),
-                checkbox = document.createElement("input")
+                checkbox = document.createElement("input"),
+                text = document.createElement("span")
 
 
             checkbox.setAttribute("type", "checkbox")
             checkbox.dataset.feature = choice.val
 
+            text.appendChild(document.createTextNode(choice.text))
+
             label.appendChild(checkbox)
-            label.appendChild(document.createTextNode(choice.text))
+            label.appendChild(text)
 
             group.append(label)
         }
@@ -1353,5 +1408,5 @@ function UIElements(root, options) {
 }
 
 module.exports = UIElements
-},{}]},{},[5])(5)
+},{}]},{},[6])(6)
 });

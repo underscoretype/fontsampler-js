@@ -15,17 +15,24 @@ var Fontloader = require("./fontloader")
 var Interface = require("./interface")
 var Preloader = require("./preloader")
 var errors = require("./errors")
+var events = require("./events")
+var helpers = require("./helpers")
 
 function Fontsampler(root, fonts, opt) {
 
-    console.debug("Fontsampler()", root, fonts, opt)
+    console.debug("Fontsampler()", root, fonts, opt, this)
+
+    if (this === window) {
+        throw new Error(errors.newInit)
+    }
 
     var extractedFonts,
         interface,
-        isInit = false,
         preloader = new Preloader(),
         defaults
-
+        
+    this.initialized = false
+    
     // Check for a root element to render to
     if (!root) {
         throw new Error(errors.missingRoot + root)
@@ -37,8 +44,11 @@ function Fontsampler(root, fonts, opt) {
         initialText: "",
         order: [
             ["fontsize", "lineheight", "letterspacing"],
-            ["fontfamily", "alignment", "direction", "language", "opentype"], "tester"
+            ["fontfamily", "language"],
+            ["alignment", "direction", "opentype"], 
+            "tester"
         ],
+        rootClass: "fontsampler",
         wrapperClass: "fontsampler-ui-wrapper",
         loadingClass: "loading",
         preloadingClass: "preloading",
@@ -94,7 +104,7 @@ function Fontsampler(root, fonts, opt) {
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
             },
             language: {
-                choices: ["enGB|Engish", "deDe|Deutsch", "nlNL|Dutch"],
+                choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
                 init: "enGb",
                 label: "Language",
                 wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
@@ -107,6 +117,8 @@ function Fontsampler(root, fonts, opt) {
             }
         }
     }
+
+    this.root = root
 
     // defaults.ui.fontsize.render = false if not passed in
     // etc.
@@ -127,6 +139,11 @@ function Fontsampler(root, fonts, opt) {
         options = defaults
     }
 
+    // A passed in UI order superseeds, not extends!, the default
+    if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
+        options.order = opt.order
+    }
+
     // Extract fonts; Look first on root element, then on select, then in
     // passed in fonts Array
     extractedFonts = extractFontsFromDOM()
@@ -144,43 +161,43 @@ function Fontsampler(root, fonts, opt) {
     interface = Interface(root, fonts, options)
 
     // Setup the interface listeners and delegate events back to the interface
-    function addEventListeners() {
+    function setupUIEvents() {
         // sliders
-        root.addEventListener("fontsampler.onfontsizechanged", function() {
+        this.root.addEventListener("fontsampler.onfontsizechanged", function() {
             var val = interface.getCSSValue("fontsize")
-            interface.setInputCss(getCssAttrForKey("fontsize"), val)
+            interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
         })
-        root.addEventListener("fontsampler.onlineheightchanged", function() {
+        this.root.addEventListener("fontsampler.onlineheightchanged", function() {
             var val = interface.getCSSValue("lineheight")
-            interface.setInputCss(getCssAttrForKey("lineheight"), val)
+            interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
         })
-        root.addEventListener("fontsampler.onletterspacingchanged", function() {
+        this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
             var val = interface.getCSSValue("letterspacing")
-            interface.setInputCss(getCssAttrForKey("letterspacing"), val)
+            interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
         })
 
         // checkbox
-        root.addEventListener("fontsampler.onopentypechanged", function() {
+        this.root.addEventListener("fontsampler.onopentypechanged", function() {
             var val = interface.getOpentype()
             interface.setInputOpentype(val)
         })
 
         // dropdowns
-        root.addEventListener("fontsampler.onfontfamilychanged", function() {
+        this.root.addEventListener("fontsampler.onfontfamilychanged", function() {
             var val = interface.getValue("fontfamily")
             loadFont(val)
         })
-        root.addEventListener("fontsampler.onlanguagechanged", function() {
+        this.root.addEventListener("fontsampler.onlanguagechanged", function() {
             var val = interface.getValue("language")
             interface.setInputAttr("lang", val)
         })
 
         // buttongroups
-        root.addEventListener("fontsampler.onalignmentclicked", function() {
+        this.root.addEventListener("fontsampler.onalignmentclicked", function() {
             var val = interface.getButtongroupValue("alignment")
             interface.setInputCss("textAlign", val)
         })
-        root.addEventListener("fontsampler.ondirectionclicked", function() {
+        this.root.addEventListener("fontsampler.ondirectionclicked", function() {
             var val = interface.getButtongroupValue("direction")
             interface.setInputAttr("dir", val)
         })
@@ -296,10 +313,14 @@ function Fontsampler(root, fonts, opt) {
         })
     }
 
-    function init() {
-        console.debug("Fontsampler.init()")
+    /**
+     * PUBLIC API
+     */
+
+    this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
         interface.init()
-        addEventListeners()
+        setupUIEvents.call(this)
         loadFont(0)
 
         if (options.lazyload) {
@@ -308,19 +329,38 @@ function Fontsampler(root, fonts, opt) {
                 interface.setStatusClass(options.preloadingClass, false)
             })
         }
+
+        this.initalized = true
+        root.className = helpers.addClass("fontsampler-initialized", root.className)
+
+
+        root.dispatchEvent(new CustomEvent(events.init))
+
+        // For convenience also have the init method return the instance
+        // This way you can create the object and init it, e.g.
+        // var fs = new Fontsampler().init()
+        return this
     }
 
-    function lazyload() {
-        if (isInit && fonts) {
+    this.lazyload = function() {
+        if (this.initialized && fonts) {
             preloader.load(fonts)
         }
     }
 
-    // interface
-    return {
-        init: init,
-        lazyload: lazyload
+    this.registerEventhandler = function(event, callback) {
+        // Validate that only fontsampler.events.… are passed in
+        if (Object.values(events).indexOf(event) === -1) {
+            throw new Error(errors.invalidEvent)
+        }
+
+        // Only act if there is a valid callback
+        if (typeof(callback) === "function") {
+            root.addEventListener(event, callback)
+        }
     }
+
+    return this
 }
 
 module.exports = Fontsampler

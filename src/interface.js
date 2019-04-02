@@ -30,6 +30,7 @@ function Interface(_root, fonts, options) {
         console.debug("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
+        root.className = Helpers.addClass(options.rootClass, root.className)
         uifactory = UIElements(root, options)
 
         // Before modifying the root node, detect if it is containing only
@@ -54,36 +55,39 @@ function Interface(_root, fonts, options) {
         //   appended in the end
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
-            var element = parseUIOrderElement(options.order[i])
-            if (element) {
-                root.appendChild(element)
+            var elementA = parseUIOrderElement(options.order[i])
+            if (elementA) {
+                root.appendChild(elementA)
             }
         }
-        for (var key in options.ui) {
-            if (key in uinodes === false) {
-                var element = parseUIOrderElement(options.ui[key])
-                if (element) {
-                    root.appendChild(element)
+        for (var keyB in options.ui) {
+            if (options.ui.hasOwnProperty(keyB)) {
+                if (keyB in uinodes === false) {
+                    var elementB = parseUIOrderElement(options.ui[keyB])
+                    if (elementB) {
+                        root.appendChild(elementB)
+                    }
                 }
             }
         }
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
-        for (var key in uinodes) {
-            initNode(key, uinodes[key], options.ui[key])
+        for (var keyC in uinodes) {
+            if (uinodes.hasOwnProperty(keyC)) {
+                initNode(keyC, uinodes[keyC], options.ui[keyC])
+            }
         }
-
-
 
         // prevent line breaks on single line instances
         if (!options.multiline) {
             var typeEvents = ["keypress", "keyup", "change", "paste"]
             for (var e in typeEvents) {
-                uinodes.tester.addEventListener(typeEvents[e], onKey)
+                if (typeEvents.hasOwnProperty(e)) {
+                    uinodes.tester.addEventListener(typeEvents[e], onKey)
+                }
             }
         }
-
 
         // prevent pasting styled content
         uinodes.tester.addEventListener('paste', function(e) {
@@ -162,7 +166,7 @@ function Interface(_root, fonts, options) {
             uinodes[item] = node
             
             return true
-        } else if (options.ui[item].render && item in ui) {
+        } else if (options.ui[item].render && item in ui === true && item in uinodes === false) {
             node = createNode(item, options.ui[item])
             uinodes[item] = node
 
@@ -194,7 +198,7 @@ function Interface(_root, fonts, options) {
         // initNode(item, node, opt)
 
         wrapper = document.createElement("div")
-        wrapper.className = opt.wrapperClass
+        wrapper.className = opt.wrapperClass + " " + "fontsampler-ui-type-" + ui[item]
 
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
@@ -211,7 +215,7 @@ function Interface(_root, fonts, options) {
      * @param object opt 
      * @return boolean
      */
-    function validateNode(node, opt) {
+    function validateNode(/*node, opt*/) {
         // TODO
         return true
     }
@@ -257,21 +261,21 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        var property = e.currentTarget.dataset.property,
-            customEvent = new CustomEvent("fontsampler.on" + property + "changed"),
-            label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
+        var property = e.target.dataset.property,
+            customEvent = new CustomEvent("fontsampler.on" + property + "changed")
+        //     label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
 
-        if (label) {
-            label.innerText = getValue(property)
-        }
+        // if (label) {
+        //     label.innerText = getValue(property)
+        // }
 
         root.dispatchEvent(customEvent)
     }
 
     function onClick(e) {
-        var property = e.currentTarget.dataset.property,
+        var property = e.target.parentNode.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
-            buttons = e.currentTarget.childNodes,
+            buttons = e.target.parentNode.childNodes,
             currentClass = "fontsampler-buttongroup-selected"
 
         if (property in ui && ui[property] === "buttongroup") {    

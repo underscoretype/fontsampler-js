@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
+    <meta charset="utf8">
+    <!-- Just some styling for this documentaiton page -->
+    <link rel="stylesheet" href="assets/demo.css">
+
+
+    <!-- Fontsampler -->
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <!-- /Fontsampler -->
+</head>
+
+<body>
+    <h1><a href="./index.html">fontsampler-js</a></h1>
+    <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+
+    <h2>Skinning</h2>
+    <p>By default Fontsampler can be used without any styling or the optional skin.
+        However, default HTML controls are often not very appealing, so Fontsampler
+        comes with a minimal skin that you can load to make Fontsamplers look more nice.
+    </p>
+
+    <code>
+&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js">&lt;/script&gt;
+&lt;!-- Load the optional skin javascript and css --&gt;
+&lt;script src="../node_modules/fontsampler-js/dist/fontsampler-skin.js">&lt;/script&gt;
+&lt;link rel="stylesheet" href="../node_modules/fontsampler-js/dist/fontsampler-skin.css"&gt;
+…
+&lt;script&gt;
+…
+var fs = new Fontsampler(document.getElementById("demo"), fonts, options)
+// Initiate the skin by passing the Fontsampler instance to it
+FontsamplerSkin(fs)
+
+// Only then init the Fontsampler
+fs.init
+&lt;/script&gt;
+    </code>
+
+    <div class="demo" id="demo">Fontsampler comes with a minimal skin, but you can also code your own</div>
+
+    <p>Naturally all of the UI components can be configured or omitted via options.
+        The above just shows a full set of all UI elements for preview.
+    </p>
+    <p>The default skin tries to inherit as much as possible from the enclosing elements.
+        For example font sizes and colors are inherited. If you need more control, you can
+        overwrite part of the css.
+    </p>
+    <p>If you want to use the UI components (dropdown, sliders) but overwrite their CSS
+        you can base your own styles on the included
+        <a href="../scss/fontsampler-skin.scss">scss/fontsampler-skin.scss</a>.
+        <br>
+        Check out the included <a href="../src/skin.js">src/skin.js</a> for how the
+        default HTML UI components are overwritten or to roll your own alternative.
+    </p>
+
+    <script>
+        var fonts = [{
+            name: "IBM Plex Sans Light",
+            files: [
+                "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff",
+                "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff2"
+            ]
+        }]
+        var demo = document.getElementById("demo")
+        var fs = new Fontsampler(demo, fonts, { generate: true })
+        FontsamplerSkin(fs)
+        fs.init()
+    </script>
+
+</body>
+
+</html>

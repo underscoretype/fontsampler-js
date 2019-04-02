@@ -4,41 +4,16 @@
 <head>
     <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
     <meta charset="utf8">
-    <script src="../dist/fontsampler.js"></script>
+    <!-- Just some styling for this documentaiton page -->
     <link rel="stylesheet" href="assets/demo.css">
-    <style type="text/css">
-    /* The bare minimum styling applied to all demo Fontsamplers */
-    .demo > div {
-        display: flex;
-        justify-content: space-between;
-    }
-    .demo .fontsampler-ui-element-tester {
-        display: block;
-    }
-    .demo .fontsampler-ui-element {
-        box-sizing: border-box;
-        padding: 5px;
-        width: 100%;
-    }
-    .demo .fontsampler-ui-element input[type="range"] {
-        display: block;
-        width: 100%;
-    }
-    .demo .fontsampler-ui-element label {
-        display: flex;
-        justify-content: flex-end;
-        width: 100%;
-    }
-    .demo .fontsampler-ui-element-opentype label {
-        justify-content: flex-start;
-    }
-    .demo .fontsampler-ui-element label span:first-child {
-        margin-right: auto;
-    }
-    .demo [contenteditable] {
-        outline: none;
-    }
-    </style>
+
+
+    <!-- Fontsampler -->
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <!-- /Fontsampler -->
 </head>
 
 <body>
@@ -96,10 +71,10 @@
 &lt;div id="demo"&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
-    var fonts = [
-        { name: "Font name", files: ["path/to/font-name.woff", "path/to/font-name.woff2"] }
-    ]
-    Fontsampler(document.getElementById("demo")).init(fonts)
+var fonts = [
+    { name: "Font name", files: ["path/to/font-name.woff", "path/to/font-name.woff2"] }
+]
+new Fontsampler(document.getElementById("demo"), fonts).init()
 &lt;/script&gt;
     </code>
 
@@ -109,11 +84,11 @@
     data-woff2="path/to/font-name.woff2"&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
-    Fontsampler(document.getElementById("demo")).init()
+new Fontsampler(document.getElementById("demo")).init()
 &lt;/script&gt;
     </code>
 
-    <div id="demo-minimal" class="demo" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2">Demo minimal</div>
+    <div id="demo-minimal" class="demo" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2">Demo minimal — just load a font and transform this into an editable textarea</div>
 
     <h3 id="examples-demo-js">Demo JS configuration</h3>
     <p>To configure a Fontsampler via Javascript and supply several fonts, you 
@@ -249,7 +224,7 @@ var fonts = [
         ]
     }
 ]
-Fontsampler(document.getElementById("demo"), fonts)
+new Fontsampler(document.getElementById("demo"), fonts).init()
     </code>
     <p>Fonts on the root element:</p>
     <code>
@@ -260,7 +235,7 @@ Fontsampler(document.getElementById("demo"), fonts)
     Demo minimal
 &lt;/div&gt;
 …
-Fontsampler(document.getElementById("demo"))
+new Fontsampler(document.getElementById("demo")).init()
     </code>
 
     <h2 id="options">Options</h2>
@@ -427,13 +402,13 @@ var options = {
     </p>
     <code>
 &lt;script&gt;
-    var options = {
-        lazyload: true
-    }
-    var fonts = {
-        …
-    }
-    Fontsampler(document.getElementById("demo"), fonts, options).init()
+var options = {
+    lazyload: true
+}
+var fonts = {
+    …
+}
+new Fontsampler(document.getElementById("demo"), fonts, options).init()
 &lt;/script&gt;
     </code>
     <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser network throttling and network tool to see what’s going on).</p>
@@ -452,10 +427,12 @@ var options = {
                 order: [ ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment"], ["tester"] ],
                 generate: true
             }
-            Fontsampler(document.getElementById("demo-full"), alegreyaFonts, optionsFull).init()
+            var fs = new Fontsampler(document.getElementById("demo-full"), alegreyaFonts, optionsFull)
+            FontsamplerSkin(fs)
+            fs.init()
 
             // Demo minimal
-            Fontsampler(document.getElementById("demo-minimal")).init()
+            new Fontsampler(document.getElementById("demo-minimal")).init()
 
             // Demo JS
             var options = {
@@ -505,10 +482,12 @@ var options = {
                     { name: "Alegreya Regular", files: ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"] },
                     { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
                 ]
-            Fontsampler(document.getElementById("demo-js"), fonts, options).init()
+            var fs = new Fontsampler(document.getElementById("demo-js"), fonts, options)
+            FontsamplerSkin(fs)
+            fs.init()
 
             // Demo DOM
-            Fontsampler(document.getElementById("demo-dom")).init()
+            new Fontsampler(document.getElementById("demo-dom")).init()
         }
     </script>
 </body>

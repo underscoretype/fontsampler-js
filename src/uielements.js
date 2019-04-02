@@ -121,14 +121,17 @@ function UIElements(root, options) {
         for (var o in opt.choices) {
             var choice = parseChoice(opt.choices[o]),
                 label = document.createElement("label"),
-                checkbox = document.createElement("input")
+                checkbox = document.createElement("input"),
+                text = document.createElement("span")
 
 
             checkbox.setAttribute("type", "checkbox")
             checkbox.dataset.feature = choice.val
 
+            text.appendChild(document.createTextNode(choice.text))
+
             label.appendChild(checkbox)
-            label.appendChild(document.createTextNode(choice.text))
+            label.appendChild(text)
 
             group.append(label)
         }
