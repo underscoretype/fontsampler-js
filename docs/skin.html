@@ -17,8 +17,11 @@
 </head>
 
 <body>
-    <h1><a href="./index.html">fontsampler-js</a></h1>
-    <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    <header>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <h1><a href="./index.html">fontsampler-js</a> &rsaquo; skin</h1>
+        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    </header>
 
     <h2>Skinning</h2>
     <p>By default Fontsampler can be used without any styling or the optional skin.
@@ -28,18 +31,19 @@
 
     <code>
 &lt;script src="node_modules/fontsampler-js/dist/fontsampler.js">&lt;/script&gt;
+
 &lt;!-- Load the optional skin javascript and css --&gt;
-&lt;script src="../node_modules/fontsampler-js/dist/fontsampler-skin.js">&lt;/script&gt;
-&lt;link rel="stylesheet" href="../node_modules/fontsampler-js/dist/fontsampler-skin.css"&gt;
+&lt;script src="../node_modules/fontsampler-js/dist/<em>fontsampler-skin.js</em>">&lt;/script&gt;
+&lt;link rel="stylesheet" href="../node_modules/fontsampler-js/dist/<em>fontsampler-skin.css</em>"&gt;
 …
 &lt;script&gt;
 …
-var fs = new Fontsampler(document.getElementById("demo"), fonts, options)
+var <em>fs</em> = new Fontsampler(document.getElementById("demo"), fonts, options)
 // Initiate the skin by passing the Fontsampler instance to it
-FontsamplerSkin(fs)
+FontsamplerSkin(<em>fs</em>)
 
 // Only then init the Fontsampler
-fs.init
+<em>fs.init()</em>
 &lt;/script&gt;
     </code>
 
@@ -59,6 +63,13 @@ fs.init
         Check out the included <a href="../src/skin.js">src/skin.js</a> for how the
         default HTML UI components are overwritten or to roll your own alternative.
     </p>
+    
+    <footer>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <em>fontsampler-js is brought to you by Underscore</em><br>
+        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        <p><a href="../LICENCE.txt">Licensed under GNU GPL-3</a></p>
+    </footer>
 
     <script>
         var fonts = [{

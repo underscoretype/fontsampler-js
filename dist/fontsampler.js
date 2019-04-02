@@ -860,6 +860,7 @@ function Interface(_root, fonts, options) {
         wrapper = document.createElement("div")
         wrapper.className = opt.wrapperClass + " " + "fontsampler-ui-type-" + ui[item]
 
+        console.log("LABEL", opt.label, opt.unit, opt.init, item)
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
         }
@@ -1250,7 +1251,7 @@ function UIElements(root, options) {
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
-        if (labelUnit && labelValue) {
+        if (typeof(labelUnit) === "string" && labelValue !== "") {
 
             val = document.createElement("span")
             val.className = "fontsampler-label-value"

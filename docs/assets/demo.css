@@ -6,6 +6,11 @@ body {
     max-width: 50rem;
     padding: 0 2rem;
     color: #333;
+    font-size: 18px;
+}
+
+nav {
+    font-size: larger;
 }
 
 h2,
@@ -15,10 +20,15 @@ h3 {
 
 h2[id]:before,
 h3[id]:before {
+    color: #DE2543;
     content: "⁋";
     margin-left: -0.75em;
     margin-right: 0.25em;
     font-weight: normal;
+}
+
+a {
+    color: #08F;
 }
 
 ul {
@@ -42,14 +52,22 @@ li {
 }
 
 code {
-    background: #f9f9f9;
+    background: #f6f6f6;
     border-radius: 0.25rem;
+    color: #444;
     display: block;
     padding: 1rem;
     position: relative;
     margin: 2rem auto;
     white-space: pre;
     line-height: 1.35em;
+    letter-spacing: 0.025em;
+    font-size: smaller;
+}
+
+code em {
+    font-style: normal;
+    color: #DE2543;
 }
 
 code:before {
@@ -77,4 +95,23 @@ code:before,
 .fontsampler.fontsampler-initialized {
     opacity: 1;
     display: block;
+}
+
+body {
+    background: #fcfcfc;
+    color: #050303;
+}
+
+header {
+    box-sizing: border-box;
+}
+
+footer {
+    margin-top: 5rem;
+}
+
+.underscore-logo {
+    display: block;
+    height: auto;
+    max-width: 150px;
 }

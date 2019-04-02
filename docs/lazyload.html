@@ -35,8 +35,11 @@
 </head>
 
 <body>
-    <h1><a href="./index.html">fontsampler-js</a></h1>
-    <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    <header>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <h1><a href="./index.html">fontsampler-js</a> &rsaquo; lazyloading</h1>
+        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    </header>
 
     <h2>Lazyload demo</h2>
     <p>By default Fontsampler will load webfonts when they are selected. To preload
@@ -48,21 +51,22 @@
     <code>
 &lt;style type="text/css"&gt;
 #demo.loading:after {
-background: limegreen;
-content: "Loading a font now";
-display: block;
+    background: limegreen;
+    content: "Loading a font now";
+    display: block;
 }
 #demo.preloading:after {
-background: orange;
-content: "Preloading fonts";
-display: block;
+    background: orange;
+    content: "Preloading fonts";
+    display: block;
 }
 #demo:after {
-background: lightcyan;
-content: "Done preloading fonts"
-display: block;
+    background: lightcyan;
+    content: "Done preloading fonts"
+    display: block;
 }
 &lt;/style&gt;
+
 &lt;script&gt;
 var fonts = {
 …
@@ -75,6 +79,14 @@ new Fontsampler(document.getElementById("demo"), fonts, options).init()
     </code>
 
     <div id="demo-lazyload" class="demo">Lazyloading all 18 styles of IBM Plex Sans in the background…</div>
+
+    <footer>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <em>fontsampler-js is brought to you by Underscore</em><br>
+        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        <p><a href="../LICENCE.txt">Licensed under GNU GPL-3</a></p>
+    </footer>
+    
     <script>
         window.onload = function() {
             var fonts = [{

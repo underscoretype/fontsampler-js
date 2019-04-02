@@ -18,7 +18,7 @@ function UIElements(root, options) {
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
-        if (labelUnit && labelValue) {
+        if (typeof(labelUnit) === "string" && labelValue !== "") {
 
             val = document.createElement("span")
             val.className = "fontsampler-label-value"

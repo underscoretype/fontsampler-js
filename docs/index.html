@@ -17,8 +17,11 @@
 </head>
 
 <body>
-    <h1>fontsampler-js</h1>
-    <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    <header>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <h1>fontsampler-js</h1>
+        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    </header>
 
     <p>Fontsampler takes care of, webfont (pre) loading, detecting woff(2) support and providing
         an interface to manipulate type tester.
@@ -32,23 +35,26 @@
     <div id="demo-full" class="demo" style="margin-top:3rem;">This is a Fontsampler! Type here to test this this webfont…</div>
     
     <h2>Content</h2>
-    <ul>
-        <li><a href="#examples">Examples</a>
+    <nav>
         <ul>
-            <li><a href="#examples-bare-minimum">Bare minimum configuration</a></li>
-            <li><a href="#examples-demo-js">Demo JS configuration</a></li>
-            <li><a href="#examples-demo-dom">Demo DOM configuration</a></li>
-        </ul>
-        </li>
-        <li><a href="#fonts">Fonts</a></li>
-        <li><a href="#options">Options</a></li>
-        <li><a href="#styling">Styling</a></li>
-        <li><a href="#more-examples">More examples</a>
+            <li><a href="#examples">Examples</a>
             <ul>
-                <li><a href="#lazyloading">Lazyloading (preloading) fonts</a></li>
+                <li><a href="#examples-bare-minimum">Bare minimum configuration</a></li>
+                <li><a href="#examples-demo-js">Demo JS configuration</a></li>
+                <li><a href="#examples-demo-dom">Demo DOM configuration</a></li>
             </ul>
-        </li>
-    </ul>
+            </li>
+            <li><a href="#styling">Styling</a></li>
+            <li><a href="#fonts">Fonts</a></li>
+            <li><a href="#options">Options</a></li>
+            <li><a href="#styling">Styling</a></li>
+            <li><a href="#more-examples">More examples</a>
+                <ul>
+                    <li><a href="#lazyloading">Lazyloading (preloading) fonts</a></li>
+                </ul>
+            </li>
+        </ul>
+    </nav>
 
     <h2 id="examples">Examples</h2>
     <p>Fontsampler.js can be configured either through DOM nodes and attributes 
@@ -68,20 +74,24 @@
 
     <p>…fonts passed in as object:</p>
     <code>
-&lt;div id="demo"&gt;Demo minimal&lt;/div&gt;
+&lt;div id="<em>demo</em>"&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
-var fonts = [
-    { name: "Font name", files: ["path/to/font-name.woff", "path/to/font-name.woff2"] }
+var <em>fonts</em> = [
+    { 
+        name: "Font name", 
+        files: ["path/to/font-name.woff", "path/to/font-name.woff2"] 
+    }
 ]
-new Fontsampler(document.getElementById("demo"), fonts).init()
+new Fontsampler(document.getElementById("<em>demo</em>"), <em>fonts</em>).init()
 &lt;/script&gt;
     </code>
 
     <p>…or fonts defined as data attributes:</p>
     <code>
-&lt;div id="demo" data-woff="path/to/font-name.woff" 
-    data-woff2="path/to/font-name.woff2"&gt;Demo minimal&lt;/div&gt;
+&lt;div id="demo" 
+    <em>data-woff</em>="path/to/font-name.woff" 
+    <em>data-woff2</em>="path/to/font-name.woff2"&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
 new Fontsampler(document.getElementById("demo")).init()
@@ -97,9 +107,13 @@ new Fontsampler(document.getElementById("demo")).init()
 &lt;div id="demo"&gt;&lt;/div&gt;      
 
 &lt;script&gt;
-var options = {
+var <em>options</em> = {
     initialText: "Hello Tester!",
+
+    <em>// This sets the UI element’s order and groupings</em>
     order: ["tester", ["fontsize", "lineheight", "fontfamily"]],
+
+    <em>// This defines UI element options that differ from the <a href="#options">defaults</a></em>
     ui: {
         fontsize: {
             init: 36,
@@ -113,7 +127,11 @@ var options = {
         fontfamily: {
             label: "Pick a font"
         }
-    }
+    },
+
+    <em>// Using the ´generate´ option any UI elements not in the ´ui´ option</em>
+    <em>// will be automatically instantiated</em>
+    // generate: true
 }
 
 var fonts = [
@@ -124,16 +142,15 @@ var fonts = [
             "./fonts/alegreya/alegreya-v12-latin-regular.woff2"
         ] 
     },
-    { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
+    …
 ]
 
-Fontsampler(document.getElementById("demo"), fonts, options).init()
+Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
 &lt;/script&gt;
     </code>
 
 
     <div id="demo-js" class="demo">Demo JS configuration</div>
-
 
     <h3 id="examples-demo-dom">Demo DOM configuration</h3>
     <p>It is also possible to initiate a Fontsampler on a DOM node that already
@@ -144,22 +161,28 @@ Fontsampler(document.getElementById("demo"), fonts, options).init()
     <p>To link Fontsampler to existing DOM nodes, the UI elements need to have specific
         data-property attributes to be recognized. Missing attributes (such as min, max, step,
         data-unit on sliders) will be automatically added, but you can also use them to configure
-        the Fontsampler
+        the Fontsampler.
+    </p>
+    <p>To see all properties and the generated attributes it is advisable to 
+        check the DOM output of a javascript-instantiated Fontsampler, then use
+        similar DOM nodes (but in any arbitrary order and additional markup) to
+        create your fully customized layouts.
     </p>
     <code>
 …
 For the type tester element:
-&lt;div data-property="tester"&gt;Type here to test&lt;/div&gt;
+&lt;div <em>data-property="tester"</em>&gt;Type here to test&lt;/div&gt;
 …
 For fontsize, linheight, letterspacing:
 &lt;label for="fontsize"&gt;…&lt;span class="fontsampler-label-value"&gt;12&lt;/span&gt;px&lt;/label&gt;
-&lt;input data-property="fontsize" min="8" max="96" step="1" data-init="14" data-unit="px"&gt;
+&lt;input <em>data-property="fontsize" min="8" max="96" step="1" data-init="14" data-unit="px"</em>&gt;
 …
 For the fontfamily dropdown
-&lt;select data-property="fontfamily"&gt;
-    &lt;option value="My font name" data-fontname="My font name"
-        data-woff="path/to/font-file.woff" 
-        data-woff2="path/to/font-file.woff2"&gt;My font name&lt;/option&gt;
+&lt;select <em>data-property="fontfamily"</em>&gt;
+    &lt;option value="My font name" <em>data-fontname</em>="My font name"
+        <em>data-woff</em>="path/to/font-file.woff" 
+        <em>data-woff2</em>="path/to/font-file.woff2"&gt;My font name&lt;/option&gt;
+    …
 &lt;/select&gt;
 …
     </code>
@@ -200,9 +223,27 @@ For the fontfamily dropdown
             </div>
         </div>
         <div data-property="tester" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-            <span>Demo from DOM</span>
+            <span>Demo from DOM & no skin applied</span>
         </div>
     </div>
+
+    <h2 id="styling">Styling</h2>
+    <p>Fontsampler is intended to provide a barebones functionality and UI. To 
+        use and customize Fontsampler to use a skin, include the 
+        <a href="../dist/fontsampler-skin.js">fontsampler-skin.js</a> javascript 
+        and <a href="../dist/fontsampler-skin.css">fontsampler-skin.css</a> stylesheet
+        files.</p>
+
+    <code>
+&lt;!-- barebones functionality --&gt;
+&lt;script src="../dist/fontsampler.js">&lt;/script&gt;
+
+&lt;!-- optional skin files --&gt;
+&lt;script src="../dist/<em>fontsampler-skin.js</em>">&lt;/script&gt;
+&lt;link rel="stylesheet" href="../dist/<em>fontsampler-skin.css</em>"&gt;
+    </code>
+
+    <p>See the <a href="./skin.html">Skin</a> demo page for more info.</p>
 
     <h2 id="fonts">Fonts</h2>
     <p>The webfonts to render in the Fontsampler can be passed in either as 
@@ -215,23 +256,33 @@ For the fontfamily dropdown
 // Supply fonts, even a single font, as Objects in an Array
 // The order of the Array elements is the fonts’ order in the dropdown select
 var fonts = [
-    // Each font one Object
+    <em>// Each font one Object inside the Array, even a single font!</em>
     {
-        name: "My font name",
-        files: [
-            "path/to/font-file.woff",
-            "path/to/font-file.woff2"
+        // Provide a nice display name for the font
+        <em>name</em>: "My font name",
+
+        // Provide at the very least a woff file to render. When passing in
+        // a woff and a woff2 file Fontsampler will determine the best font
+        // to use
+        // If you pass in more than one woff file or more than one woff2 file
+        // only the first will be used
+        <em>files</em>: [
+            "path/to/font-file.<em>woff</em>",
+            "path/to/font-file.<em>woff2</em>"
         ]
+    },
+    {
+        …
     }
 ]
-new Fontsampler(document.getElementById("demo"), fonts).init()
+new Fontsampler(document.getElementById("demo"), <em>fonts</em>).init()
     </code>
     <p>Fonts on the root element:</p>
     <code>
 &lt;div id="demo" 
-    data-woff="path/to/font-name.woff" 
-    data-woff2="path/to/font-name.woff2"
-    data-fontname="My font name"&gt;
+    <em>data-woff</em>="path/to/font-name.woff" 
+    <em>data-woff2</em>="path/to/font-name.woff2"
+    <em>data-fontname</em>="My font name"&gt;
     Demo minimal
 &lt;/div&gt;
 …
@@ -255,6 +306,10 @@ order: [
 ],
 
 // A string of class attributes applied to the Fontsampler root node
+rootClass: "fontsampler",
+
+// A string of class attributes applied to any wrapper elements
+// created for each nested array in the ´order´ option
 wrapperClass: "fontsampler-ui-wrapper",
 
 // A class string applied to the Fontsampler root node whenever
@@ -343,45 +398,54 @@ ui: {
 &lt;style type="text/css"&gt;
 /* Fontsampler provides classes for when a font is loading (e.g. to display 
 a spinner or fade out the text tester while the font is loading) */
-#your-root-element.loading {}
+.fontsampler.loading {…}
 
 /* If you use the lazyload option you can use this class to change appearance
 while some fonts are still loading in the background */
-#your-root-element.preloading {}
+.fontsampler.preloading {…}
+
+/* The Fontsampler has initialized */
+.fontsampler.fontsampler-initiallized {…}
 
 /* When Fontsampler groups items together as per the definitions (nested arrays)
 in the options attribute, those wrappers will have this class */
-.fontsampler-ui-wrapper {}
+.fontsampler-ui-wrapper {…}
 
 /* Any UI element (controls, tester input) */
-.fontsampler-ui-element {}
+.fontsampler-ui-element {…}
 
 /* All UI elements have their key as class */
 .fontsampler-ui-element-fontsize,
 .fontsampler-ui-element.tester,
-… {}
+… {…}
+
+/* All UI types have a class, e.g. slider, dropdown, buttongroup, checkboxes, textarea */
+.fontsampler-ui-type-buttongroup {…}
 
 /* UI elements with labels have markup for the label and it’s content */
-.fontsampler-ui-element-fontsize label[for=fontsize] {}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-text {}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-value {}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-unit {}
+.fontsampler-ui-element-fontsize label[for=fontsize] {…}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-text {…}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-value {…}
+.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-unit {…}
 &lt;/style&gt;
     </code>
-    <p>You can overwrite many classes by passing in an options object.</p>
+    <p>You can overwrite many classes by passing in an options object. Note that
+        the default skin relies on many of the default classes.
+    </p>
     <code>
 &lt;script&gt;
 var options = {
     …
-    wrapperClass: "fontsampler-ui-wrapper",
-    loadingClass: "loading",
-    preloadingClass: "preloading",
+    <em>rootClass</em>: "fontsampler",
+    <em>wrapperClass</em>: "fontsampler-ui-wrapper",
+    <em>loadingClass</em>: "loading",
+    <em>preloadingClass</em>: "preloading",
     ui: {
         tester: {
-            wrapperClass: "fontsampler-ui-element-tester"
+            <em>wrapperClass</em>: "fontsampler-ui-element-tester"
         },
         fontsize: {
-            wrapperClass: "fontsampler-ui-element-tester"
+            <em>wrapperClass</em>: "fontsampler-ui-element-tester"
         },
         …
     }        
@@ -403,15 +467,22 @@ var options = {
     <code>
 &lt;script&gt;
 var options = {
-    lazyload: true
+    <em>lazyload: true</em>
 }
 var fonts = {
     …
 }
-new Fontsampler(document.getElementById("demo"), fonts, options).init()
+new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
 &lt;/script&gt;
     </code>
     <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser network throttling and network tool to see what’s going on).</p>
+
+    <footer>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <em>fontsampler-js is brought to you by Underscore</em><br>
+        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        <p><a href="../LICENCE.txt">Licensed under GNU GPL-3</a></p>
+    </footer>
 
     <script>
         window.onload = function() {
@@ -447,7 +518,7 @@ new Fontsampler(document.getElementById("demo"), fonts, options).init()
 
                             // min: 12,
                             // max: 96,
-                            init: 18,
+                            init: 36,
                             step: 1,
                             unit: "px",
                             // label: "Size"
@@ -463,8 +534,8 @@ new Fontsampler(document.getElementById("demo"), fonts, options).init()
                             // unit: "%",
                             // label: "Leading"
                         },
-                        // NOTE: leaving out one of the ui elements makes it not render
-
+                        // NOTE: leaving out one of the ui elements makes it not render unless 
+                        // option ´generate´ is set to true
                         // letterspacing: {
                         //     min: -1,
                         //     max: 1,
@@ -474,7 +545,7 @@ new Fontsampler(document.getElementById("demo"), fonts, options).init()
                         //     label: "Letterspacing"
                         // },
                         fontfamily: {
-                            label: "Fontfamily"
+                            label: "Pick a font"
                         }
                     }
                 },
