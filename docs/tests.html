@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
+    <meta charset="utf8">
+    <!-- Just some styling for this documentaiton page -->
+    <link rel="stylesheet" href="assets/demo.css">
+
+
+    <!-- Fontsampler -->
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <!-- /Fontsampler -->
+</head>
+
+<body>
+    <header>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <h1>fontsampler-js</h1>
+        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    </header>
+
+    <h1>Miscellenious tests</h1>
+
+    <div id="test1" class="demo" data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'></div>
+
+    <footer>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <em>fontsampler-js is brought to you by Underscore</em><br>
+        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        <p><a href="../LICENCE.txt">Licensed under GNU GPL-3</a></p>
+    </footer>
+
+    <script>
+        window.onload = function() {
+            var options = {
+                initialText: "Testing passing fonts via data-fonts",
+                generate: true
+            }
+            var fs = new Fontsampler(document.getElementById("test1"), false, options)
+            FontsamplerSkin(fs)
+            fs.init()
+        }
+    </script>
+</body>
+</html>
