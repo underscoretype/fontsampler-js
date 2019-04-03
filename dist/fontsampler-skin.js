@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.FontsamplerSkin = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.FontsamplerSkin = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	//CommonJS2
 	if(typeof exports === 'object' && typeof module === 'object')
@@ -6786,7 +6786,7 @@ exports.setIsLoading = setIsLoading;
 /***/ })
 /******/ ]);
 });
-},{}],2:[function(require,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -7985,13 +7985,13 @@ var between = exports.between = function between(pos, min, max) {
 /******/ });
 });
 
-},{}],3:[function(require,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 var events = {
     "init": "fontsampler.events.init"
 }
 
 module.exports = events
-},{}],4:[function(require,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -8048,11 +8048,11 @@ module.exports = {
     pruneClass: pruneClass,
     addClass: addClass
 }
-},{}],5:[function(require,module,exports){
-var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
-var Choices = require("../node_modules/choices.js/public/assets/scripts/choices")
-var events = require("./events")
-var helpers = require("./helpers")
+},{}],5:[function(_dereq_,module,exports){
+var rangeSlider = _dereq_("../node_modules/rangeslider-pure/dist/range-slider")
+var Choices = _dereq_("../node_modules/choices.js/public/assets/scripts/choices")
+var events = _dereq_("./events")
+var helpers = _dereq_("./helpers")
 
 function Skin(FS) {
     

@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fontsampler = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fontsampler = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -117,7 +117,7 @@ module.exports = function extend() {
 	return target;
 };
 
-},{}],2:[function(require,module,exports){
+},{}],2:[function(_dereq_,module,exports){
 /* Font Face Observer v2.1.0 - © Bram Stein. License: BSD-3-Clause */(function(){function l(a,b){document.addEventListener?a.addEventListener("scroll",b,!1):a.attachEvent("scroll",b)}function m(a){document.body?a():document.addEventListener?document.addEventListener("DOMContentLoaded",function c(){document.removeEventListener("DOMContentLoaded",c);a()}):document.attachEvent("onreadystatechange",function k(){if("interactive"==document.readyState||"complete"==document.readyState)document.detachEvent("onreadystatechange",k),a()})};function t(a){this.a=document.createElement("div");this.a.setAttribute("aria-hidden","true");this.a.appendChild(document.createTextNode(a));this.b=document.createElement("span");this.c=document.createElement("span");this.h=document.createElement("span");this.f=document.createElement("span");this.g=-1;this.b.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.c.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";
 this.f.style.cssText="max-width:none;display:inline-block;position:absolute;height:100%;width:100%;overflow:scroll;font-size:16px;";this.h.style.cssText="display:inline-block;width:200%;height:200%;font-size:16px;max-width:none;";this.b.appendChild(this.h);this.c.appendChild(this.f);this.a.appendChild(this.b);this.a.appendChild(this.c)}
 function u(a,b){a.a.style.cssText="max-width:none;min-width:20px;min-height:20px;display:inline-block;overflow:hidden;position:absolute;width:auto;margin:0;padding:0;top:-999px;white-space:nowrap;font-synthesis:none;font:"+b+";"}function z(a){var b=a.a.offsetWidth,c=b+100;a.f.style.width=c+"px";a.c.scrollLeft=c;a.b.scrollLeft=a.b.scrollWidth+100;return a.g!==b?(a.g=b,!0):!1}function A(a,b){function c(){var a=k;z(a)&&a.a.parentNode&&b(a.g)}var k=a;l(a.b,c);l(a.c,c);z(a)};function B(a,b){var c=b||{};this.family=a;this.style=c.style||"normal";this.weight=c.weight||"normal";this.stretch=c.stretch||"normal"}var C=null,D=null,E=null,F=null;function G(){if(null===D)if(J()&&/Apple/.test(window.navigator.vendor)){var a=/AppleWebKit\/([0-9]+)(?:\.([0-9]+))(?:\.([0-9]+))/.exec(window.navigator.userAgent);D=!!a&&603>parseInt(a[1],10)}else D=!1;return D}function J(){null===F&&(F=!!document.fonts);return F}
@@ -127,7 +127,7 @@ b)}else m(function(){function v(){var b;if(b=-1!=f&&-1!=g||-1!=f&&-1!=h||-1!=g&&
 n+"ms timeout exceeded"));else{var a=document.hidden;if(!0===a||void 0===a)f=e.a.offsetWidth,g=p.a.offsetWidth,h=q.a.offsetWidth,v();r=setTimeout(I,50)}}var e=new t(k),p=new t(k),q=new t(k),f=-1,g=-1,h=-1,w=-1,x=-1,y=-1,d=document.createElement("div");d.dir="ltr";u(e,L(c,"sans-serif"));u(p,L(c,"serif"));u(q,L(c,"monospace"));d.appendChild(e.a);d.appendChild(p.a);d.appendChild(q.a);document.body.appendChild(d);w=e.a.offsetWidth;x=p.a.offsetWidth;y=q.a.offsetWidth;I();A(e,function(a){f=a;v()});u(e,
 L(c,'"'+c.family+'",sans-serif'));A(p,function(a){g=a;v()});u(p,L(c,'"'+c.family+'",serif'));A(q,function(a){h=a;v()});u(q,L(c,'"'+c.family+'",monospace'))})})};"object"===typeof module?module.exports=B:(window.FontFaceObserver=B,window.FontFaceObserver.prototype.load=B.prototype.load);}());
 
-},{}],3:[function(require,module,exports){
+},{}],3:[function(_dereq_,module,exports){
 
 module.exports = {
     "noFonts": "Fontsampler: No fonts were passed in.",
@@ -141,16 +141,16 @@ module.exports = {
 }
 
 
-},{}],4:[function(require,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 var events = {
     "init": "fontsampler.events.init"
 }
 
 module.exports = events
-},{}],5:[function(require,module,exports){
-var FontFaceObserver = require("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
+},{}],5:[function(_dereq_,module,exports){
+var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
 
-var errors = require("./errors")
+var errors = _dereq_("./errors")
 
 // supportsWoff2 manually copied from npm woff2-feature-test
 var supportsWoff2 = (function() {
@@ -233,7 +233,7 @@ module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],6:[function(require,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],6:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -245,14 +245,14 @@ module.exports = {
  */
 
 // var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
-var extend = require("../node_modules/extend")
+var extend = _dereq_("../node_modules/extend")
 
-var Fontloader = require("./fontloader")
-var Interface = require("./interface")
-var Preloader = require("./preloader")
-var errors = require("./errors")
-var events = require("./events")
-var helpers = require("./helpers")
+var Fontloader = _dereq_("./fontloader")
+var Interface = _dereq_("./interface")
+var Preloader = _dereq_("./preloader")
+var errors = _dereq_("./errors")
+var events = _dereq_("./events")
+var helpers = _dereq_("./helpers")
 
 function Fontsampler(root, fonts, opt) {
 
@@ -600,7 +600,7 @@ function Fontsampler(root, fonts, opt) {
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./errors":3,"./events":4,"./fontloader":5,"./helpers":7,"./interface":8,"./preloader":9}],7:[function(require,module,exports){
+},{"../node_modules/extend":1,"./errors":3,"./events":4,"./fontloader":5,"./helpers":7,"./interface":8,"./preloader":9}],7:[function(_dereq_,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -657,11 +657,11 @@ module.exports = {
     pruneClass: pruneClass,
     addClass: addClass
 }
-},{}],8:[function(require,module,exports){
-var UIElements = require("./uielements")
-var Helpers = require("./helpers")
-var errors = require("./errors")
-var selection = require("./selection")
+},{}],8:[function(_dereq_,module,exports){
+var UIElements = _dereq_("./uielements")
+var Helpers = _dereq_("./helpers")
+var errors = _dereq_("./errors")
+var selection = _dereq_("./selection")
 
 function Interface(_root, fonts, options) {
 
@@ -1080,8 +1080,8 @@ function Interface(_root, fonts, options) {
     }
 }
 module.exports = Interface
-},{"./errors":3,"./helpers":7,"./selection":10,"./uielements":11}],9:[function(require,module,exports){
-var Fontloader = require("./fontloader")
+},{"./errors":3,"./helpers":7,"./selection":10,"./uielements":11}],9:[function(_dereq_,module,exports){
+var Fontloader = _dereq_("./fontloader")
 
 function Preloader() {
 
@@ -1142,7 +1142,7 @@ function Preloader() {
 
 
 module.exports = Preloader
-},{"./fontloader":5}],10:[function(require,module,exports){
+},{"./fontloader":5}],10:[function(_dereq_,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1230,7 +1230,7 @@ function Selection () {
 }
 
 module.exports = Selection
-},{}],11:[function(require,module,exports){
+},{}],11:[function(_dereq_,module,exports){
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
