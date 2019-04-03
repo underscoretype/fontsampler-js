@@ -58,11 +58,11 @@ function Fontsampler(root, fonts, opt) {
         ui: {
             tester: {
                 editable: true,
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-tester"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-tester"
             },
             fontfamily: {
                 label: "Font",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontfamily"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontfamily"
             },
             fontsize: {
                 unit: "px",
@@ -71,7 +71,7 @@ function Fontsampler(root, fonts, opt) {
                 max: 96,
                 step: 1,
                 label: "Size",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontsize"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontsize"
             },
             lineheight: {
                 unit: "%",
@@ -80,7 +80,7 @@ function Fontsampler(root, fonts, opt) {
                 max: 120,
                 step: 5,
                 label: "Leading",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-lineheight"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-lineheight"
             },
             letterspacing: {
                 unit: "em",
@@ -89,31 +89,31 @@ function Fontsampler(root, fonts, opt) {
                 max: 0.1,
                 step: 0.01,
                 label: "Letterspacing",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-letterspacing"
             },
             alignment: {
                 choices: ["left|Left", "center|Centered", "right|Right"],
                 init: "left",
                 label: "Alignment",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-alignment"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-alignment"
             },
             direction: {
                 choices: ["ltr|Left to right", "rtl|Right to left"],
                 init: "ltr",
                 label: "Direction",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-direction"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-direction"
             },
             language: {
                 choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
                 init: "enGb",
                 label: "Language",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-language"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-language"
             },
             opentype: {
                 choices: ["liga|Ligatures", "frac|Fractions"],
                 init: ["liga"],
                 label: "Opentype features",
-                wrapperClass: "fontsampler-ui-element fontsampler-ui-element-opentype"
+                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-opentype"
             }
         }
     }
@@ -278,7 +278,6 @@ function Fontsampler(root, fonts, opt) {
                 fonts = JSON.parse(node.dataset.fonts)
                 return fonts
             } catch (error) {
-                console.warn(error)
                 console.error(node.dataset.fonts)
                 throw new Error(errors.dataFontsJsonInvalid)
             }

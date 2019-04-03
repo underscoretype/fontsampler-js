@@ -14,7 +14,7 @@ $elementPadding: 0 5px;
 $elementMargin: 5px;
 
 // Scope all styles for fontsamplers with skin only
-.fontsampler.fontsampler-skin {
+.fontsampler-skin {
 
     // Handle basic loading states to avoid flash of unstyle text
     transition: opacity 0.2s ease-out;
@@ -27,12 +27,12 @@ $elementMargin: 5px;
     }
 
 
-    .fontsampler-ui-element-tester {
+    .fontsampler-ui-block-tester {
         transition: opacity 0.2s ease-out;
         opacity: 1;
     }
 
-    &.loading .fontsampler-ui-element-tester {
+    &.loading .fontsampler-ui-block-tester {
         opacity: 0;
     }
 

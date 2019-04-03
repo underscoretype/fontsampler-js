@@ -6,12 +6,12 @@
     justify-content: space-between;
 }
 
-.fontsampler-ui-element-tester {
+.fontsampler-ui-block-tester {
     display: block;
 }
 
 // All UI elements
-.fontsampler-ui-element {
+.fontsampler-ui-block {
     box-sizing: border-box;
     padding: $elementPadding;
     margin: $elementMargin;
@@ -32,7 +32,7 @@
     }
 }
 
-.fontsampler-ui-element-opentype label {
+.fontsampler-ui-block-opentype label {
     display: block;
     justify-content: flex-start;
 }

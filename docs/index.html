@@ -354,7 +354,7 @@ ui: {
     // The actual input element for testing the webfonts
     tester: {
         editable: true,
-        wrapperClass: "fontsampler-ui-element fontsampler-ui-element-tester"
+        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-tester"
     },
 
     // The font-size slider
@@ -372,7 +372,7 @@ ui: {
         label: "Size",
 
         // A string of css classes applied to the element
-        wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontsize"
+        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontsize"
     },
 
     // The line-height slider
@@ -383,7 +383,7 @@ ui: {
         max: 120,
         step: 5,
         label: "Leading",
-        wrapperClass: "fontsampler-ui-element fontsampler-ui-element-lineheight"
+        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-lineheight"
     },
 
     // The letter-spacing slider
@@ -394,13 +394,13 @@ ui: {
         max: 1,
         step: 0.05,
         label: "Letterspacing",
-        wrapperClass: "fontsampler-ui-element fontsampler-ui-element-letterspacing"
+        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-letterspacing"
     },
 
     // The drop-down for picking fonts
     fontfamily: {
         label: "Font",
-        wrapperClass: "fontsampler-ui-element fontsampler-ui-element-fontfamily"
+        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontfamily"
     }
 }        
     </code>
@@ -427,21 +427,21 @@ in the options attribute, those wrappers will have this class */
 .fontsampler-ui-wrapper {…}
 
 /* Any UI element (controls, tester input) */
-.fontsampler-ui-element {…}
+.fontsampler-ui-block {…}
 
 /* All UI elements have their key as class */
-.fontsampler-ui-element-fontsize,
-.fontsampler-ui-element.tester,
+.fontsampler-ui-block-fontsize,
+.fontsampler-ui-block.tester,
 … {…}
 
 /* All UI types have a class, e.g. slider, dropdown, buttongroup, checkboxes, textarea */
 .fontsampler-ui-type-buttongroup {…}
 
 /* UI elements with labels have markup for the label and it’s content */
-.fontsampler-ui-element-fontsize label[for=fontsize] {…}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-text {…}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-value {…}
-.fontsampler-ui-element-fontsize label[for=fontsize] .fontsampler-label-unit {…}
+.fontsampler-ui-block-fontsize label[for=fontsize] {…}
+.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-text {…}
+.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-value {…}
+.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-unit {…}
 &lt;/style&gt;
     </code>
     <p>You can overwrite many classes by passing in an options object. Note that
@@ -457,10 +457,10 @@ var options = {
     <em>preloadingClass</em>: "preloading",
     ui: {
         tester: {
-            <em>wrapperClass</em>: "fontsampler-ui-element-tester"
+            <em>wrapperClass</em>: "fontsampler-ui-block-tester"
         },
         fontsize: {
-            <em>wrapperClass</em>: "fontsampler-ui-element-tester"
+            <em>wrapperClass</em>: "fontsampler-ui-block-tester"
         },
         …
     }        

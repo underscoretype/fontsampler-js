@@ -1,5 +1,5 @@
 var UIElements = require("./uielements")
-var Helpers = require("./helpers")
+var helpers = require("./helpers")
 var errors = require("./errors")
 var selection = require("./selection")
 
@@ -30,7 +30,7 @@ function Interface(_root, fonts, options) {
         console.debug("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
-        root.className = Helpers.addClass(options.rootClass, root.className)
+        root.className = helpers.addClass(options.rootClass, root.className)
         uifactory = UIElements(root, options)
 
         // Before modifying the root node, detect if it is containing only
@@ -280,9 +280,9 @@ function Interface(_root, fonts, options) {
 
         if (property in ui && ui[property] === "buttongroup") {    
             for (var b = 0; b < buttons.length; b++) {
-                buttons[b].className = Helpers.pruneClass(currentClass, buttons[b].className)
+                buttons[b].className = helpers.pruneClass(currentClass, buttons[b].className)
             }
-            e.target.className = Helpers.addClass(currentClass, e.target.className)
+            e.target.className = helpers.addClass(currentClass, e.target.className)
 
             root.dispatchEvent(customEvent)
         }
@@ -393,16 +393,11 @@ function Interface(_root, fonts, options) {
 
     // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
-        var classes = root.className.split(" "),
-            classIndex = classes.indexOf(classString)
-
-        if (status && classIndex === -1) {
-            classes.push(classString)
-        } else if (!status && classIndex !== -1) {
-            classes.splice(classIndex, 1)
+        if (status) {
+            root.className = helpers.addClass(classString, root.className)
+        } else if (!status) {
+            root.classname = helpers.pruneClass(classString, root.className)
         }
-
-        root.className = classes.join(" ")
     }
 
     return {
