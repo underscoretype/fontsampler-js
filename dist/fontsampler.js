@@ -384,7 +384,7 @@ function Fontsampler(root, fonts, opt) {
     // Extract fonts; Look first on root element, then on select, then in
     // passed in fonts Array
     extractedFonts = extractFontsFromDOM()
-    if (!fonts && extractedFonts) {
+    if ((!fonts || fonts.length < 1) && extractedFonts) {
         fonts = extractedFonts
     }
     if (!fonts) {
