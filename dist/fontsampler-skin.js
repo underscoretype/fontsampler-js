@@ -8087,6 +8087,8 @@ function Skin(FS) {
                         searchChoices: false,
                         maxItemCount: 1,
                         itemSelectText: "",
+                        shouldSort: false,
+                        shouldSortItems: false
                     })
                 }
 
