@@ -863,9 +863,7 @@ function Interface(_root, fonts, options) {
         }
 
         var node = uifactory[ui[item]](item, opt),
-            wrapper
-
-        wrapper = document.createElement("div")
+            wrapper = document.createElement("div")
 
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
@@ -886,13 +884,16 @@ function Interface(_root, fonts, options) {
         // passing uifactory the node will validate the node against the
         // required options (for those uielements that are implemented to
         // take a third parameter)
-        uifactory[ui[key]](key, opt, node)
+        var uielement = uifactory[ui[key]](key, opt, node.querySelector("[data-property]")),
+            classes = [
+                options.elementClass + "",
+                options.elementClass + "-block-" + key,
+                options.elementClass + "-type-" + ui[key]
+            ]
 
-        node.className = helpers.addClass([
-            options.elementClass + "",
-            options.elementClass + "-block-" + key,
-            options.elementClass + "-type-" + ui[key]
-        ].join(" "), node.className)
+        for (var c = 0; c < classes.length; c++) {
+            node.className = helpers.addClass(classes[c], node.className)
+        }
 
         if (opt.label) {
             var labels = root.querySelectorAll("[for='" + key + "']")
@@ -909,12 +910,12 @@ function Interface(_root, fonts, options) {
 
                     if (value && value.textContent === "") {
                         // If set in already set in DOM the above validate will have set it
-                        value.textContent = node.value
+                        value.textContent = uielement.value
                     }
 
                     if (unit && unit.textContent === "") {
                         // If set in already set in DOM the above validate will have set it
-                        unit.textContent = node.dataset.unit
+                        unit.textContent = uielement.dataset.unit
                     }
 
                 }
@@ -942,13 +943,17 @@ function Interface(_root, fonts, options) {
             // TODO
         } else if (ui[key] === "buttongroup") {
             var buttons = node.querySelectorAll("[data-choice]")
-            
+
             if (buttons.length > 0) {
                 for (var b = 0; b < buttons.length; b++) {
                     buttons[b].addEventListener("click", onClick)
                 }
             }
-            
+
+            // TODO 
+        } else if (ui[key] === "checkboxes") {
+            node.addEventListener("change", onChange)
+
             // TODO
         }
 
@@ -1341,7 +1346,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = typeof(node) === "undefined" ? document.createElement("input") : node
+        var input = typeof(node) === "undefined" || node === null ? document.createElement("input") : node
 
         var attributes = {
             type: "range",
@@ -1359,7 +1364,7 @@ function UIElements(root, options) {
             }
         }
 
-        if (input.value === "undefined") {
+        if (typeof(input.val) === "undefined") {
             input.value = opt.init
         }
 

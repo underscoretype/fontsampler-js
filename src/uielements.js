@@ -34,7 +34,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = typeof(node) === "undefined" ? document.createElement("input") : node
+        var input = typeof(node) === "undefined" || node === null ? document.createElement("input") : node
 
         var attributes = {
             type: "range",
@@ -52,7 +52,7 @@ function UIElements(root, options) {
             }
         }
 
-        if (input.value === "undefined") {
+        if (typeof(input.val) === "undefined") {
             input.value = opt.init
         }
 
