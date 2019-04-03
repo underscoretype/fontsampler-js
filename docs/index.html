@@ -311,29 +311,9 @@ new Fontsampler(document.getElementById("demo")).init()
         nested Arrays to group elements into the same wrapper element.</p>
     <p>Here is a full list of all default options:</p>
     <code>
+
 // Leave empty to set no text or inherit the DOM node’s current text
 initialText: "",
-
-// Define the order and presence of UI elements
-// Use nested Arrays to group elements into the same wrapper
-order: [
-    ["fontsize", "lineheight", "letterspacing", "fontfamily"], "tester"
-],
-
-// A string of class attributes applied to the Fontsampler root node
-rootClass: "fontsampler",
-
-// A string of class attributes applied to any wrapper elements
-// created for each nested array in the ´order´ option
-wrapperClass: "fontsampler-ui-wrapper",
-
-// A class string applied to the Fontsampler root node whenever
-// a font is loading
-loadingClass: "loading",
-
-// A class string applied to the Fontsampler root node while
-// fontsampler fonts are loading in the background
-preloadingClass: "preloading",
 
 // Set false to force single line input
 multiline: true,
@@ -346,15 +326,51 @@ lazyload: false,
 // not explicitly defined in the ui attribute or present in the DOM
 generate: false,
 
+// CSS classes for various elements and states
+// The root element on which Fontsampler was initiated
+rootClass: "fontsampler",
+
+// Root element class while loading a webfont file
+loadingClass: "loading",
+
+// Root element class while preloading (e.g. ´lazyload´ is true and 
+// not all fonts have preloaded yet)
+preloadingClass: "preloading",
+
+// Any Array wrapper in the ´order´ attribute will generate a wrapper
+// with this class
+wrapperClass: "fontsampler-ui-wrapper",
+
+// Classes for the label of various UI elements
+labelTextClass: "fontsampler-label-text",
+labelValueClass: "fontsampler-label-value",
+lableUnitClass: "fontsampler-label-unit",
+
+// Every ´ui´ element receives this class
+// For each UI element this base also is used to create a class: 
+// fontsampler-ui-block-<i>element</i> (e.g. elements are "fontsize", "lineheight", etc.)
+// For each UI element this base also is used to create a UI type class: 
+// fontsampler-ui-type-<i>type</i> (e.g. types are "slider", "checkboxes", "buttongroup", "textarea")
+elementClass: "fontsampler-ui",
+
+// Define the order and presence of UI elements
+// Use nested Arrays to group elements into the same wrapper
+order: [
+    ["fontsize", "lineheight", "letterspacing"],
+    ["fontfamily", "language"],
+    ["alignment", "direction", "opentype"], 
+    "tester"
+],
+
 // Definitions for each UI element
-// Any nested element can be only partially defined, which will make it inherit
+// Any nested element can also be only partially defined, which will make it inherit
 // the rest of its configuration from the defaults
 ui: {
 
     // The actual input element for testing the webfonts
     tester: {
-        editable: true,
-        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-tester"
+        // Tester currently has only this option
+        editable: true
     },
 
     // The font-size slider
@@ -369,10 +385,7 @@ ui: {
 
         // The text label to render for the element, set to false to disabled 
         // rendering a label
-        label: "Size",
-
-        // A string of css classes applied to the element
-        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontsize"
+        label: "Size"
     },
 
     // The line-height slider
@@ -382,8 +395,7 @@ ui: {
         min: 60,
         max: 120,
         step: 5,
-        label: "Leading",
-        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-lineheight"
+        label: "Leading"
     },
 
     // The letter-spacing slider
@@ -393,14 +405,48 @@ ui: {
         min: -1,
         max: 1,
         step: 0.05,
-        label: "Letterspacing",
-        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-letterspacing"
+        label: "Letterspacing"
     },
 
     // The drop-down for picking fonts
     fontfamily: {
-        label: "Font",
-        wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontfamily"
+        // Currently only has this option
+        label: "Font"
+    },
+
+    // The set of buttons controlling alignment
+    alignment: {
+        // Choices can an Array of strings used both as value and display label
+        // or the strings are separated by | to use as value|Display label
+        choices: ["left|Left", "center|Centered", "right|Right"],
+
+        // Has to be one of the above choices
+        init: "left",
+
+        label: "Alignment"
+    },
+
+    // The script direction, options like alignment
+    direction: {
+        choices: ["ltr|Left to right", "rtl|Right to left"],
+        init: "ltr",
+        label: "Direction"
+    },
+
+    // The language dropdown setting the html lang attribute, thus triggering
+    // opentype locl features
+    language: {
+        choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
+        init: "enGb",
+        label: "Language"
+    },
+
+    // A set of checkboxes; NOTE: No validation whatsoever if the font
+    // supports these opentype features
+    opentype: {
+        choices: ["liga|Ligatures", "frac|Fractions"],
+        init: ["liga"],
+        label: "Opentype features"
     }
 }        
     </code>

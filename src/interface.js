@@ -161,10 +161,9 @@ function Interface(_root, fonts, options) {
         // validate and hook up
         var node = getUIItem(item)
         if (node) {
-            validateNode(node, options.ui[item])
-            // initNode(item, node, options.ui[item])
+            validateNode(item, node, options.ui[item])
             uinodes[item] = node
-            
+
             return true
         } else if (options.ui[item].render && item in ui === true && item in uinodes === false) {
             node = createNode(item, options.ui[item])
@@ -187,7 +186,7 @@ function Interface(_root, fonts, options) {
         // are the fonts passed in. let’s make this transformation behind
         // the scenes so we can use the re-usable "dropdown" ui
         if (item === "fontfamily") {
-            opt.choices = fonts.map(function (value) {
+            opt.choices = fonts.map(function(value) {
                 return value.name
             })
         }
@@ -195,10 +194,12 @@ function Interface(_root, fonts, options) {
         var node = uifactory[ui[item]](item, opt),
             wrapper
 
-        // initNode(item, node, opt)
-
         wrapper = document.createElement("div")
-        wrapper.className = opt.wrapperClass + " " + "fontsampler-ui-type-" + ui[item]
+        wrapper.className = [
+            options.elementClass + "", 
+            options.elementClass + "-block-" + item,
+            options.elementClass + "-type-" + ui[item]
+        ].join(" ")
 
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
@@ -215,8 +216,40 @@ function Interface(_root, fonts, options) {
      * @param object opt 
      * @return boolean
      */
-    function validateNode(/*node, opt*/) {
-        // TODO
+    function validateNode(key, node, opt) {
+        console.error("validateNode", key)
+        // passing uifactory the node will validate the node against the
+        // required options (for those uielements that are implemented to
+        // take a third parameter)
+        uifactory[ui[key]](key, opt, node)
+
+        if (opt.label) {
+            var labels = root.querySelectorAll("[for='" + key + "']")
+            if (labels.length > 0) {
+                for (var l = 0; l < labels.length; l++) {
+                    var label = labels[l],
+                        text = label.querySelector("." + options.labelTextClass), 
+                        value = label.querySelector("." + options.labelValueClass),
+                        unit = label.querySelector("." + options.labelUnitClass)
+
+                    if (text && text.textContent === "") {
+                        text.textContent = opt.label
+                    }
+
+                    if (value && value.textContent === "") {
+                        // If set in already set in DOM the above validate will have set it
+                        value.textContent = node.value
+                    }
+
+                    if (unit && unit.textContent === "") {
+                        // If set in already set in DOM the above validate will have set it
+                        unit.textContent = node.dataset.unit
+                    }
+                    
+                }
+            }
+        }
+
         return true
     }
 
@@ -227,7 +260,7 @@ function Interface(_root, fonts, options) {
      * @return boolean
      */
     function initNode(key, node, opt) {
-        // TODO set values if passed in an different on node
+        // TODO set values if passed in and different on node
 
         node.addEventListener("change", onChange)
         node.addEventListener("click", onClick)
@@ -278,7 +311,7 @@ function Interface(_root, fonts, options) {
             buttons = e.target.parentNode.childNodes,
             currentClass = "fontsampler-buttongroup-selected"
 
-        if (property in ui && ui[property] === "buttongroup") {    
+        if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
                 buttons[b].className = helpers.pruneClass(currentClass, buttons[b].className)
             }
@@ -315,7 +348,11 @@ function Interface(_root, fonts, options) {
     function getValue(property) {
         var element = getUIItem(property)
 
-        return element.value
+        if (element) {
+            return element.value
+        } else {
+            return false
+        }
     }
 
     /**
@@ -340,7 +377,7 @@ function Interface(_root, fonts, options) {
 
             for (var f = 0; f < features.length; f++) {
                 var input = features[f]
-                re[input.dataset.feature] = input.checked 
+                re[input.dataset.feature] = input.checked
             }
 
             return re
@@ -366,6 +403,18 @@ function Interface(_root, fonts, options) {
         return false
     }
 
+    function getKeyForCssAttr(attr) {
+        for (var key in keyToCss) {
+            if (keyToCss.hasOwnProperty(key)) {
+                if (keyToCss[key] === attr) {
+                    return key
+                }
+            }
+        }
+
+        return false
+    }
+
     /**
      * Set the tester’s text
      * @param {*} attr 
@@ -373,6 +422,18 @@ function Interface(_root, fonts, options) {
      */
     function setInputCss(attr, val) {
         uinodes.tester.style[attr] = val
+        var key = getKeyForCssAttr(attr)
+
+        if (key && key in ui) {
+            if (ui[key] === "slider") {
+                if (val !== getCSSValue(key)) {
+                    var value = getValue(attr)
+                    if (value) {
+                        uinodes[key].value = value
+                    }
+                }
+            }
+        }
     }
 
     function setInputAttr(attr, val) {
@@ -383,7 +444,7 @@ function Interface(_root, fonts, options) {
         var parsed = []
         for (var key in features) {
             if (features.hasOwnProperty(key)) {
-                parsed.push('"' + key  + '" ' + (features[key] ? "1" : "0"))
+                parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }
         }
         var val = parsed.join(",")
@@ -393,10 +454,10 @@ function Interface(_root, fonts, options) {
 
     // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
-        if (status) {
+        if (status === true) {
             root.className = helpers.addClass(classString, root.className)
-        } else if (!status) {
-            root.classname = helpers.pruneClass(classString, root.className)
+        } else if (status === false) {
+            root.className = helpers.pruneClass(classString, root.className)
         }
     }
 
@@ -407,6 +468,7 @@ function Interface(_root, fonts, options) {
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,
         getCssAttrForKey: getCssAttrForKey,
+        getKeyForCssAttr: getKeyForCssAttr,
         setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,

@@ -42,27 +42,29 @@ function Fontsampler(root, fonts, opt) {
     // interface elements except a tester input
     defaults = {
         initialText: "",
+        multiline: true,
+        lazyload: false,
+        generate: false,
+        rootClass: "fontsampler",
+        loadingClass: "loading",
+        preloadingClass: "preloading",
+        wrapperClass: "fontsampler-ui-wrapper",
+        labelTextClass: "fontsampler-label-text",
+        labelValueClass: "fontsampler-label-value",
+        lableUnitClass: "fontsampler-label-unit",
+        elementClass: "fontsampler-ui",
         order: [
             ["fontsize", "lineheight", "letterspacing"],
             ["fontfamily", "language"],
             ["alignment", "direction", "opentype"], 
             "tester"
         ],
-        rootClass: "fontsampler",
-        wrapperClass: "fontsampler-ui-wrapper",
-        loadingClass: "loading",
-        preloadingClass: "preloading",
-        multiline: true,
-        lazyload: false,
-        generate: false,
         ui: {
             tester: {
-                editable: true,
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-tester"
+                editable: true
             },
             fontfamily: {
-                label: "Font",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontfamily"
+                label: "Font"
             },
             fontsize: {
                 unit: "px",
@@ -70,8 +72,7 @@ function Fontsampler(root, fonts, opt) {
                 min: 8,
                 max: 96,
                 step: 1,
-                label: "Size",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-fontsize"
+                label: "Size"
             },
             lineheight: {
                 unit: "%",
@@ -79,8 +80,7 @@ function Fontsampler(root, fonts, opt) {
                 min: 60,
                 max: 120,
                 step: 5,
-                label: "Leading",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-lineheight"
+                label: "Leading"
             },
             letterspacing: {
                 unit: "em",
@@ -88,26 +88,22 @@ function Fontsampler(root, fonts, opt) {
                 min: -0.1,
                 max: 0.1,
                 step: 0.01,
-                label: "Letterspacing",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-letterspacing"
+                label: "Letterspacing"
             },
             alignment: {
                 choices: ["left|Left", "center|Centered", "right|Right"],
                 init: "left",
-                label: "Alignment",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-alignment"
+                label: "Alignment"
             },
             direction: {
                 choices: ["ltr|Left to right", "rtl|Right to left"],
                 init: "ltr",
-                label: "Direction",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-direction"
+                label: "Direction"
             },
             language: {
                 choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
                 init: "enGb",
-                label: "Language",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-language"
+                label: "Language"
             },
             opentype: {
                 choices: ["liga|Ligatures", "frac|Fractions"],

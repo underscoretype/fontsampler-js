@@ -14,19 +14,18 @@ function UIElements(root, options) {
 
         label.setAttribute("for", relatedInput)
 
-        text.className = "fontsampler-label-text"
+        text.className = options.labelTextClass
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
         if (typeof(labelUnit) === "string" && labelValue !== "") {
-
             val = document.createElement("span")
-            val.className = "fontsampler-label-value"
+            val.className = options.labelValueClass
             val.appendChild(document.createTextNode(labelValue))
             label.appendChild(val)
 
             unit = document.createElement("span")
-            unit.className = "fontsampler-label-unit"
+            unit.className = options.labelUnitClass
             unit.appendChild(document.createTextNode(labelUnit))
             label.appendChild(unit)
         }
@@ -34,19 +33,38 @@ function UIElements(root, options) {
         return label
     }
 
-    function slider(key, opt) {
-        var input = document.createElement("input")
+    function slider(key, opt, node) {
+        var input = typeof(node) === "undefined" ? document.createElement("input") : node
 
-        input.setAttribute("type", "range")
-        input.setAttribute("min", opt.min)
-        input.setAttribute("max", opt.max)
-        input.setAttribute("step", opt.step)
-        input.dataset.property = key
+        var attributes = {
+            type: "range",
+            min: opt.min,
+            max: opt.max,
+            step: opt.step
+        }
+
         input.setAttribute("autocomplete", "off")
-        input.value = opt.init
-        if (opt.unit) {
+        for (var a in attributes) {
+            if (attributes.hasOwnProperty(a)) {
+                if (!input.hasAttribute(a)) {
+                    input.setAttribute(a, attributes[a])
+                }
+            }
+        }
+
+        if (input.value === "undefined") {
+            input.value = opt.init
+        }
+
+    
+        if ("unit" in input.dataset === false) {
             input.dataset.unit = opt.unit
         }
+        if ("init" in input.dataset === false) {
+            input.dataset.init = opt.init
+        }
+
+        input.dataset.property = key
 
         return input
     }

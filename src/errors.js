@@ -8,6 +8,6 @@ module.exports = {
     "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
     "invalidEvent": "Fontsampler: Invalid event type. You can only register Fontsampler events on the Fontsampler instance.",
     "newInit": "Fontsampler: Instantiated Fontsampler without 'new' keyword. Create Fontsamplers using new Fontsampler(…)",
-    "dataFontsJsonInvalid": "Fontsampler: The data-fonts JSON failed to parse.",
+    "dataFontsJsonInvalid": "Fontsampler: The data-fonts JSON failed to parse."
 }
 

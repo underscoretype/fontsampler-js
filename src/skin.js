@@ -47,7 +47,7 @@ function Skin(FS) {
 
     function updateSlider(position /*, value*/) {
         var property = this.element.dataset.property,
-            label = this.element.parentNode.querySelector("label[for='" + property + "'] .fontsampler-label-value")
+            label = FS.root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
 
         FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + property + "changed"))
 
