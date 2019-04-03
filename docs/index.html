@@ -87,18 +87,33 @@ new Fontsampler(document.getElementById("<em>demo</em>"), <em>fonts</em>).init()
 &lt;/script&gt;
     </code>
 
-    <p>…or fonts defined as data attributes:</p>
+    <p>…or fonts defined as data attributes; for a single-font Fontsampler you can use:</p>
     <code>
-&lt;div id="demo" 
+&lt;div id="demo"   
+    <em>data-name</em>="Your Font name"
     <em>data-woff</em>="path/to/font-name.woff" 
-    <em>data-woff2</em>="path/to/font-name.woff2"&gt;Demo minimal&lt;/div&gt;
+    <em>data-woff2</em>="path/to/font-name.woff2"
+&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
 new Fontsampler(document.getElementById("demo")).init()
 &lt;/script&gt;
     </code>
+    
+    <div id="demo-minimal-single" class="demo" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2">Demo minimal — just load a font and transform this into an editable textarea</div>
 
-    <div id="demo-minimal" class="demo" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2">Demo minimal — just load a font and transform this into an editable textarea</div>
+    <p>…or to load several fonts use a stringfied JSON structured like the above fonts object:</p>
+    <code>
+&lt;div id="demo"   
+    <em>data-fonts</em>='[{"name": "Your font name", "files": ["…/font.woff", "…/font.woff2"], {…}]'
+&gt;Demo minimal&lt;/div&gt;
+
+&lt;script&gt;
+new Fontsampler(document.getElementById("demo")).init()
+&lt;/script&gt;       
+    </code>
+
+    <div id="demo-minimal-multiple" class="demo" data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'>Demo minimal — just load a font and transform this into an editable textarea</div>
 
     <h3 id="examples-demo-js">Demo JS configuration</h3>
     <p>To configure a Fontsampler via Javascript and supply several fonts, you 
@@ -190,8 +205,8 @@ For the fontfamily dropdown
         <div>
             <div>
                 <select autocomplete="off" data-property="fontfamily">
-                    <option value="Alegreya Regular" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2" selected="selected">Alegreya Regular</option>
-                    <option value="Alegreya Italic" data-woff="./fonts/alegreya/alegreya-v12-latin-italic.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-italic.woff2">Alegreya Italic</option>
+                    <option value="Alegreya Regular" data-name="Alegreya Regular" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2" selected="selected">Alegreya Regular</option>
+                    <option value="Alegreya Italic" data-name="Alegreya Italic" data-woff="./fonts/alegreya/alegreya-v12-latin-italic.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-italic.woff2">Alegreya Italic</option>
                 </select>
             </div>
             <div>
@@ -503,7 +518,8 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
             fs.init()
 
             // Demo minimal
-            new Fontsampler(document.getElementById("demo-minimal")).init()
+            new Fontsampler(document.getElementById("demo-minimal-single")).init()
+            new Fontsampler(document.getElementById("demo-minimal-multiple")).init()
 
             // Demo JS
             var options = {

@@ -216,12 +216,13 @@ function Fontsampler(root, fonts, opt) {
             return false
         }
 
-        for (var index in fonts) {
-            if (typeof(fonts[index]) !== "object") {
+        for (var i = 0; i < fonts.length; i++) {
+            var font = fonts[i]
+            if (typeof(font) !== "object") {
                 return false
             }
 
-            if (!fonts[index].name || !fonts[index].files || !Array.isArray(fonts[index].files) || fonts[index].files.length <= 0) {
+            if (!font.name || !font.files || !Array.isArray(font.files) || font.files.length <= 0) {
                 return false
             }
         }
@@ -234,12 +235,11 @@ function Fontsampler(root, fonts, opt) {
             options = [],
             fonts = []
 
-        // First try to get and data-woff/2 on the root element
+        // First try to get data-fonts or data-woff/2 on the root element
         // If such are found, return them
         var rootFonts = extractFontsFromNode(root, true)
         if (rootFonts) {
-            fonts.push(rootFonts)
-            return fonts
+            return rootFonts
         }
 
         // Otherwise check if there is a dropdown with options that have
@@ -251,10 +251,10 @@ function Fontsampler(root, fonts, opt) {
         options = select.querySelectorAll("option")
         for (i = 0; i < options.length; i++) {
             var opt = options[i],
-                font = extractFontsFromNode(opt, false)
+                extractedFonts = extractFontsFromNode(opt, false)
 
-            if (font) {
-                fonts.push(font)
+            if (fonts) {
+                fonts = fonts.concat(extractedFonts)
             }
         }
 
@@ -266,25 +266,40 @@ function Fontsampler(root, fonts, opt) {
     }
 
     function extractFontsFromNode(node, ignoreName) {
-        var font = {
-            name: "default",
-            files: []
+        var fonts = [],
+            singleFont = {
+                "name": "Default",
+                "files": []
+            }
+
+        // prever a data-fonts json_encoded array
+        if (node.dataset.fonts) {
+            try {
+                fonts = JSON.parse(node.dataset.fonts)
+                return fonts
+            } catch (error) {
+                console.warn(error)
+                console.error(node.dataset.fonts)
+                throw new Error(errors.dataFontsJsonInvalid)
+            }
         }
 
-        if (node.dataset.fontname) {
-            font.name = node.dataset.fontname
+        // else see if a single font can be extracted
+        if (node.dataset.name) {
+            singleFont.name = node.dataset.name
         }
 
         if (node.dataset.woff) {
-            font.files.push(node.dataset.woff)
+            singleFont.files.push(node.dataset.woff)
         }
 
         if (node.dataset.woff2) {
-            font.files.push(node.dataset.woff2)
+            singleFont.files.push(node.dataset.woff2)
         }
 
-        if ((font.name || (!font.name && ignoreName)) && font.files.length > 0) {
-            return font
+        if ((singleFont.name || (!singleFont.name && ignoreName)) && singleFont.files.length > 0) {
+            console.log("return single font", singleFont)
+            return [singleFont]
         }
 
         return false
