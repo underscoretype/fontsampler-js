@@ -167,6 +167,7 @@ function Interface(_root, fonts, options) {
             return true
         } else if (options.ui[item].render && item in ui === true && item in uinodes === false) {
             node = createNode(item, options.ui[item])
+            validateNode(item, node, options.ui[item])
             uinodes[item] = node
 
             return node
@@ -195,11 +196,6 @@ function Interface(_root, fonts, options) {
             wrapper
 
         wrapper = document.createElement("div")
-        wrapper.className = [
-            options.elementClass + "", 
-            options.elementClass + "-block-" + item,
-            options.elementClass + "-type-" + ui[item]
-        ].join(" ")
 
         if (opt.label) {
             wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
@@ -217,18 +213,23 @@ function Interface(_root, fonts, options) {
      * @return boolean
      */
     function validateNode(key, node, opt) {
-        console.error("validateNode", key)
         // passing uifactory the node will validate the node against the
         // required options (for those uielements that are implemented to
         // take a third parameter)
         uifactory[ui[key]](key, opt, node)
+
+        node.className = helpers.addClass([
+            options.elementClass + "",
+            options.elementClass + "-block-" + key,
+            options.elementClass + "-type-" + ui[key]
+        ].join(" "), node.className)
 
         if (opt.label) {
             var labels = root.querySelectorAll("[for='" + key + "']")
             if (labels.length > 0) {
                 for (var l = 0; l < labels.length; l++) {
                     var label = labels[l],
-                        text = label.querySelector("." + options.labelTextClass), 
+                        text = label.querySelector("." + options.labelTextClass),
                         value = label.querySelector("." + options.labelValueClass),
                         unit = label.querySelector("." + options.labelUnitClass)
 
@@ -245,7 +246,7 @@ function Interface(_root, fonts, options) {
                         // If set in already set in DOM the above validate will have set it
                         unit.textContent = node.dataset.unit
                     }
-                    
+
                 }
             }
         }
@@ -262,15 +263,22 @@ function Interface(_root, fonts, options) {
     function initNode(key, node, opt) {
         // TODO set values if passed in and different on node
 
-        node.addEventListener("change", onChange)
-        node.addEventListener("click", onClick)
-
         if (ui[key] === "slider") {
+            node.addEventListener("change", onChange)
             node.val = opt.init
             setInputCss(keyToCss[key], opt.init + opt.unit)
         } else if (ui[key] === "dropdown") {
+            node.addEventListener("change", onChange)
             // TODO
         } else if (ui[key] === "buttongroup") {
+            var buttons = node.querySelectorAll("[data-choice]")
+            
+            if (buttons.length > 0) {
+                for (var b = 0; b < buttons.length; b++) {
+                    buttons[b].addEventListener("click", onClick)
+                }
+            }
+            
             // TODO
         }
 
@@ -296,26 +304,26 @@ function Interface(_root, fonts, options) {
     function onChange(e) {
         var property = e.target.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "changed")
-        //     label = root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
-
-        // if (label) {
-        //     label.innerText = getValue(property)
-        // }
 
         root.dispatchEvent(customEvent)
     }
 
+    /**
+     * Currently only reacting to buttongroup nested buttons’ clicks
+     * @param {*} e 
+     */
     function onClick(e) {
-        var property = e.target.parentNode.dataset.property,
+        var parent = e.currentTarget.parentNode,
+            property = parent.dataset.property,
             customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
-            buttons = e.target.parentNode.childNodes,
+            buttons = parent.querySelectorAll("[data-choice]"),
             currentClass = "fontsampler-buttongroup-selected"
 
         if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
                 buttons[b].className = helpers.pruneClass(currentClass, buttons[b].className)
             }
-            e.target.className = helpers.addClass(currentClass, e.target.className)
+            e.currentTarget.className = helpers.addClass(currentClass, e.currentTarget.className)
 
             root.dispatchEvent(customEvent)
         }

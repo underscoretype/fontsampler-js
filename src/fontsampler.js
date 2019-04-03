@@ -51,7 +51,7 @@ function Fontsampler(root, fonts, opt) {
         wrapperClass: "fontsampler-ui-wrapper",
         labelTextClass: "fontsampler-label-text",
         labelValueClass: "fontsampler-label-value",
-        lableUnitClass: "fontsampler-label-unit",
+        labelUnitClass: "fontsampler-label-unit",
         elementClass: "fontsampler-ui",
         order: [
             ["fontsize", "lineheight", "letterspacing"],
@@ -108,8 +108,7 @@ function Fontsampler(root, fonts, opt) {
             opentype: {
                 choices: ["liga|Ligatures", "frac|Fractions"],
                 init: ["liga"],
-                label: "Opentype features",
-                wrapperClass: "fontsampler-ui-block fontsampler-ui-block-opentype"
+                label: "Opentype features"
             }
         }
     }
