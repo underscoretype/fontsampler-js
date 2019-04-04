@@ -326,32 +326,45 @@ lazyload: false,
 // not explicitly defined in the ui attribute or present in the DOM
 generate: false,
 
-// CSS classes for various elements and states
-// The root element on which Fontsampler was initiated
-rootClass: "fontsampler",
+classes: {
 
-// Root element class while loading a webfont file
-loadingClass: "loading",
+    // CSS classes for various elements and states
+    // The root element on which Fontsampler was initiated
+    rootClass: "fontsamplerjs",
 
-// Root element class while preloading (e.g. ´lazyload´ is true and 
-// not all fonts have preloaded yet)
-preloadingClass: "preloading",
+    // Root element class after the Fontsampler has been initialized
+    initClass: "fsjs-initialized",
 
-// Any Array wrapper in the ´order´ attribute will generate a wrapper
-// with this class
-wrapperClass: "fontsampler-ui-wrapper",
+    // Root element class while loading a webfont file
+    loadingClass: "fsjs-loading",
 
-// Classes for the label of various UI elements
-labelTextClass: "fontsampler-label-text",
-labelValueClass: "fontsampler-label-value",
-lableUnitClass: "fontsampler-label-unit",
+    // Root element class while preloading (e.g. ´lazyload´ is true and 
+    // not all fonts have preloaded yet)
+    preloadingClass: "fsjs-preloading",
 
-// Every ´ui´ element receives this class
-// For each UI element this base also is used to create a class: 
-// fontsampler-ui-block-<i>element</i> (e.g. elements are "fontsize", "lineheight", etc.)
-// For each UI element this base also is used to create a UI type class: 
-// fontsampler-ui-type-<i>type</i> (e.g. types are "slider", "checkboxes", "buttongroup", "textarea")
-elementClass: "fontsampler-ui",
+    // Any Array wrapper in the ´order´ attribute will generate a wrapper
+    // with this class
+    wrapperClass: "fsjs-wrapper",
+
+    // The wrapper of each UI element around label and UI
+    // For each UI element this base also is used to create a class: 
+    // fsjs-block-<i>element</i> (e.g. elements are "fontsize", "lineheight", etc.)
+    // For each UI element this base also is used to create a UI type class: 
+    // fsjs-block-type-<i>type</i> (e.g. types are "slider", "checkboxes", "buttongroup", "textarea")
+    blockClass: "fsjs-block",
+
+    // Every ´ui´ element receives this class
+    elementClass: "fsjs-element",
+
+    // Classes for the label of various UI elements
+    labelClass: "fsjs-label",
+    labelTextClass: "fsjs-label-text",
+    labelValueClass: "fsjs-label-value",
+    lableUnitClass: "fsjs-label-unit",
+
+    // The selected button’s class in a buttongroup
+    buttonSelected: "fsjs-button-selected",
+}
 
 // Define the order and presence of UI elements
 // Use nested Arrays to group elements into the same wrapper
@@ -369,8 +382,11 @@ ui: {
 
     // The actual input element for testing the webfonts
     tester: {
-        // Tester currently has only this option
-        editable: true
+        // Set’s the contenteditable attribute
+        editable: true,
+
+        // The tester has it’s label disabled by default
+        label: false
     },
 
     // The font-size slider
@@ -459,35 +475,35 @@ ui: {
 &lt;style type="text/css"&gt;
 /* Fontsampler provides classes for when a font is loading (e.g. to display 
 a spinner or fade out the text tester while the font is loading) */
-.fontsampler.loading {…}
+.fontsamplerjs.loading {…}
 
 /* If you use the lazyload option you can use this class to change appearance
 while some fonts are still loading in the background */
-.fontsampler.preloading {…}
+.fontsamplerjs.preloading {…}
 
 /* The Fontsampler has initialized */
-.fontsampler.fontsampler-initiallized {…}
+.fontsamplerjs.fontsampler-initiallized {…}
 
 /* When Fontsampler groups items together as per the definitions (nested arrays)
 in the options attribute, those wrappers will have this class */
-.fontsampler-ui-wrapper {…}
+.fsjs-wrapper {…}
 
 /* Any UI element (controls, tester input) */
-.fontsampler-ui-block {…}
+.fsjs-block {…}
 
 /* All UI elements have their key as class */
-.fontsampler-ui-block-fontsize,
-.fontsampler-ui-block.tester,
+.fsjs-block-fontsize,
+.fsjs-block-tester,
 … {…}
 
 /* All UI types have a class, e.g. slider, dropdown, buttongroup, checkboxes, textarea */
-.fontsampler-ui-type-buttongroup {…}
+.fsjs-block-type-buttongroup {…}
 
 /* UI elements with labels have markup for the label and it’s content */
-.fontsampler-ui-block-fontsize label[for=fontsize] {…}
-.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-text {…}
-.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-value {…}
-.fontsampler-ui-block-fontsize label[for=fontsize] .fontsampler-label-unit {…}
+.fsjs-block-fontsize [data-fsjs-for=fontsize] {…}
+.fsjs-block-fontsize [data-fsjs-for=fontsize] .fsjs-label-text {…}
+.fsjs-block-fontsize [data-fsjs-for=fontsize] .fsjs-label-value {…}
+.fsjs-block-fontsize [data-fsjs-for=fontsize] .fsjs-label-unit {…}
 &lt;/style&gt;
     </code>
     <p>You can overwrite many classes by passing in an options object. Note that
@@ -497,19 +513,14 @@ in the options attribute, those wrappers will have this class */
 &lt;script&gt;
 var options = {
     …
-    <em>rootClass</em>: "fontsampler",
-    <em>wrapperClass</em>: "fontsampler-ui-wrapper",
-    <em>loadingClass</em>: "loading",
-    <em>preloadingClass</em>: "preloading",
-    ui: {
-        tester: {
-            <em>wrapperClass</em>: "fontsampler-ui-block-tester"
-        },
-        fontsize: {
-            <em>wrapperClass</em>: "fontsampler-ui-block-tester"
-        },
+    classes: {
+        <em>rootClass</em>: "fontsamplerjs",
+        <em>wrapperClass</em>: "fsjs-wrapper",
+        <em>loadingClass</em>: "fsjs-loading",
+        <em>preloadingClass</em>: "fsjs-preloading",
         …
-    }        
+    }
+    …
 }
 &lt;/script&gt;
     </code>
