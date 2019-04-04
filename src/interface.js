@@ -14,7 +14,7 @@
  * 
  * Nested in each block a variety of sub elements:
  *      Optional label with:
- *      [data-for=_property_].fsjs-label
+ *      [data-fsjs-for=_property_].fsjs-label
  *          [data-label-text=_property_].fsjs-label-text
  *          [data-label-value=_property_].fsjs-label-value (optional)
  *          [data-label-unit=_property_].fsjs-label-unit (optional)
@@ -50,6 +50,7 @@ function Interface(_root, fonts, options) {
         blocks = {},
         root = null,
         uifactory = null,
+        input = null,
         originalText = ""
 
     function init() {
@@ -103,6 +104,8 @@ function Interface(_root, fonts, options) {
                 }
             }
         }
+
+        input = getElement("tester", blocks.tester)
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
@@ -188,35 +191,41 @@ function Interface(_root, fonts, options) {
             throw new Error(errors.invalidUIItem + key)
         }
 
-        // check if a block exists
-        // yes > check it has a element
-        //      yes > validate & fix element
-        //          validate & fix block
-        //      no > make block
-        // no > make block
-
         var block = getBlock(key),
             element = false,
-            label = false
+            label = false,
+            opt = options.ui[key]
 
         if (block) {
+            // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
 
             if (options.ui[key].label && !label) {
+                // create a label if needed
                 label = uifactory.label(opt.label, opt.unit, opt.init, key)
                 block.appendChild(label)
                 sanitizeLabel(label, key)
+            } else if (label) {
+                // or check the existing label
+                sanitizeLabel(label, key)
             }
             if (!element) {
+                // create and check the element
                 element = createElement(key)
                 block.appendChild(element)
                 sanitizeElement(element, key)
+            } else {
+                // or check the existing element
+                sanitizeElement(element, key)
             }
+
+            // check the block itself
             sanitizeBlock(block, key)
 
             return block
-        } else if (!block && options.generate) {
+        } else if (!block && options.generate || !block && key === "tester") {
+            // for missing blocks that should get rendered create them
 
             return createBlock(key)
         }
@@ -263,27 +272,34 @@ function Interface(_root, fonts, options) {
     }
 
     function sanitizeElement(element, key) {
-        uifactory[ui[key]](key, options.ui[key], element)
+        var element = uifactory[ui[key]](key, options.ui[key], element)
+
+        helpers.nodeAddClass(element, options.classes.elementClass)
+        element.dataset.fsjs = key
     }
 
     function sanitizeLabel(label, key) {
         var text = label.querySelector("." + options.classes.labelTextClass),
             value = label.querySelector("." + options.classes.labelValueClass),
-            unit = label.querySelector("." + options.classes.labelUnitClass)
+            unit = label.querySelector("." + options.classes.labelUnitClass),
+            element = getElement(key)
 
         if (text && text.textContent === "") {
-            text.textContent = opt.label
+            text.textContent = options.ui[key].label
         }
 
         if (value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
-            value.textContent = uielement.value
+            value.textContent = element.value
         }
 
         if (unit && unit.textContent === "") {
             // If set in already set in DOM the above validate will have set it
-            unit.textContent = uielement.dataset.unit
+            unit.textContent = element.dataset.unit
         }
+
+        helpers.nodeAddClass(label, options.classes.labelClass)
+        label.dataset.fsjsFor = key
     }
 
     /**
@@ -344,6 +360,15 @@ function Interface(_root, fonts, options) {
             node = root
         }
         var block = root.querySelector("[data-fsjs-block='" + key + "']")
+
+        return helpers.isNode(block) ? block : false
+    }
+
+    function getLabel(key, node) {
+        if (typeof(node) === "undefined") {
+            node = root
+        }
+        var block = root.querySelector("[data-fsjs-for='" + key + "']")
 
         return helpers.isNode(block) ? block : false
     }
@@ -494,11 +519,11 @@ function Interface(_root, fonts, options) {
      * @param {*} val 
      */
     function setInputCss(attr, val) {
-        blocks.tester.style[attr] = val
+        input.style[attr] = val
     }
 
     function setInputAttr(attr, val) {
-        blocks.tester.setAttribute(attr, val)
+        input.setAttribute(attr, val)
     }
 
     function setInputOpentype(features) {
@@ -511,12 +536,12 @@ function Interface(_root, fonts, options) {
         }
         val = parsed.join(",")
 
-        blocks.tester.style["font-feature-settings"] = val
+        input.style["font-feature-settings"] = val
     }
 
     function setInputText(text) {
-        if (text && blocks.tester) {
-            blocks.tester.textContent = text
+        if (text && input) {
+            input.textContent = text
         }
     }
 

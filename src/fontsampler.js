@@ -299,7 +299,6 @@ function Fontsampler(root, fonts, opt) {
         }
 
         if ((singleFont.name || (!singleFont.name && ignoreName)) && singleFont.files.length > 0) {
-            console.log("return single font", singleFont)
             return [singleFont]
         }
 
