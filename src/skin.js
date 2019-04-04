@@ -8,16 +8,16 @@ function Skin(FS) {
     FS.registerEventhandler(events.init, init)
 
     function init() {
-        console.log("Skin.init()", FS, FS.initialized)
+        console.debug("Skin.init()", FS, FS.initialized)
 
         if (FS.initialized === true) {
             console.error(FS.root)
             throw new Error("FontsamplerSkin: Cannot apply skin to a Fontsampler that is already initialized.")
         }
 
-        FS.root.className = helpers.addClass("fontsampler-skin", FS.root.className)
+        helpers.nodeAddClass(FS.root, "fsjs-skin")
 
-        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-property]")
+        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs]")
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,
@@ -26,7 +26,7 @@ function Skin(FS) {
             })
         }
 
-        var selectInputs = FS.root.querySelectorAll("select[data-property]")
+        var selectInputs = FS.root.querySelectorAll("select[data-fsjs]")
         if (selectInputs.length) {
             for (var i in selectInputs) {
                 if (selectInputs.hasOwnProperty(i)) {
@@ -46,10 +46,10 @@ function Skin(FS) {
     }
 
     function updateSlider(position /*, value*/) {
-        var property = this.element.dataset.property,
-            label = FS.root.querySelector("label[for='" + property + "'] .fontsampler-label-value")
+        var key = this.element.dataset.fsjs,
+            label = FS.root.querySelector("[data-for='" + key + "'] .fsjs-label-value")
 
-        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + property + "changed"))
+        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + key + "changed"))
 
         if (label) {
             label.textContent = position

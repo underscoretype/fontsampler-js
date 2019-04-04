@@ -282,14 +282,20 @@ function Fontsampler(root, fonts, opt) {
         multiline: true,
         lazyload: false,
         generate: false,
-        rootClass: "fontsampler",
-        loadingClass: "loading",
-        preloadingClass: "preloading",
-        wrapperClass: "fontsampler-ui-wrapper",
-        labelTextClass: "fontsampler-label-text",
-        labelValueClass: "fontsampler-label-value",
-        labelUnitClass: "fontsampler-label-unit",
-        elementClass: "fontsampler-ui",
+        classes: {
+            rootClass: "fontsamplerjs",
+            initClass: "fsjs-initialized",
+            loadingClass: "fsjs-loading",
+            preloadingClass: "fsjs-preloading",
+            wrapperClass: "fsjs-wrapper",
+            blockClass: "fsjs-block",
+            elementClass: "fsjs-element",
+            labelClass: "fsjs-label",
+            labelTextClass: "fsjs-label-text",
+            labelValueClass: "fsjs-label-value",
+            labelUnitClass: "fsjs-label-unit",
+            buttonSelected: "fsjs-button-selected",
+        },
         order: [
             ["fontsize", "lineheight", "letterspacing"],
             ["fontfamily", "language"],
@@ -298,7 +304,8 @@ function Fontsampler(root, fonts, opt) {
         ],
         ui: {
             tester: {
-                editable: true
+                editable: true,
+                label: false
             },
             fontfamily: {
                 label: "Font"
@@ -338,8 +345,8 @@ function Fontsampler(root, fonts, opt) {
                 label: "Direction"
             },
             language: {
-                choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
-                init: "enGb",
+                choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
+                init: "en-Gb",
                 label: "Language"
             },
             opentype: {
@@ -396,15 +403,15 @@ function Fontsampler(root, fonts, opt) {
     function setupUIEvents() {
         // sliders
         this.root.addEventListener("fontsampler.onfontsizechanged", function() {
-            var val = interface.getCSSValue("fontsize")
+            var val = interface.getCssValue("fontsize")
             interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
         })
         this.root.addEventListener("fontsampler.onlineheightchanged", function() {
-            var val = interface.getCSSValue("lineheight")
+            var val = interface.getCssValue("lineheight")
             interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
         })
         this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
-            var val = interface.getCSSValue("letterspacing")
+            var val = interface.getCssValue("letterspacing")
             interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
         })
 
@@ -425,11 +432,11 @@ function Fontsampler(root, fonts, opt) {
         })
 
         // buttongroups
-        this.root.addEventListener("fontsampler.onalignmentclicked", function() {
+        this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
             interface.setInputCss("textAlign", val)
         })
-        this.root.addEventListener("fontsampler.ondirectionclicked", function() {
+        this.root.addEventListener("fontsampler.ondirectionchanged", function() {
             var val = interface.getButtongroupValue("direction")
             interface.setInputAttr("dir", val)
         })
@@ -577,7 +584,7 @@ function Fontsampler(root, fonts, opt) {
         }
 
         this.initalized = true
-        root.className = helpers.addClass("fontsampler-initialized", root.className)
+        helpers.nodeAddClass(root, options.classes.initClass)
 
 
         root.dispatchEvent(new CustomEvent(events.init))
@@ -669,11 +676,80 @@ function addClass(className, classNames) {
     }
 }
 
+function nodeAddClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = addClass(className, node.className)
+
+    return true
+}
+
+function nodeAddClasses(node, classes) {
+    if (!isNode(node) || !Array.isArray(classes) || classes.length < 1) {
+        return false
+    }
+
+    for (var c = 0; c < classes.length; c++) {
+        node.className = addClass(classes[c], node.className)
+    }
+
+    return true
+}
+
+function nodeRemoveClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = pruneClass(className, node.className)
+
+    return true
+}
+
+/**
+ * Really just an approximation of a check
+ * 
+ * @param {*} node 
+ */
+function isNode(node) {
+    return typeof(node) === "object" && node !== null && "nodeType" in node
+}
+
 module.exports = {
-    pruneClass: pruneClass,
-    addClass: addClass
+    nodeAddClass: nodeAddClass,
+    nodeAddClasses: nodeAddClasses,
+    nodeRemoveClass: nodeRemoveClass,
+    isNode: isNode
 }
 },{}],8:[function(_dereq_,module,exports){
+/**
+ * A wrapper around the Fontsampler interface
+ * 
+ * 
+ * Generally, the DOM is structured in such a way:
+ * 
+ * Each nested Array in ´order´ is enclosed in a
+ * 
+ * .fsjs-wrapper
+ * 
+ * In each (optional, e.g. without Array straight output) wrapper one more more:
+ * 
+ *  [data-fsjs-block=_property_].fsjs-block .fsjs-block-_property_ .fsjs-block-type-_type_
+ * 
+ * Nested in each block a variety of sub elements:
+ *      Optional label with:
+ *      [data-for=_property_].fsjs-label
+ *          [data-label-text=_property_].fsjs-label-text
+ *          [data-label-value=_property_].fsjs-label-value (optional)
+ *          [data-label-unit=_property_].fsjs-label-unit (optional)
+ * 
+ *      The actual ui control (input, select, buttongroup)
+ *      [data-fsjs=_property_].fsjs-element-_property_
+ * 
+ */
+
 var UIElements = _dereq_("./uielements")
 var helpers = _dereq_("./helpers")
 var errors = _dereq_("./errors")
@@ -697,17 +773,24 @@ function Interface(_root, fonts, options) {
             "lineheight": "lineHeight",
             "letterspacing": "letterSpacing"
         },
+        blocks = {},
         root = null,
         uifactory = null,
-        uinodes = {},
         originalText = ""
 
     function init() {
         console.debug("Fontsampler.Interface.init()", _root, fonts, options)
 
         root = _root
-        root.className = helpers.addClass(options.rootClass, root.className)
+        helpers.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
+
+        // The fontfamily is just being defined without the options, which
+        // are the fonts passed in. let’s make this transformation behind
+        // the scenes so we can use the re-usable "dropdown" ui
+        options.ui.fontfamily.choices = fonts.map(function(value) {
+            return value.name
+        })
 
         // Before modifying the root node, detect if it is containing only
         // text, and if so, store it to the options for later use
@@ -731,16 +814,16 @@ function Interface(_root, fonts, options) {
         //   appended in the end
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
-            var elementA = parseUIOrderElement(options.order[i])
-            if (elementA) {
+            var elementA = parseOrder(options.order[i])
+            if (helpers.isNode(elementA) && elementA.childNodes.length > 0) {
                 root.appendChild(elementA)
             }
         }
         for (var keyB in options.ui) {
             if (options.ui.hasOwnProperty(keyB)) {
-                if (keyB in uinodes === false) {
-                    var elementB = parseUIOrderElement(options.ui[keyB])
-                    if (elementB) {
+                if (keyB in blocks === false) {
+                    var elementB = parseOrder(options.ui[keyB])
+                    if (helpers.isNode(elementB) && elementB.childNodes.length > 0) {
                         root.appendChild(elementB)
                     }
                 }
@@ -749,9 +832,9 @@ function Interface(_root, fonts, options) {
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
-        for (var keyC in uinodes) {
-            if (uinodes.hasOwnProperty(keyC)) {
-                initNode(keyC, uinodes[keyC], options.ui[keyC])
+        for (var keyC in blocks) {
+            if (blocks.hasOwnProperty(keyC)) {
+                initBlock(keyC)
             }
         }
 
@@ -760,13 +843,13 @@ function Interface(_root, fonts, options) {
             var typeEvents = ["keypress", "keyup", "change", "paste"]
             for (var e in typeEvents) {
                 if (typeEvents.hasOwnProperty(e)) {
-                    uinodes.tester.addEventListener(typeEvents[e], onKey)
+                    blocks.tester.addEventListener(typeEvents[e], onKey)
                 }
             }
         }
 
         // prevent pasting styled content
-        uinodes.tester.addEventListener('paste', function(e) {
+        blocks.tester.addEventListener('paste', function(e) {
             e.preventDefault();
             var text = '';
             if (e.clipboardData || e.originalEvent.clipboardData) {
@@ -789,27 +872,25 @@ function Interface(_root, fonts, options) {
 
     /**
      * Recursively go through an element in the options.order
-     * @param string item
+     * @param string key
      * @param node parent
      */
-    function parseUIOrderElement(item) {
+    function parseOrder(key) {
         var child, wrapper
 
-        if (typeof(item) === "string") {
-            child = parseUIElement(item)
-            if (child === true) {
-                // exists
-            } else if (child) {
-                return child
-            } else {
-                // parsing failed
+        if (typeof(key) === "string") {
+            var block = parseBlock(key)
+            if (block) {
+                blocks[key] = block
             }
-        } else if (Array.isArray(item)) {
-            wrapper = document.createElement("div")
-            wrapper.className = options.wrapperClass
 
-            for (var i = 0; i < item.length; i++) {
-                child = parseUIOrderElement(item[i])
+            return block
+        } else if (Array.isArray(key)) {
+            wrapper = document.createElement("div")
+            wrapper.className = options.classes.wrapperClass
+
+            for (var i = 0; i < key.length; i++) {
+                child = parseOrder(key[i])
                 if (child) {
                     wrapper.appendChild(child)
                 }
@@ -828,110 +909,107 @@ function Interface(_root, fonts, options) {
      * @param string item 
      * @return node || boolean (true = in DOM, false = invalid item)
      */
-    function parseUIElement(item) {
-        if (item in ui === false) {
-            throw new Error(errors.invalidUIItem + item)
+    function parseBlock(key) {
+        if (key in ui === false) {
+            throw new Error(errors.invalidUIItem + key)
         }
 
-        // check if in DOM
-        // validate and hook up
-        var node = getUIItem(item)
-        if (node !== null) {
-            validateNode(item, node, options.ui[item])
-            uinodes[item] = node
+        // check if a block exists
+        // yes > check it has a element
+        //      yes > validate & fix element
+        //          validate & fix block
+        //      no > make block
+        // no > make block
 
-            return true
-        } else if (options.ui[item].render && item in ui === true && item in uinodes === false) {
-            node = createNode(item, options.ui[item])
-            validateNode(item, node, options.ui[item])
-            uinodes[item] = node
+        var block = getBlock(key),
+            element = false,
+            label = false
 
-            return node
+        if (block) {
+            element = getElement(key, block)
+            label = getLabel(key, block)
+
+            if (options.ui[key].label && !label) {
+                label = uifactory.label(opt.label, opt.unit, opt.init, key)
+                block.appendChild(label)
+                sanitizeLabel(label, key)
+            }
+            if (!element) {
+                element = createElement(key)
+                block.appendChild(element)
+                sanitizeElement(element, key)
+            }
+            sanitizeBlock(block, key)
+
+            return block
+        } else if (!block && options.generate) {
+
+            return createBlock(key)
         }
 
         return false
     }
 
-    /**
-     * Create a new UI element 
-     * @param string item 
-     * @param object opt 
-     * @return node
-     */
-    function createNode(item, opt) {
-        // The fontfamily is just being defined without the options, which
-        // are the fonts passed in. let’s make this transformation behind
-        // the scenes so we can use the re-usable "dropdown" ui
-        if (item === "fontfamily") {
-            opt.choices = fonts.map(function(value) {
-                return value.name
-            })
-        }
-
-        var node = uifactory[ui[item]](item, opt),
-            wrapper = document.createElement("div")
+    function createBlock(key) {
+        var block = document.createElement("div"),
+            element = createElement(key),
+            label = false
+            opt = options.ui[key]
 
         if (opt.label) {
-            wrapper.append(uifactory.label(opt.label, opt.unit, opt.init, item))
+            label = uifactory.label(opt.label, opt.unit, opt.init, key)
+            block.append(label)
+            sanitizeLabel(label, key)
         }
-        wrapper.append(node)
-
-        return wrapper
-
+        
+        block.append(element)
+        sanitizeElement(element, key)
+        
+        sanitizeBlock(block, key)
+        
+        return block
     }
 
-    /**
-     * Validate a UI element (as found in the DOM)
-     * @param node node 
-     * @param object opt 
-     * @return boolean
-     */
-    function validateNode(key, node, opt) {
-        // passing uifactory the node will validate the node against the
-        // required options (for those uielements that are implemented to
-        // take a third parameter)
+    function createElement(key) {
+        var element = uifactory[ui[key]](key, options.ui[key])
+        sanitizeElement(element, key)
 
-        // check if the node is itself having the property, of it is nested in a wrapper
-        node = "property" in node.dataset === true ? node : node.querySelector("[data-property]")
-        var uielement = uifactory[ui[key]](key, opt, node),
-            classes = [
-                options.elementClass + "",
-                options.elementClass + "-block-" + key,
-                options.elementClass + "-type-" + ui[key]
-            ]
+        return element
+    }
 
-        for (var c = 0; c < classes.length; c++) {
-            node.className = helpers.addClass(classes[c], node.className)
+    function sanitizeBlock(block, key) {
+        var classes = [
+            options.classes.blockClass,
+            options.classes.blockClass + "-" + key,
+            options.classes.blockClass + "-type-" + ui[key]
+        ]
+
+        helpers.nodeAddClasses(block, classes)
+        block.dataset.fsjsBlock = key
+    }
+
+    function sanitizeElement(element, key) {
+        uifactory[ui[key]](key, options.ui[key], element)
+    }
+
+    function sanitizeLabel(label, key) {
+        var text = label.querySelector("." + options.classes.labelTextClass),
+            value = label.querySelector("." + options.classes.labelValueClass),
+            unit = label.querySelector("." + options.classes.labelUnitClass)
+
+        if (text && text.textContent === "") {
+            text.textContent = opt.label
         }
 
-        if (opt.label) {
-            var labels = root.querySelectorAll("[for='" + key + "']")
-            if (labels.length > 0) {
-                for (var l = 0; l < labels.length; l++) {
-                    var label = labels[l],
-                        text = label.querySelector("." + options.labelTextClass),
-                        value = label.querySelector("." + options.labelValueClass),
-                        unit = label.querySelector("." + options.labelUnitClass)
-
-                    if (text && text.textContent === "") {
-                        text.textContent = opt.label
-                    }
-
-                    if (value && value.textContent === "") {
-                        // If set in already set in DOM the above validate will have set it
-                        value.textContent = uielement.value
-                    }
-
-                    if (unit && unit.textContent === "") {
-                        // If set in already set in DOM the above validate will have set it
-                        unit.textContent = uielement.dataset.unit
-                    }
-
-                }
-            }
+        if (value && value.textContent === "") {
+            // If set in already set in DOM the above validate will have set it
+            value.textContent = uielement.value
         }
 
-        return true
+        if (unit && unit.textContent === "") {
+            // If set in already set in DOM the above validate will have set it
+            unit.textContent = uielement.dataset.unit
+        }
     }
 
     /**
@@ -940,18 +1018,22 @@ function Interface(_root, fonts, options) {
      * @param object opt 
      * @return boolean
      */
-    function initNode(key, node, opt) {
+    function initBlock(key) {
         // TODO set values if passed in and different on node
+        var block = getBlock(key),
+            element = getElement(key, block),
+            type = ui[key],
+            opt = options.ui[key]
 
-        if (ui[key] === "slider") {
-            node.addEventListener("change", onChange)
-            node.val = opt.init
+        if (type === "slider") {
+            element.addEventListener("change", onChange)
+            element.val = opt.init
             setInputCss(keyToCss[key], opt.init + opt.unit)
-        } else if (ui[key] === "dropdown") {
-            node.addEventListener("change", onChange)
-            // TODO
-        } else if (ui[key] === "buttongroup") {
-            var buttons = node.querySelectorAll("[data-choice]")
+        } else if (type === "dropdown") {
+            element.addEventListener("change", onChange)
+            // TODO init values to tester
+        } else if (type === "buttongroup") {
+            var buttons = element.querySelectorAll("[data-choice]")
 
             if (buttons.length > 0) {
                 for (var b = 0; b < buttons.length; b++) {
@@ -959,25 +1041,37 @@ function Interface(_root, fonts, options) {
                 }
             }
 
-            // TODO 
-        } else if (ui[key] === "checkboxes") {
-            node.addEventListener("change", onChange)
+            // TODO init values to tester
+        } else if (type === "checkboxes") {
+            var checkboxes = element.querySelectorAll("[data-feature]")
+            if (checkboxes.length > 0) {
+                for (var c = 0; c < checkboxes.length; c++) {
+                    checkboxes[c].addEventListener("change", onCheck)
+                }
+            }
 
-            // TODO
+            // TODO init values to tester
         }
 
         return true
     }
 
-    /**
-     * Convenience helper to return a DOM element fetching one of the Fontsampler
-     * UI elements
-     * 
-     * @param string item 
-     * @return node
-     */
-    function getUIItem(item) {
-        return root.querySelector("[data-property='" + item + "']")
+    function getElement(key, node) {
+        if (typeof(node) === "undefined") {
+            node = root
+        }
+        var element = root.querySelector("[data-fsjs='" + key + "']")
+
+        return helpers.isNode(element) ? element : false
+    }
+
+    function getBlock(key, node) {
+        if (typeof(node) === "undefined") {
+            node = root
+        }
+        var block = root.querySelector("[data-fsjs-block='" + key + "']")
+
+        return helpers.isNode(block) ? block : false
     }
 
     /**
@@ -986,10 +1080,16 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        var property = e.target.dataset.property,
-            customEvent = new CustomEvent("fontsampler.on" + property + "changed")
+        var property = e.target.dataset.fsjs
 
-        root.dispatchEvent(customEvent)
+        sendEvent(property)
+    }
+
+    function onCheck() {
+        // Currently this is only used for opentype checkboxes
+        var property = "opentype"
+
+        sendEvent(property)
     }
 
     /**
@@ -998,19 +1098,22 @@ function Interface(_root, fonts, options) {
      */
     function onClick(e) {
         var parent = e.currentTarget.parentNode,
-            property = parent.dataset.property,
-            customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
-            buttons = parent.querySelectorAll("[data-choice]"),
-            currentClass = "fontsampler-buttongroup-selected"
+            property = parent.dataset.fsjs,
+            // customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
+            buttons = parent.querySelectorAll("[data-choice]")
 
         if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
-                buttons[b].className = helpers.pruneClass(currentClass, buttons[b].className)
+                helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelected)
             }
-            e.currentTarget.className = helpers.addClass(currentClass, e.currentTarget.className)
+            helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelected)
 
-            root.dispatchEvent(customEvent)
+            sendEvent(property)
         }
+    }
+
+    function sendEvent(type) {
+        root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
     }
 
     function onKey(event) {
@@ -1023,12 +1126,12 @@ function Interface(_root, fonts, options) {
         } else {
             // allow other events, filter any html with $.text() and replace linebreaks
             // TODO fix paste event from setting the caret to the front of the non-input non-textarea
-            var text = uinodes.tester.textContent,
+            var text = blocks.tester.textContent,
                 hasLinebreaks = text.indexOf("\n")
 
             if (-1 !== hasLinebreaks) {
-                uinodes.tester.innerHTML(text.replace('/\n/gi', ''));
-                selection.setCaret(uinodes.tester, uinodes.tester.textContent.length, 0);
+                blocks.tester.innerHTML(text.replace('/\n/gi', ''));
+                selection.setCaret(blocks.tester, blocks.tester.textContent.length, 0);
             }
         }
     }
@@ -1038,7 +1141,7 @@ function Interface(_root, fonts, options) {
      * @param {*} property 
      */
     function getValue(property) {
-        var element = getUIItem(property)
+        var element = getElement(property)
 
         if (element) {
             return element.value
@@ -1051,18 +1154,18 @@ function Interface(_root, fonts, options) {
      * Get a UI element value with CSS unit
      * @param {*} property 
      */
-    function getCSSValue(property) {
-        var element = getUIItem(property)
+    function getCssValue(property) {
+        var element = getElement(property)
 
-        return element.value + element.dataset.unit
+        return element ? element.value + element.dataset.unit : ""
     }
 
     function getOpentype() {
-        if (!uinodes.opentype) {
+        if (!blocks.opentype) {
             return false
         }
 
-        var features = uinodes.opentype.querySelectorAll("[data-feature]")
+        var features = blocks.opentype.querySelectorAll("[data-feature]")
 
         if (features) {
             var re = {}
@@ -1076,14 +1179,18 @@ function Interface(_root, fonts, options) {
         }
     }
 
-    function getButtongroupValue(property) {
-        var element = getUIItem(property),
-            selected = element.querySelector(".fontsampler-buttongroup-selected")
+    function getButtongroupValue(key) {
+        var element = getElement(key),
+            selected
+
+        if (element) {
+            selected = element.querySelector("." + options.classes.buttonSelected)
+        }
 
         if (selected) {
             return selected.dataset.choice
         } else {
-            return null
+            return ""
         }
     }
 
@@ -1113,56 +1220,44 @@ function Interface(_root, fonts, options) {
      * @param {*} val 
      */
     function setInputCss(attr, val) {
-        uinodes.tester.style[attr] = val
-        var key = getKeyForCssAttr(attr)
-
-        if (key && key in ui) {
-            if (ui[key] === "slider") {
-                if (val !== getCSSValue(key)) {
-                    var value = getValue(attr)
-                    if (value) {
-                        uinodes[key].value = value
-                    }
-                }
-            }
-        }
+        blocks.tester.style[attr] = val
     }
 
     function setInputAttr(attr, val) {
-        uinodes.tester.setAttribute(attr, val)
+        blocks.tester.setAttribute(attr, val)
     }
 
     function setInputOpentype(features) {
-        var parsed = []
+        var parsed = [],
+            val
         for (var key in features) {
             if (features.hasOwnProperty(key)) {
                 parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }
         }
-        var val = parsed.join(",")
+        val = parsed.join(",")
 
-        uinodes.tester.style["font-feature-settings"] = val
+        blocks.tester.style["font-feature-settings"] = val
     }
 
     function setInputText(text) {
-        if (text && uinodes.tester) {
-            uinodes.tester.textContent = text
+        if (text && blocks.tester) {
+            blocks.tester.textContent = text
         }
     }
 
-    // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
         if (status === true) {
-            root.className = helpers.addClass(classString, root.className)
+            helpers.nodeAddClass(root, classString)
         } else if (status === false) {
-            root.className = helpers.pruneClass(classString, root.className)
+            helpers.nodeRemoveClass(root, classString)
         }
     }
 
     return {
         init: init,
         getValue: getValue,
-        getCSSValue: getCSSValue,
+        getCssValue: getCssValue,
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,
         getCssAttrForKey: getCssAttrForKey,
@@ -1326,6 +1421,8 @@ function Selection () {
 
 module.exports = Selection
 },{}],11:[function(_dereq_,module,exports){
+
+var helpers = _dereq_("./helpers")
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
@@ -1340,20 +1437,21 @@ function UIElements(root, options) {
             text = document.createElement("span"),
             val, unit
 
-        label.setAttribute("for", relatedInput)
+        label.dataset.for = relatedInput
+        helpers.nodeAddClass(label, options.classes.labelClass)
 
-        text.className = options.labelTextClass
+        text.className = options.classes.labelTextClass
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
         if (typeof(labelUnit) === "string" && labelValue !== "") {
             val = document.createElement("span")
-            val.className = options.labelValueClass
+            val.className = options.classes.labelValueClass
             val.appendChild(document.createTextNode(labelValue))
             label.appendChild(val)
 
             unit = document.createElement("span")
-            unit.className = options.labelUnitClass
+            unit.className = options.classes.labelUnitClass
             unit.appendChild(document.createTextNode(labelUnit))
             label.appendChild(unit)
         }
@@ -1362,7 +1460,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = typeof(node) === "undefined" || node === null ? document.createElement("input") : node
+        var input = helpers.isNode(node) ? node : document.createElement("input")
 
         var attributes = {
             type: "range",
@@ -1385,14 +1483,14 @@ function UIElements(root, options) {
             input.dataset.init = opt.init
         }
 
-        input.dataset.property = key
+        input.dataset.fsjs = key
 
         return input
     }
 
     function dropdown(key, opt) {
         var dropdown = document.createElement("select")
-        dropdown.dataset.property = key
+        dropdown.dataset.fsjs = key
 
         for (var o in opt.choices) {
             var option = document.createElement("option"),
@@ -1418,7 +1516,7 @@ function UIElements(root, options) {
 
         setMissingAttributes(tester, attr)
 
-        tester.dataset.property = key
+        tester.dataset.fsjs = key
 
         // If the original root element was a single DOM element with some text, copy that
         // text into the tester
@@ -1435,6 +1533,8 @@ function UIElements(root, options) {
     function buttongroup(key, opt) {
         var group = document.createElement("div")
 
+        group.dataset.fsjs = key
+
         for (var o in opt.choices) {
             var button = document.createElement("button"),
                 choice = parseChoice(opt.choices[o])
@@ -1442,12 +1542,10 @@ function UIElements(root, options) {
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
             if (opt.init === choice.val) {
-                button.className = "fontsampler-buttongroup-selected"
+                button.className = options.classes.buttonSelected
             }
             group.appendChild(button)
         }
-
-        group.dataset.property = key
 
         return group
     }
@@ -1455,7 +1553,7 @@ function UIElements(root, options) {
     function checkboxes(key, opt) {
         var group = document.createElement("div")
 
-        group.dataset.property = key
+        group.dataset.fsjs = key
 
         for (var o in opt.choices) {
             var choice = parseChoice(opt.choices[o]),
@@ -1528,5 +1626,5 @@ function UIElements(root, options) {
 }
 
 module.exports = UIElements
-},{}]},{},[6])(6)
+},{"./helpers":7}]},{},[6])(6)
 });

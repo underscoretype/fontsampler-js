@@ -1,3 +1,5 @@
+
+var helpers = require("./helpers")
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
@@ -12,20 +14,21 @@ function UIElements(root, options) {
             text = document.createElement("span"),
             val, unit
 
-        label.setAttribute("for", relatedInput)
+        label.dataset.for = relatedInput
+        helpers.nodeAddClass(label, options.classes.labelClass)
 
-        text.className = options.labelTextClass
+        text.className = options.classes.labelTextClass
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
         if (typeof(labelUnit) === "string" && labelValue !== "") {
             val = document.createElement("span")
-            val.className = options.labelValueClass
+            val.className = options.classes.labelValueClass
             val.appendChild(document.createTextNode(labelValue))
             label.appendChild(val)
 
             unit = document.createElement("span")
-            unit.className = options.labelUnitClass
+            unit.className = options.classes.labelUnitClass
             unit.appendChild(document.createTextNode(labelUnit))
             label.appendChild(unit)
         }
@@ -34,7 +37,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = typeof(node) === "undefined" || node === null ? document.createElement("input") : node
+        var input = helpers.isNode(node) ? node : document.createElement("input")
 
         var attributes = {
             type: "range",
@@ -57,14 +60,14 @@ function UIElements(root, options) {
             input.dataset.init = opt.init
         }
 
-        input.dataset.property = key
+        input.dataset.fsjs = key
 
         return input
     }
 
     function dropdown(key, opt) {
         var dropdown = document.createElement("select")
-        dropdown.dataset.property = key
+        dropdown.dataset.fsjs = key
 
         for (var o in opt.choices) {
             var option = document.createElement("option"),
@@ -90,7 +93,7 @@ function UIElements(root, options) {
 
         setMissingAttributes(tester, attr)
 
-        tester.dataset.property = key
+        tester.dataset.fsjs = key
 
         // If the original root element was a single DOM element with some text, copy that
         // text into the tester
@@ -107,6 +110,8 @@ function UIElements(root, options) {
     function buttongroup(key, opt) {
         var group = document.createElement("div")
 
+        group.dataset.fsjs = key
+
         for (var o in opt.choices) {
             var button = document.createElement("button"),
                 choice = parseChoice(opt.choices[o])
@@ -114,12 +119,10 @@ function UIElements(root, options) {
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
             if (opt.init === choice.val) {
-                button.className = "fontsampler-buttongroup-selected"
+                button.className = options.classes.buttonSelected
             }
             group.appendChild(button)
         }
-
-        group.dataset.property = key
 
         return group
     }
@@ -127,7 +130,7 @@ function UIElements(root, options) {
     function checkboxes(key, opt) {
         var group = document.createElement("div")
 
-        group.dataset.property = key
+        group.dataset.fsjs = key
 
         for (var o in opt.choices) {
             var choice = parseChoice(opt.choices[o]),

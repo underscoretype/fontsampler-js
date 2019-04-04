@@ -45,14 +45,20 @@ function Fontsampler(root, fonts, opt) {
         multiline: true,
         lazyload: false,
         generate: false,
-        rootClass: "fontsampler",
-        loadingClass: "loading",
-        preloadingClass: "preloading",
-        wrapperClass: "fontsampler-ui-wrapper",
-        labelTextClass: "fontsampler-label-text",
-        labelValueClass: "fontsampler-label-value",
-        labelUnitClass: "fontsampler-label-unit",
-        elementClass: "fontsampler-ui",
+        classes: {
+            rootClass: "fontsamplerjs",
+            initClass: "fsjs-initialized",
+            loadingClass: "fsjs-loading",
+            preloadingClass: "fsjs-preloading",
+            wrapperClass: "fsjs-wrapper",
+            blockClass: "fsjs-block",
+            elementClass: "fsjs-element",
+            labelClass: "fsjs-label",
+            labelTextClass: "fsjs-label-text",
+            labelValueClass: "fsjs-label-value",
+            labelUnitClass: "fsjs-label-unit",
+            buttonSelected: "fsjs-button-selected",
+        },
         order: [
             ["fontsize", "lineheight", "letterspacing"],
             ["fontfamily", "language"],
@@ -61,7 +67,8 @@ function Fontsampler(root, fonts, opt) {
         ],
         ui: {
             tester: {
-                editable: true
+                editable: true,
+                label: false
             },
             fontfamily: {
                 label: "Font"
@@ -101,8 +108,8 @@ function Fontsampler(root, fonts, opt) {
                 label: "Direction"
             },
             language: {
-                choices: ["enGB|English", "deDe|Deutsch", "nlNL|Dutch"],
-                init: "enGb",
+                choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
+                init: "en-Gb",
                 label: "Language"
             },
             opentype: {
@@ -159,15 +166,15 @@ function Fontsampler(root, fonts, opt) {
     function setupUIEvents() {
         // sliders
         this.root.addEventListener("fontsampler.onfontsizechanged", function() {
-            var val = interface.getCSSValue("fontsize")
+            var val = interface.getCssValue("fontsize")
             interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
         })
         this.root.addEventListener("fontsampler.onlineheightchanged", function() {
-            var val = interface.getCSSValue("lineheight")
+            var val = interface.getCssValue("lineheight")
             interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
         })
         this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
-            var val = interface.getCSSValue("letterspacing")
+            var val = interface.getCssValue("letterspacing")
             interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
         })
 
@@ -188,11 +195,11 @@ function Fontsampler(root, fonts, opt) {
         })
 
         // buttongroups
-        this.root.addEventListener("fontsampler.onalignmentclicked", function() {
+        this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
             interface.setInputCss("textAlign", val)
         })
-        this.root.addEventListener("fontsampler.ondirectionclicked", function() {
+        this.root.addEventListener("fontsampler.ondirectionchanged", function() {
             var val = interface.getButtongroupValue("direction")
             interface.setInputAttr("dir", val)
         })
@@ -340,7 +347,7 @@ function Fontsampler(root, fonts, opt) {
         }
 
         this.initalized = true
-        root.className = helpers.addClass("fontsampler-initialized", root.className)
+        helpers.nodeAddClass(root, options.classes.initClass)
 
 
         root.dispatchEvent(new CustomEvent(events.init))

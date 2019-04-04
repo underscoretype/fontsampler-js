@@ -1,38 +1,38 @@
 /* The bare minimum styling applied to all demo Fontsamplers */
 
 // A fairly simple approach to spacing out all the UI elements
-> .fontsampler-ui-wrapper {
+> .fsjs-wrapper {
     display: flex;
     justify-content: space-between;
 }
 
-.fontsampler-ui-block-tester {
+.fsjs-block-tester {
     display: block;
 }
 
 // All UI elements
-.fontsampler-ui {
+.fsjs-block {
     box-sizing: border-box;
     padding: $elementPadding;
     margin: $elementMargin;
     width: 100%;
 }
 
-.fontsampler-ui-type-slider {
-    label {
+.fsjs-block-type-slider {
+    .fsjs-label {
         padding: 5px 0;
         display: flex;
         justify-content: flex-end;
         width: 100%;
-    }
 
-    // Only for labels with Text, value & unit
-    label span:first-child {
-        margin-right: auto;
+        // Only for labels with Text, value & unit
+        span:first-child {
+            margin-right: auto;
+        }
     }
 }
 
-.fontsampler-ui-block-opentype label {
+.fsjs-block-opentype .fsjs-label {
     display: block;
     justify-content: flex-start;
 }

@@ -14,25 +14,25 @@ $elementPadding: 0 5px;
 $elementMargin: 5px;
 
 // Scope all styles for fontsamplers with skin only
-.fontsampler-skin {
+.fsjs-skin {
 
     // Handle basic loading states to avoid flash of unstyle text
     transition: opacity 0.2s ease-out;
     opacity: 0;
 
     // Show fontsampler when initialized
-    &.fontsampler-initialized {
+    &.fsjs-initialized {
         opacity: 1;
         display: block;
     }
 
 
-    .fontsampler-ui-block-tester {
+    .fsjs-block-tester {
         transition: opacity 0.2s ease-out;
         opacity: 1;
     }
 
-    &.loading .fontsampler-ui-block-tester {
+    &.loading .fsjs-block-tester {
         opacity: 0;
     }
 
@@ -48,4 +48,4 @@ $elementMargin: 5px;
     @import "_choices";
     @import "_rangeslider";
 
-    }
+}

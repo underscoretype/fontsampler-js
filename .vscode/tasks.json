@@ -8,6 +8,18 @@
         "auto": true
       },
       {
+        "label": "npm run js-skin",
+        "type": "npm",
+        "script": "js-skin",
+        "auto": true
+      },
+      {
+        "label": "npm run scss",
+        "type": "npm",
+        "script": "scss",
+        "auto": true
+      },
+      {
         "label": "npm run start",
         "type": "npm",
         "script": "start",

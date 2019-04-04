@@ -8041,12 +8041,57 @@ function addClass(className, classNames) {
         } else {
             return className
         }
+    } else {
+        return classNames
     }
 }
 
+function nodeAddClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = addClass(className, node.className)
+
+    return true
+}
+
+function nodeAddClasses(node, classes) {
+    if (!isNode(node) || !Array.isArray(classes) || classes.length < 1) {
+        return false
+    }
+
+    for (var c = 0; c < classes.length; c++) {
+        node.className = addClass(classes[c], node.className)
+    }
+
+    return true
+}
+
+function nodeRemoveClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = pruneClass(className, node.className)
+
+    return true
+}
+
+/**
+ * Really just an approximation of a check
+ * 
+ * @param {*} node 
+ */
+function isNode(node) {
+    return typeof(node) === "object" && node !== null && "nodeType" in node
+}
+
 module.exports = {
-    pruneClass: pruneClass,
-    addClass: addClass
+    nodeAddClass: nodeAddClass,
+    nodeAddClasses: nodeAddClasses,
+    nodeRemoveClass: nodeRemoveClass,
+    isNode: isNode
 }
 },{}],5:[function(_dereq_,module,exports){
 var rangeSlider = _dereq_("../node_modules/rangeslider-pure/dist/range-slider")
@@ -8059,16 +8104,16 @@ function Skin(FS) {
     FS.registerEventhandler(events.init, init)
 
     function init() {
-        console.log("Skin.init()", FS, FS.initialized)
+        console.debug("Skin.init()", FS, FS.initialized)
 
         if (FS.initialized === true) {
             console.error(FS.root)
             throw new Error("FontsamplerSkin: Cannot apply skin to a Fontsampler that is already initialized.")
         }
 
-        FS.root.className = helpers.addClass("fontsampler-skin", FS.root.className)
+        helpers.nodeAddClass(FS.root, "fsjs-skin")
 
-        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-property]")
+        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs]")
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,
@@ -8077,7 +8122,7 @@ function Skin(FS) {
             })
         }
 
-        var selectInputs = FS.root.querySelectorAll("select[data-property]")
+        var selectInputs = FS.root.querySelectorAll("select[data-fsjs]")
         if (selectInputs.length) {
             for (var i in selectInputs) {
                 if (selectInputs.hasOwnProperty(i)) {
@@ -8097,10 +8142,10 @@ function Skin(FS) {
     }
 
     function updateSlider(position /*, value*/) {
-        var property = this.element.dataset.property,
-            label = this.element.parentNode.querySelector("label[for='" + property + "'] .fontsampler-label-value")
+        var key = this.element.dataset.fsjs,
+            label = FS.root.querySelector("[data-for='" + key + "'] .fsjs-label-value")
 
-        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + property + "changed"))
+        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + key + "changed"))
 
         if (label) {
             label.textContent = position

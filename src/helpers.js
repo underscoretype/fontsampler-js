@@ -52,7 +52,50 @@ function addClass(className, classNames) {
     }
 }
 
+function nodeAddClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = addClass(className, node.className)
+
+    return true
+}
+
+function nodeAddClasses(node, classes) {
+    if (!isNode(node) || !Array.isArray(classes) || classes.length < 1) {
+        return false
+    }
+
+    for (var c = 0; c < classes.length; c++) {
+        node.className = addClass(classes[c], node.className)
+    }
+
+    return true
+}
+
+function nodeRemoveClass(node, className) {
+    if (!isNode(node) || typeof(className) !== "string") {
+        return false
+    }
+
+    node.className = pruneClass(className, node.className)
+
+    return true
+}
+
+/**
+ * Really just an approximation of a check
+ * 
+ * @param {*} node 
+ */
+function isNode(node) {
+    return typeof(node) === "object" && node !== null && "nodeType" in node
+}
+
 module.exports = {
-    pruneClass: pruneClass,
-    addClass: addClass
+    nodeAddClass: nodeAddClass,
+    nodeAddClasses: nodeAddClasses,
+    nodeRemoveClass: nodeRemoveClass,
+    isNode: isNode
 }

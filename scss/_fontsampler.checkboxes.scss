@@ -1,55 +1,55 @@
 $checkboxSize: 10px;
 $checkboxPadding: 4px;
 
-.fontsampler-ui-type-checkboxes {
-    [data-property] {
-        label {
-            cursor: pointer;
-            padding: 5px 0;
+.fsjs-block-type-checkboxes {
+    [data-fsjs] label {
+        cursor: pointer;
+        padding: 5px 0;
+        display: block;
 
-            &:hover,
-            &:focus {
-                input[type=checkbox] + span:before {
-                    background: $bgColorHover;
-                }
-            }
-        }
-
-        input[type=checkbox] {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            opacity: 0;
-        }
-
-        input[type=checkbox] + span {
-            position: relative;
-            padding-left: $checkboxSize * 1.5 + $checkboxPadding * 2;
-
-            &:before,
-            &:after {
-                content: " ";
-                display: block;
-                border: $borderWidth solid $baseColor;
-                border-radius: $borderRadius;
-                position: absolute;
-                left: 0;
-                top: -$checkboxPadding/2;
-                padding: $checkboxPadding;
-                height: $checkboxSize;
-                width: $checkboxSize;
-            }
-        }
-
-        input[type=checkbox]:checked + span {
-            &:after {
-                border-radius: 0;
-                background: $baseColor;
-                padding: 0;
-                top: -$checkboxPadding/2 + $checkboxPadding;
-                left: $checkboxPadding;
+        &:hover,
+        &:focus {
+            input[type=checkbox] + span:before {
+                background: $bgColorHover;
             }
         }
     }
+
+    input[type=checkbox] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        opacity: 0;
+    }
+
+    input[type=checkbox] + span {
+        position: relative;
+        padding-left: $checkboxSize * 1.5 + $checkboxPadding * 2;
+
+        &:before,
+        &:after {
+            content: " ";
+            display: block;
+            border: $borderWidth solid $baseColor;
+            border-radius: $borderRadius;
+            position: absolute;
+            left: 0;
+            top: -$checkboxPadding/2;
+            padding: $checkboxPadding;
+            height: $checkboxSize;
+            width: $checkboxSize;
+        }
+    }
+
+    input[type=checkbox]:checked + span {
+        &:after {
+            border-radius: 0;
+            background: $baseColor;
+            padding: 0;
+            top: -$checkboxPadding/2 + $checkboxPadding;
+            left: $checkboxPadding;
+        }
+    }
+
 }
