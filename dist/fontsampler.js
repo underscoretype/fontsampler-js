@@ -836,7 +836,7 @@ function Interface(_root, fonts, options) {
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
-        if (node) {
+        if (node !== null) {
             validateNode(item, node, options.ui[item])
             uinodes[item] = node
 
@@ -890,7 +890,10 @@ function Interface(_root, fonts, options) {
         // passing uifactory the node will validate the node against the
         // required options (for those uielements that are implemented to
         // take a third parameter)
-        var uielement = uifactory[ui[key]](key, opt, node.querySelector("[data-property]")),
+
+        // check if the node is itself having the property, of it is nested in a wrapper
+        node = "property" in node.dataset === true ? node : node.querySelector("[data-property]")
+        var uielement = uifactory[ui[key]](key, opt, node),
             classes = [
                 options.elementClass + "",
                 options.elementClass + "-block-" + key,
@@ -1369,19 +1372,12 @@ function UIElements(root, options) {
         }
 
         input.setAttribute("autocomplete", "off")
-        for (var a in attributes) {
-            if (attributes.hasOwnProperty(a)) {
-                if (!input.hasAttribute(a)) {
-                    input.setAttribute(a, attributes[a])
-                }
-            }
-        }
+        setMissingAttributes(input, attributes)
 
         if (typeof(input.val) === "undefined") {
             input.value = opt.init
         }
 
-    
         if ("unit" in input.dataset === false) {
             input.dataset.unit = opt.unit
         }
@@ -1410,19 +1406,18 @@ function UIElements(root, options) {
         return dropdown
     }
 
-    function textfield(key, opt) {
-        var tester = document.createElement("div"),
+    function textfield(key, opt, node) {
+        var tester = typeof(node) === "undefined" || node === null ? document.createElement("div") : node,
             attr = {
-                "autocomplete": "off",
-                "autocorrect": "off",
-                "autocapitalize": "off",
-                "spellcheck": "false",
-                "contenteditable": opt.editable
+                autocomplete: "off",
+                autocorrect: "off",
+                autocapitalize: "off",
+                spellcheck: "false",
+                contenteditable: opt.editable
             }
 
-        for (var a in attr) {
-            tester.setAttribute(a, attr[a])
-        }
+        setMissingAttributes(tester, attr)
+
         tester.dataset.property = key
 
         // If the original root element was a single DOM element with some text, copy that
@@ -1459,7 +1454,7 @@ function UIElements(root, options) {
 
     function checkboxes(key, opt) {
         var group = document.createElement("div")
-            
+
         group.dataset.property = key
 
         for (var o in opt.choices) {
@@ -1467,7 +1462,6 @@ function UIElements(root, options) {
                 label = document.createElement("label"),
                 checkbox = document.createElement("input"),
                 text = document.createElement("span")
-
 
             checkbox.setAttribute("type", "checkbox")
             checkbox.dataset.feature = choice.val
@@ -1506,6 +1500,20 @@ function UIElements(root, options) {
         return {
             val: val,
             text: text
+        }
+    }
+
+    function setMissingAttributes(node, attributes) {
+        if (typeof(node) === "undefined" || node === null || typeof(attributes) !== "object") {
+            return
+        }
+
+        for (var a in attributes) {
+            if (attributes.hasOwnProperty(a)) {
+                if (!node.hasAttribute(a)) {
+                    node.setAttribute(a, attributes[a])
+                }
+            }
         }
     }
 

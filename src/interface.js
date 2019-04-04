@@ -160,7 +160,7 @@ function Interface(_root, fonts, options) {
         // check if in DOM
         // validate and hook up
         var node = getUIItem(item)
-        if (node) {
+        if (node !== null) {
             validateNode(item, node, options.ui[item])
             uinodes[item] = node
 
@@ -214,7 +214,10 @@ function Interface(_root, fonts, options) {
         // passing uifactory the node will validate the node against the
         // required options (for those uielements that are implemented to
         // take a third parameter)
-        var uielement = uifactory[ui[key]](key, opt, node.querySelector("[data-property]")),
+
+        // check if the node is itself having the property, of it is nested in a wrapper
+        node = "property" in node.dataset === true ? node : node.querySelector("[data-property]")
+        var uielement = uifactory[ui[key]](key, opt, node),
             classes = [
                 options.elementClass + "",
                 options.elementClass + "-block-" + key,
