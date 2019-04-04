@@ -102,6 +102,7 @@ function UIElements(root, options) {
 
         // If the original root element was a single DOM element with some text, copy that
         // text into the tester
+        // TODO move this to interface and on tester node init
         if (options.initialText) {
             tester.append(document.createTextNode(options.initialText))
         } else if (!options.initialText && options.originalText) {

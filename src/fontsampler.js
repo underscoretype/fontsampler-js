@@ -369,6 +369,10 @@ function Fontsampler(root, fonts, opt) {
         }
     }
 
+    this.setText = function (text) {
+        interface.setInputText(text)
+    }
+
     return this
 }
 

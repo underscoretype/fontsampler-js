@@ -465,6 +465,12 @@ function Interface(_root, fonts, options) {
         uinodes.tester.style["font-feature-settings"] = val
     }
 
+    function setInputText(text) {
+        if (text && uinodes.tester) {
+            uinodes.tester.textContent = text
+        }
+    }
+
     // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
         if (status === true) {
@@ -485,6 +491,7 @@ function Interface(_root, fonts, options) {
         setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,
+        setInputText: setInputText,
         setStatusClass: setStatusClass
     }
 }

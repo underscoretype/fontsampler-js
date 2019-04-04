@@ -606,6 +606,10 @@ function Fontsampler(root, fonts, opt) {
         }
     }
 
+    this.setText = function (text) {
+        interface.setInputText(text)
+    }
+
     return this
 }
 
@@ -1135,6 +1139,12 @@ function Interface(_root, fonts, options) {
         uinodes.tester.style["font-feature-settings"] = val
     }
 
+    function setInputText(text) {
+        if (text && uinodes.tester) {
+            uinodes.tester.textContent = text
+        }
+    }
+
     // TODO use helper.pruneClass
     function setStatusClass(classString, status) {
         if (status === true) {
@@ -1155,6 +1165,7 @@ function Interface(_root, fonts, options) {
         setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,
+        setInputText: setInputText,
         setStatusClass: setStatusClass
     }
 }
@@ -1414,6 +1425,7 @@ function UIElements(root, options) {
 
         // If the original root element was a single DOM element with some text, copy that
         // text into the tester
+        // TODO move this to interface and on tester node init
         if (options.initialText) {
             tester.append(document.createTextNode(options.initialText))
         } else if (!options.initialText && options.originalText) {
