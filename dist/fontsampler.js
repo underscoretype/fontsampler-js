@@ -664,6 +664,8 @@ function addClass(className, classNames) {
         } else {
             return className
         }
+    } else {
+        return classNames
     }
 }
 
