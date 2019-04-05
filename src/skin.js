@@ -1,10 +1,10 @@
 var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
-var Choices = require("../node_modules/choices.js/public/assets/scripts/choices")
+var Dropkick = require("../node_modules/dropkickjs/dist/dropkick").default
 var events = require("./events")
 var helpers = require("./helpers")
 
 function Skin(FS) {
-    
+
     FS.registerEventhandler(events.init, init)
 
     function init() {
@@ -30,14 +30,8 @@ function Skin(FS) {
         if (selectInputs.length) {
             for (var i in selectInputs) {
                 if (selectInputs.hasOwnProperty(i)) {
-                    var element = selectInputs[i]
-                    new Choices(element, {
-                        searchEnabled: false,
-                        searchChoices: false,
-                        maxItemCount: 1,
-                        itemSelectText: "",
-                        shouldSort: false,
-                        shouldSortItems: false
+                    new Dropkick(selectInputs[i], {
+                        mobile: true
                     })
                 }
 
@@ -45,7 +39,7 @@ function Skin(FS) {
         }
     }
 
-    function updateSlider(position /*, value*/) {
+    function updateSlider(position /*, value*/ ) {
         var key = this.element.dataset.fsjs,
             label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
 
@@ -58,4 +52,4 @@ function Skin(FS) {
 
 }
 
-module.exports = Skin 
+module.exports = Skin

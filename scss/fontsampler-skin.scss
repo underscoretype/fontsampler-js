@@ -48,7 +48,8 @@ $elementMargin: 5px;
     @import "_fontsampler.checkboxes";
 
     // Overwrite included libraries’ and polyfill’s styling
-    @import "_choices";
+    // @import "_choices";
+    @import "_dropkick";
     @import "_rangeslider";
 
 }

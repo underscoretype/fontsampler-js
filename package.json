@@ -29,13 +29,16 @@
     "dependencies": {
         "choices.js": "^7.0.0",
         "derequire": "^2.0.6",
+        "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
         "rangeslider-pure": "^0.4.7",
+        "vanilla-js-dropdown": "^2.1.3",
         "woff2-feature-test": "^1.0.3"
     },
     "devDependencies": {
         "browserify": "^16.2.3",
+        "browserify-global-shim": "^1.0.3",
         "http-server": "^0.11.1",
         "uglifyjs": "^2.4.11"
     }
