@@ -1,3 +1,21 @@
+.fsjs-button {
+    background: $bgColor;
+    border: $borderWidth solid $borderColor;
+    border-radius: $borderRadius;
+    cursor: pointer;
+    flex-grow: 1;
+    font-family: inherit;
+    font-size: inherit;
+    font-style: inherit;
+    line-height: $buttonHeight;
+    padding: $buttonPadding;
+
+    &:hover,
+    &:focus {
+        background: $bgColorHover;
+    }
+}
+
 .fsjs-block-type-buttongroup {
     
     & > [data-property] {
@@ -5,21 +23,9 @@
     }
 
     button {
-        background: $bgColor;
-        border: $borderWidth solid $borderColor;
-        cursor: pointer;
-        flex-grow: 1;
-        font-family: inherit;
-        font-size: inherit;
-        font-style: inherit;
-        line-height: 2em;
-        padding: 0.25em 0.5em;
-
-        &:hover,
-        &:focus {
-            background: $bgColorHover;
-        }
-
+        @extend .fsjs-button;
+        border-radius: 0;
+        
         &:first-of-type {
             border-top-left-radius: $borderRadius;
             border-bottom-left-radius: $borderRadius;

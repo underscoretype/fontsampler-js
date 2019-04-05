@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .fsjs-skin {
   transition: opacity 0.2s ease-out;
   opacity: 0;
@@ -31,17 +32,23 @@
 .fsjs-skin .fsjs-block {
   box-sizing: border-box;
   padding: 0 5px;
+  position: relative;
   margin: 5px;
   width: 100%;
 }
+.fsjs-skin .fsjs-label {
+  line-height: 1.5em;
+}
 .fsjs-skin .fsjs-block-type-slider .fsjs-label {
-  padding: 5px 0;
   display: flex;
   justify-content: flex-end;
   width: 100%;
 }
 .fsjs-skin .fsjs-block-type-slider .fsjs-label span:first-child {
   margin-right: auto;
+}
+.fsjs-skin .fsjs-block-type-slider .fsjs-label .fsjs-label-unit:before {
+  content: " ";
 }
 .fsjs-skin .fsjs-block-opentype .fsjs-label {
   display: block;
@@ -50,22 +57,26 @@
 .fsjs-skin [contenteditable] {
   outline: none;
 }
-.fsjs-skin .fsjs-block-type-buttongroup > [data-property] {
-  display: flex;
-}
-.fsjs-skin .fsjs-block-type-buttongroup button {
+.fsjs-skin .fsjs-button, .fsjs-skin .fsjs-block-type-buttongroup button {
   background: #FDFDFD;
   border: 1px solid #CCC;
+  border-radius: 2px;
   cursor: pointer;
   flex-grow: 1;
   font-family: inherit;
   font-size: inherit;
   font-style: inherit;
   line-height: 2em;
-  padding: 0.25em 0.5em;
+  padding: 0.1em 0.5em 0;
 }
-.fsjs-skin .fsjs-block-type-buttongroup button:hover, .fsjs-skin .fsjs-block-type-buttongroup button:focus {
+.fsjs-skin .fsjs-button:hover, .fsjs-skin .fsjs-block-type-buttongroup button:hover, .fsjs-skin .fsjs-button:focus, .fsjs-skin .fsjs-block-type-buttongroup button:focus {
   background: #f0f0f0;
+}
+.fsjs-skin .fsjs-block-type-buttongroup > [data-property] {
+  display: flex;
+}
+.fsjs-skin .fsjs-block-type-buttongroup button {
+  border-radius: 0;
 }
 .fsjs-skin .fsjs-block-type-buttongroup button:first-of-type {
   border-top-left-radius: 2px;
@@ -138,13 +149,9 @@
 .fsjs-skin .choices[data-type*=select-one] {
   cursor: pointer;
 }
-.fsjs-skin .choices[data-type*=select-one] .choices__inner {
-  padding-bottom: 7.5px;
-}
 .fsjs-skin .choices[data-type*=select-one] .choices__input {
   display: block;
   width: 100%;
-  padding: 10px;
   border-bottom: 1px solid #CCC;
   background-color: #FFFFFF;
   margin: 0;
@@ -225,7 +232,6 @@
   vertical-align: top;
   width: 100%;
   background-color: #FDFDFD;
-  padding: 7.5px 7.5px 3.75px;
   border: 1px solid #CCC;
   border-radius: 2px;
   overflow: hidden;
@@ -246,15 +252,12 @@
 }
 .fsjs-skin .choices__list--single {
   display: inline-block;
-  padding: 4px 16px 4px 4px;
   width: 100%;
-}
-[dir=rtl] .fsjs-skin .choices__list--single {
-  padding-right: 4px;
-  padding-left: 16px;
 }
 .fsjs-skin .choices__list--single .choices__item {
   width: 100%;
+  padding: 0.1em 0.5em 0;
+  line-height: 2em;
 }
 .fsjs-skin .choices__list--multiple {
   display: inline;

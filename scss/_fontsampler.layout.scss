@@ -14,13 +14,17 @@
 .fsjs-block {
     box-sizing: border-box;
     padding: $elementPadding;
+    position: relative;
     margin: $elementMargin;
     width: 100%;
 }
 
+.fsjs-label {
+    line-height: $labelHeight;
+}
+
 .fsjs-block-type-slider {
     .fsjs-label {
-        padding: 5px 0;
         display: flex;
         justify-content: flex-end;
         width: 100%;
@@ -28,6 +32,12 @@
         // Only for labels with Text, value & unit
         span:first-child {
             margin-right: auto;
+        }
+
+        .fsjs-label-unit {
+            &:before {
+                content: " "; // figure space #2007
+            }
         }
     }
 }

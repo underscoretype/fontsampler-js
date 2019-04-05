@@ -121,8 +121,9 @@ function UIElements(root, options) {
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
+            helpers.nodeAddClass(options.classes.buttonClass)
             if (opt.init === choice.val) {
-                button.className = options.classes.buttonSelected
+                button.className = options.classes.buttonSelectedClass
             }
             group.appendChild(button)
         }
@@ -136,20 +137,26 @@ function UIElements(root, options) {
         group.dataset.fsjs = key
 
         for (var o in opt.choices) {
-            var choice = parseChoice(opt.choices[o]),
-                label = document.createElement("label"),
-                checkbox = document.createElement("input"),
-                text = document.createElement("span")
+            if (opt.choices.hasOwnProperty(o)) {
+                var choice = parseChoice(opt.choices[o]),
+                    label = document.createElement("label"),
+                    checkbox = document.createElement("input"),
+                    text = document.createElement("span")
 
-            checkbox.setAttribute("type", "checkbox")
-            checkbox.dataset.feature = choice.val
+                checkbox.setAttribute("type", "checkbox")
+                checkbox.dataset.feature = choice.val
 
-            text.appendChild(document.createTextNode(choice.text))
+                if (opt.init.indexOf(Object.values(choice)[0]) !== -1) {
+                    checkbox.checked = true
+                }
 
-            label.appendChild(checkbox)
-            label.appendChild(text)
+                text.appendChild(document.createTextNode(choice.text))
 
-            group.append(label)
+                label.appendChild(checkbox)
+                label.appendChild(text)
+
+                group.append(label)
+            }
         }
 
         return group

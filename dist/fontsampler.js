@@ -294,7 +294,8 @@ function Fontsampler(root, fonts, opt) {
             labelTextClass: "fsjs-label-text",
             labelValueClass: "fsjs-label-value",
             labelUnitClass: "fsjs-label-unit",
-            buttonSelected: "fsjs-button-selected",
+            buttonClass: "fsjs-button",
+            buttonSelectedClass: "fsjs-button-selected",
         },
         order: [
             ["fontsize", "lineheight", "letterspacing"],
@@ -434,6 +435,7 @@ function Fontsampler(root, fonts, opt) {
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
+            console.log("alignemnt", val)
             interface.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {
@@ -815,7 +817,9 @@ function Interface(_root, fonts, options) {
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
-            if (helpers.isNode(elementA) && elementA.childNodes.length > 0) {
+            // console.log(options.order[i], elementA.childNodes, elementA.childNodes.length, elementA.isConnected)
+            if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
+                console.warn("add to root A", elementA, options.order[i])
                 root.appendChild(elementA)
             }
         }
@@ -823,7 +827,8 @@ function Interface(_root, fonts, options) {
             if (options.ui.hasOwnProperty(keyB)) {
                 if (keyB in blocks === false) {
                     var elementB = parseOrder(options.ui[keyB])
-                    if (helpers.isNode(elementB) && elementB.childNodes.length > 0) {
+                    if (helpers.isNode(elementB) && elementB.childNodes.length > 0 && !elementB.isConnected) {
+                        console.warn("add to root B", elementB, keyB)
                         root.appendChild(elementB)
                     }
                 }
@@ -882,20 +887,21 @@ function Interface(_root, fonts, options) {
 
         if (typeof(key) === "string") {
             var block = parseBlock(key)
-            if (block) {
-                blocks[key] = block
-            }
 
             return block
         } else if (Array.isArray(key)) {
             wrapper = document.createElement("div")
-            wrapper.className = options.classes.wrapperClass
+            wrapper.className = options.classes.wrapperClass + " " + key
 
             for (var i = 0; i < key.length; i++) {
                 child = parseOrder(key[i])
                 if (child) {
                     wrapper.appendChild(child)
                 }
+            }
+
+            if (wrapper.children.length < 1) {
+                return false
             }
 
             return wrapper
@@ -922,6 +928,7 @@ function Interface(_root, fonts, options) {
             opt = options.ui[key]
 
         if (block) {
+            console.log(key, "block in DOM")
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
@@ -947,12 +954,15 @@ function Interface(_root, fonts, options) {
 
             // check the block itself
             sanitizeBlock(block, key)
+            blocks[key] = block
 
-            return block
+            return false
         } else if (!block && options.generate || !block && key === "tester") {
             // for missing blocks that should get rendered create them
+            block = createBlock(key)
+            blocks[key] = block
 
-            return createBlock(key)
+            return block
         }
 
         return false
@@ -962,19 +972,19 @@ function Interface(_root, fonts, options) {
         var block = document.createElement("div"),
             element = createElement(key),
             label = false
-            opt = options.ui[key]
+        opt = options.ui[key]
 
         if (opt.label) {
             label = uifactory.label(opt.label, opt.unit, opt.init, key)
             block.append(label)
             sanitizeLabel(label, key)
         }
-        
+
         block.append(element)
         sanitizeElement(element, key)
-        
+
         sanitizeBlock(block, key)
-        
+
         return block
     }
 
@@ -997,7 +1007,7 @@ function Interface(_root, fonts, options) {
     }
 
     function sanitizeElement(element, key) {
-        var element = uifactory[ui[key]](key, options.ui[key], element)
+        element = uifactory[ui[key]](key, options.ui[key], element)
 
         helpers.nodeAddClass(element, options.classes.elementClass)
         element.dataset.fsjs = key
@@ -1053,19 +1063,25 @@ function Interface(_root, fonts, options) {
             if (buttons.length > 0) {
                 for (var b = 0; b < buttons.length; b++) {
                     buttons[b].addEventListener("click", onClick)
+                    if (buttons[b].dataset.choice === options.ui[key].init) {
+                        helpers.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
+                    } else {
+                        helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
+                    }
                 }
             }
-
-            // TODO init values to tester
         } else if (type === "checkboxes") {
             var checkboxes = element.querySelectorAll("[data-feature]")
             if (checkboxes.length > 0) {
+                var features = {}
                 for (var c = 0; c < checkboxes.length; c++) {
                     checkboxes[c].addEventListener("change", onCheck)
+                    if ("features" in checkboxes[c].dataset) {
+                        features[checkboxes[c].dataset.features] = checkboxes[c].checked ? "1" : "0"
+                    }
                 }
+                setInputOpentype(features)
             }
-
-            // TODO init values to tester
         }
 
         return true
@@ -1128,9 +1144,9 @@ function Interface(_root, fonts, options) {
 
         if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
-                helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelected)
+                helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
             }
-            helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelected)
+            helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
 
             sendEvent(property)
         }
@@ -1208,7 +1224,7 @@ function Interface(_root, fonts, options) {
             selected
 
         if (element) {
-            selected = element.querySelector("." + options.classes.buttonSelected)
+            selected = element.querySelector("." + options.classes.buttonSelectedClass)
         }
 
         if (selected) {
@@ -1255,7 +1271,8 @@ function Interface(_root, fonts, options) {
         var parsed = [],
             val
         for (var key in features) {
-            if (features.hasOwnProperty(key)) {
+            console.log(key === "undefined")
+            if (features.hasOwnProperty(key) && key && key !== "undefined") {
                 parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }
         }
@@ -1568,8 +1585,9 @@ function UIElements(root, options) {
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
+            helpers.nodeAddClass(options.classes.buttonClass)
             if (opt.init === choice.val) {
-                button.className = options.classes.buttonSelected
+                button.className = options.classes.buttonSelectedClass
             }
             group.appendChild(button)
         }
@@ -1583,20 +1601,26 @@ function UIElements(root, options) {
         group.dataset.fsjs = key
 
         for (var o in opt.choices) {
-            var choice = parseChoice(opt.choices[o]),
-                label = document.createElement("label"),
-                checkbox = document.createElement("input"),
-                text = document.createElement("span")
+            if (opt.choices.hasOwnProperty(o)) {
+                var choice = parseChoice(opt.choices[o]),
+                    label = document.createElement("label"),
+                    checkbox = document.createElement("input"),
+                    text = document.createElement("span")
 
-            checkbox.setAttribute("type", "checkbox")
-            checkbox.dataset.feature = choice.val
+                checkbox.setAttribute("type", "checkbox")
+                checkbox.dataset.feature = choice.val
 
-            text.appendChild(document.createTextNode(choice.text))
+                if (opt.init.indexOf(Object.values(choice)[0]) !== -1) {
+                    checkbox.checked = true
+                }
 
-            label.appendChild(checkbox)
-            label.appendChild(text)
+                text.appendChild(document.createTextNode(choice.text))
 
-            group.append(label)
+                label.appendChild(checkbox)
+                label.appendChild(text)
+
+                group.append(label)
+            }
         }
 
         return group

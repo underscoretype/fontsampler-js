@@ -49,13 +49,12 @@ $choices-icon-cross-inverse: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiI
     cursor: pointer;
 
     .#{$choices-selector}__inner {
-        padding-bottom: 7.5px;
     }
 
     .#{$choices-selector}__input {
         display: block;
         width: 100%;
-        padding: 10px;
+        // padding: 10px;
         border-bottom: 1px solid $choices-keyline-color;
         background-color: #FFFFFF;
         margin: 0;
@@ -78,10 +77,6 @@ $choices-icon-cross-inverse: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiI
         &:hover,
         &:focus {
             opacity: 1;
-        }
-
-        &:focus {
-            // box-shadow: 0px 0px 0px 2px $choices-highlight-color;
         }
     }
 
@@ -154,10 +149,8 @@ $choices-icon-cross-inverse: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiI
     vertical-align: top;
     width: 100%;
     background-color: $choices-bg-color;
-    padding: 7.5px 7.5px 3.75px;
     border: 1px solid $choices-keyline-color;
     border-radius: $choices-border-radius;
-    // min-height: 44px;
     overflow: hidden;
 
     &:hover,
@@ -187,16 +180,12 @@ $choices-icon-cross-inverse: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjEiI
 
 .#{$choices-selector}__list--single {
     display: inline-block;
-    padding: 4px 16px 4px 4px;
     width: 100%;
-
-    [dir="rtl"] & {
-        padding-right: 4px;
-        padding-left: 16px;
-    }
 
     .#{$choices-selector}__item {
         width: 100%;
+        padding: $buttonPadding;
+        line-height: $buttonHeight;
     }
 }
 

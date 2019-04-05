@@ -57,7 +57,8 @@ function Fontsampler(root, fonts, opt) {
             labelTextClass: "fsjs-label-text",
             labelValueClass: "fsjs-label-value",
             labelUnitClass: "fsjs-label-unit",
-            buttonSelected: "fsjs-button-selected",
+            buttonClass: "fsjs-button",
+            buttonSelectedClass: "fsjs-button-selected",
         },
         order: [
             ["fontsize", "lineheight", "letterspacing"],
@@ -197,6 +198,7 @@ function Fontsampler(root, fonts, opt) {
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
+            console.log("alignemnt", val)
             interface.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {

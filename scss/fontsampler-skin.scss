@@ -10,6 +10,11 @@ $borderColor: #CCC;
 $sliderBarWidth: 1px;
 $sliderHandleSize: 10px;
 
+$buttonPadding: 0.1em 0.5em 0;
+$buttonHeight: 2em;
+
+$labelHeight: 1.5em;
+
 $elementPadding: 0 5px;
 $elementMargin: 5px;
 
@@ -26,7 +31,6 @@ $elementMargin: 5px;
         display: block;
     }
 
-
     .fsjs-block-tester {
         transition: opacity 0.2s ease-out;
         opacity: 1;
@@ -35,7 +39,6 @@ $elementMargin: 5px;
     &.loading .fsjs-block-tester {
         opacity: 0;
     }
-
 
     // A sensible baseline layout
     @import "_fontsampler.layout";
