@@ -57,6 +57,7 @@
   background: #FDFDFD;
   border: 1px solid #CCC;
   border-radius: 2px;
+  color: inherit;
   cursor: pointer;
   flex-grow: 1;
   font-family: inherit;
@@ -66,6 +67,9 @@
   padding: 0.1em 0.5em 0;
 }
 .fsjs-skin .fsjs-button:hover, .fsjs-skin .fsjs-block-type-buttongroup button:hover, .fsjs-skin .fsjs-button:focus, .fsjs-skin .fsjs-block-type-buttongroup button:focus {
+  background: #f0f0f0;
+}
+.fsjs-skin .fsjs-button.fsjs-button-selected, .fsjs-skin .fsjs-block-type-buttongroup button.fsjs-button-selected {
   background: #f0f0f0;
 }
 .fsjs-skin .fsjs-block-type-buttongroup > [data-property] {

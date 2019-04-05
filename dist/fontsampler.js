@@ -1268,7 +1268,6 @@ function Interface(_root, fonts, options) {
         var parsed = [],
             val
         for (var key in features) {
-            console.log(key === "undefined")
             if (features.hasOwnProperty(key) && key && key !== "undefined") {
                 parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }

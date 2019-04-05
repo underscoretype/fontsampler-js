@@ -260,6 +260,22 @@ For the fontfamily dropdown
 
     <p>See the <a href="./skin.html">Skin</a> demo page for more info.</p>
 
+    <p>By default you can use Fontsampler also without a skin and that will give
+        you a completely unstyled UI for you to implement your own layout and
+        visual styles.
+    </p>
+    <p>Even when you use the included skin Javascript and Stylesheet Fontsampler
+        tries to minimally interfere with existing page styles and inherits styling
+        like font size, line height and colors from it’s surrounding containers:
+    </p>
+
+    <div class="demo" style="font-family: sans-serif; color: #A06; font-size: 12px;">
+        <p>This demo wrapper uses different font styling, and the Fontsampler inherits
+            most of it:
+        </p><br>
+        <div id="demo-style-inherit">The UI inherts styling from the page or container.</div>
+    </div>
+
     <h2 id="fonts">Fonts</h2>
     <p>The webfonts to render in the Fontsampler can be passed in either as 
         Array in the Fontsampler() method or via data-woff and data-woff2 attributes.</p>
@@ -630,6 +646,10 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
                     { name: "Alegreya Italic", files: ["./fonts/alegreya/alegreya-v12-latin-italic.woff"] },
                 ]
             var fs = new Fontsampler(document.getElementById("demo-js"), fonts, options)
+            FontsamplerSkin(fs)
+            fs.init()
+
+            var fs = new Fontsampler(document.getElementById("demo-style-inherit"), fonts, { generate: true })
             FontsamplerSkin(fs)
             fs.init()
 

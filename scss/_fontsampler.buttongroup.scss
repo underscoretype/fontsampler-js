@@ -2,6 +2,7 @@
     background: $bgColor;
     border: $borderWidth solid $borderColor;
     border-radius: $borderRadius;
+    color: inherit;
     cursor: pointer;
     flex-grow: 1;
     font-family: inherit;
@@ -12,6 +13,10 @@
 
     &:hover,
     &:focus {
+        background: $bgColorHover;
+    }
+
+    &.fsjs-button-selected {
         background: $bgColorHover;
     }
 }
