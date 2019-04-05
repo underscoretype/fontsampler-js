@@ -14,6 +14,18 @@
         "auto": true
       },
       {
+        "label": "npm run js-compressed",
+        "type": "npm",
+        "script": "js-compressed",
+        "auto": true
+      },
+      {
+        "label": "npm run js-skin-compressed",
+        "type": "npm",
+        "script": "js-skin-compressed",
+        "auto": true
+      },
+      {
         "label": "npm run scss",
         "type": "npm",
         "script": "scss",

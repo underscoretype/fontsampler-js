@@ -198,7 +198,6 @@ function Fontsampler(root, fonts, opt) {
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
-            console.log("alignemnt", val)
             interface.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {

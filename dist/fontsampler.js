@@ -435,7 +435,6 @@ function Fontsampler(root, fonts, opt) {
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
             var val = interface.getButtongroupValue("alignment")
-            console.log("alignemnt", val)
             interface.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {
@@ -819,7 +818,6 @@ function Interface(_root, fonts, options) {
             var elementA = parseOrder(options.order[i])
             // console.log(options.order[i], elementA.childNodes, elementA.childNodes.length, elementA.isConnected)
             if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
-                console.warn("add to root A", elementA, options.order[i])
                 root.appendChild(elementA)
             }
         }
@@ -828,7 +826,6 @@ function Interface(_root, fonts, options) {
                 if (keyB in blocks === false) {
                     var elementB = parseOrder(options.ui[keyB])
                     if (helpers.isNode(elementB) && elementB.childNodes.length > 0 && !elementB.isConnected) {
-                        console.warn("add to root B", elementB, keyB)
                         root.appendChild(elementB)
                     }
                 }
