@@ -21,6 +21,8 @@ function Skin(FS) {
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,
+                // utilise the more granular events offered by the skin
+                // default html range inputs only trigger on change
                 onSlide: updateSlider,
                 onSlideEnd: updateSlider
             })

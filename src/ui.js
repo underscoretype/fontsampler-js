@@ -23,13 +23,15 @@
  *      [data-fsjs=_property_].fsjs-element-_property_
  * 
  */
-
-var UIElements = require("./uielements")
-var helpers = require("./helpers")
-var errors = require("./errors")
 var selection = require("./selection")
 
-function Interface(_root, fonts, options) {
+var UIElements = require("./uielements")
+
+var helpers = require("./helpers")
+var errors = require("./errors")
+
+
+function UI(root, fonts, options) {
 
     var ui = {
             tester: "textfield",
@@ -48,21 +50,23 @@ function Interface(_root, fonts, options) {
             "letterspacing": "letterSpacing"
         },
         blocks = {},
-        root = null,
         uifactory = null,
         input = null,
         originalText = ""
 
     function init() {
-        console.debug("Fontsampler.Interface.init()", _root, fonts, options)
+        console.debug("Fontsampler.Interface.init()", root, fonts, options)
 
-        root = _root
         helpers.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
 
         // The fontfamily is just being defined without the options, which
         // are the fonts passed in. let’s make this transformation behind
-        // the scenes so we can use the re-usable "dropdown" ui
+        // the scenes so we can use the re-usable "dropdown" ui by defining
+        // the needed choices
+        if (options.ui.fontfamily && typeof(options.ui.fontfamily) === "boolean") {
+            options.ui.fontfamily = {}
+        }
         options.ui.fontfamily.choices = fonts.map(function(value) {
             return value.name
         })
@@ -75,12 +79,13 @@ function Interface(_root, fonts, options) {
         }
         options.originalText = originalText
 
-        // If no valid UI order is passed in fall back to the ui elements
-        // Their order might be random, but it ensures each required element
-        // is at least present
-        if (!options.order || !Array.isArray(options.order)) {
-            options.order = Object.keys(ui)
-        }
+
+        // // If no valid UI order is passed in fall back to the ui elements
+        // // Their order might be random, but it ensures each required element
+        // // is at least present
+        // if (!options.order || !Array.isArray(options.order)) {
+        //     options.order = Object.keys(ui)
+        // }
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -90,19 +95,8 @@ function Interface(_root, fonts, options) {
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
-            // console.log(options.order[i], elementA.childNodes, elementA.childNodes.length, elementA.isConnected)
             if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
                 root.appendChild(elementA)
-            }
-        }
-        for (var keyB in options.ui) {
-            if (options.ui.hasOwnProperty(keyB)) {
-                if (keyB in blocks === false) {
-                    var elementB = parseOrder(options.ui[keyB])
-                    if (helpers.isNode(elementB) && elementB.childNodes.length > 0 && !elementB.isConnected) {
-                        root.appendChild(elementB)
-                    }
-                }
             }
         }
 
@@ -162,7 +156,7 @@ function Interface(_root, fonts, options) {
             return block
         } else if (Array.isArray(key)) {
             wrapper = document.createElement("div")
-            wrapper.className = options.classes.wrapperClass + " " + key
+            wrapper.className = options.classes.wrapperClass
 
             for (var i = 0; i < key.length; i++) {
                 child = parseOrder(key[i])
@@ -202,7 +196,7 @@ function Interface(_root, fonts, options) {
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
-
+            
             if (options.ui[key].label && !label) {
                 // create a label if needed
                 label = uifactory.label(opt.label, opt.unit, opt.init, key)
@@ -221,13 +215,13 @@ function Interface(_root, fonts, options) {
                 // or check the existing element
                 sanitizeElement(element, key)
             }
-
+            
             // check the block itself
             sanitizeBlock(block, key)
             blocks[key] = block
-
+            
             return false
-        } else if (!block && options.generate || !block && key === "tester") {
+        } else if (!block) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -267,10 +261,10 @@ function Interface(_root, fonts, options) {
 
     function sanitizeBlock(block, key) {
         var classes = [
-            options.classes.blockClass,
-            options.classes.blockClass + "-" + key,
-            options.classes.blockClass + "-type-" + ui[key]
-        ]
+                options.classes.blockClass,
+                options.classes.blockClass + "-" + key,
+                options.classes.blockClass + "-type-" + ui[key]
+            ]
 
         helpers.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
@@ -322,6 +316,7 @@ function Interface(_root, fonts, options) {
 
         if (type === "slider") {
             element.addEventListener("change", onChange)
+            element.addEventListener("change", onSlide)
             element.val = opt.init
             setInputCss(keyToCss[key], opt.init + opt.unit)
         } else if (type === "dropdown") {
@@ -390,16 +385,25 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        var property = e.target.dataset.fsjs
+        var key = e.target.dataset.fsjs
 
-        sendEvent(property)
+        sendEvent(key)
+    }
+
+    function onSlide(e) {
+        var key = e.target.dataset.fsjs,
+            label = root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
+
+        if (label) {
+            label.textContent = getValue(key)
+        }
     }
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        var property = "opentype"
+        var key = "opentype"
 
-        sendEvent(property)
+        sendEvent(key)
     }
 
     /**
@@ -579,4 +583,4 @@ function Interface(_root, fonts, options) {
         setStatusClass: setStatusClass
     }
 }
-module.exports = Interface
+module.exports = UI

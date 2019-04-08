@@ -93,9 +93,32 @@ function isNode(node) {
     return typeof(node) === "object" && node !== null && "nodeType" in node
 }
 
+/**
+ * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
+ * @method flattenDeep
+ * @param array {Array}
+ * @return {Array} flatten array
+ */
+function flattenDeep(array) {
+    return array.reduce((acc, current) => {
+        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+    }, []);
+}
+
+function arrayUnique(a) {
+    if (!Array.isArray(a)) {
+        return false
+    }
+    return a.filter(function(value, index, self) {
+        return self.indexOf(value) === index
+    }, a)
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
-    isNode: isNode
+    flattenDeep: flattenDeep,
+    isNode: isNode,
+    arrayUnique: arrayUnique
 }

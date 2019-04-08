@@ -1,5 +1,4 @@
-var events = {
+
+module.exports = {
     "init": "fontsampler.events.init"
 }
-
-module.exports = events

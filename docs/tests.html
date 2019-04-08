@@ -25,7 +25,47 @@
 
     <h1>Miscellenious tests</h1>
 
-    <div id="test1" class="demo" data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'></div>
+    <div id="demo-woff" class="demo" data-fontname="Alegreya Regular"
+        data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2"
+        >No existing DOM UI, single font from data-woff, data-woff2 & data-fontname, no options</div>
+
+    <div id="demo-data-fonts" class="demo" 
+        data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
+        >No existing DOM UI, fonts from data-fonts, no options</div>
+
+    <div id="demo-data-fonts-options" class="demo"
+        data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
+        >No existing DOM UI, fonts from data-fonts & options from data-options</div>
+
+    <div id="demo-js-order" class="demo">No existing DOM UI, fonts from JS, options with only order in JS</div>
+    <div id="demo-js-ui" class="demo">No existing DOM UI, fonts from JS, options with only ui elements in JS.
+        Since no options.order was defined, the defined UI elements simply get put into the DOM one after another
+    </div>
+    <div id="demo-js-order-ui" class="demo">No existing DOM UI, fonts from JS, options with order & ui elements in JS</div>
+    
+    <div id="demo-js-no-options" class="demo">Existing DOM UI, fonts from JS, no options</div>
+    <div id="demo-js-existing" class="demo">
+        <div data-fsjs-block="fontsize"></div>
+        <div data-fsjs-block="tester"><div data-fsjs="tester">Existing DOM UI, fonts from JS, options with order & ui elements in JS 
+            — this allows placing the UI elements in an arbitrary layout</div></div>
+        <div data-fsjs-block="fontfamily"><select data-fsjs="fontfamily"></select></div>
+    </div>
+
+    <!-- unskinned -->
+
+    <div id="demo-js-no-options-no-skin" class="demo">UNSKINNED - Existing DOM UI, fonts from JS, no options</div>
+    <div id="demo-js-existing-no-skin" class="demo">
+        <div data-fsjs-block="fontsize"><input data-fsjs="fontsize" type="range" min="12" max="24" step="1" data-init="20" data-unit="px"></div>
+        <div data-fsjs-block="tester"><div data-fsjs="tester">UNSKINNED - Existing DOM UI, fonts from JS, options with order & ui elements in JS 
+            — this allows placing the UI elements in an arbitrary layout</div></div>
+        <div data-fsjs-block="fontfamily"></div>
+    </div>
+    <div id="demo-woff-unskinned" class="demo" data-fontname="Alegreya Regular"
+        data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2"
+        >
+        <div data-fsjs-block="tester"><div data-fsjs="tester">UNSKINNED - Existing DOM UI, single font from data-woff, data-woff2 & data-fontname, no options</div></div>
+        <div data-fsjs-block="fontfamily"><select data-fsjs="fontfamily"></select></div>
+    </div>
 
     <footer>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
@@ -36,13 +76,49 @@
 
     <script>
         window.onload = function() {
-            var options = {
-                initialText: "Testing passing fonts via data-fonts",
-                generate: true
+
+            var fonts = [{
+                    "name": "Alegreya Regular", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]
+                }, 
+                { 
+                    "name": "Alegreya Italic", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]
+                }]
+            var optionsOrder = { "order": ["tester", ["fontsize", "lineheight", "fontfamily"]] }
+            var optionsUI = { "ui": { "tester": true, "fontsize": true, "lineheight": true, "fontfamily": true }}
+            var optionsOrderUI = { "order": ["tester", ["fontsize", "lineheight", "fontfamily"]], "ui": { "tester": true, "fontsize": true, "lineheight": true, "fontfamily": true } }
+
+            var skinned = [
+                new Fontsampler(document.getElementById("demo-woff")),
+                new Fontsampler(document.getElementById("demo-data-fonts")),
+                new Fontsampler(document.getElementById("demo-data-fonts-options")),
+                new Fontsampler(document.getElementById("demo-js-order"), fonts, optionsOrder),
+                new Fontsampler(document.getElementById("demo-js-ui"), fonts, optionsUI),
+                new Fontsampler(document.getElementById("demo-js-order-ui"), fonts, optionsOrderUI),
+                new Fontsampler(document.getElementById("demo-js-no-options"), fonts),
+                new Fontsampler(document.getElementById("demo-js-existing"), fonts, optionsOrderUI),
+            ]
+            var raw = [
+                new Fontsampler(document.getElementById("demo-js-no-options-no-skin"), fonts),
+                new Fontsampler(document.getElementById("demo-js-existing-no-skin"), fonts),
+                new Fontsampler(document.getElementById("demo-woff-unskinned")),
+            ]
+
+            for (var i = 0; i < skinned.length; i++) {
+                console.log("")
+                console.log("Init skinned Fontsampler:", i, skinned[i])
+                FontsamplerSkin(skinned[i])
+                skinned[i].init()
+                console.log("")
             }
-            var fs = new Fontsampler(document.getElementById("test1"), false, options)
-            FontsamplerSkin(fs)
-            fs.init()
+
+            for (var k = 0; k < raw.length; k++) {
+                console.log("")
+                console.log("Init unskinned Fontsampler:", k, raw[k])
+                raw[k].init()
+                console.log("")
+            }
         }
     </script>
 </body>

@@ -11,4 +11,3 @@ module.exports = {
     "dataFontsJsonInvalid": "Fontsampler: The data-fonts JSON failed to parse.",
     "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure."
 }
-

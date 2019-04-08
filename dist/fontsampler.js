@@ -128,6 +128,91 @@ n+"ms timeout exceeded"));else{var a=document.hidden;if(!0===a||void 0===a)f=e.a
 L(c,'"'+c.family+'",sans-serif'));A(p,function(a){g=a;v()});u(p,L(c,'"'+c.family+'",serif'));A(q,function(a){h=a;v()});u(q,L(c,'"'+c.family+'",monospace'))})})};"object"===typeof module?module.exports=B:(window.FontFaceObserver=B,window.FontFaceObserver.prototype.load=B.prototype.load);}());
 
 },{}],3:[function(_dereq_,module,exports){
+// A minimal default setup requiring only passed in font(s) and not generating any
+// interface elements except a tester input
+module.exports = {
+    initialText: "",
+    multiline: true,
+    lazyload: false,
+    generate: false,
+    classes: {
+        rootClass: "fontsamplerjs",
+        initClass: "fsjs-initialized",
+        loadingClass: "fsjs-loading",
+        preloadingClass: "fsjs-preloading",
+        wrapperClass: "fsjs-wrapper",
+        blockClass: "fsjs-block",
+        elementClass: "fsjs-element",
+        labelClass: "fsjs-label",
+        labelTextClass: "fsjs-label-text",
+        labelValueClass: "fsjs-label-value",
+        labelUnitClass: "fsjs-label-unit",
+        buttonClass: "fsjs-button",
+        buttonSelectedClass: "fsjs-button-selected",
+    },
+    order: [
+        // ["fontsize", "lineheight", "letterspacing"],
+        // ["fontfamily", "language"],
+        // ["alignment", "direction", "opentype"],
+        "tester"
+    ],
+    ui: {
+        tester: {
+            editable: true,
+            label: false
+        },
+        fontfamily: {
+            label: "Font",
+            init: ""
+        },
+        fontsize: {
+            unit: "px",
+            init: 36,
+            min: 8,
+            max: 96,
+            step: 1,
+            label: "Size"
+        },
+        lineheight: {
+            unit: "%",
+            init: 100,
+            min: 60,
+            max: 120,
+            step: 5,
+            label: "Leading"
+        },
+        letterspacing: {
+            unit: "em",
+            init: 0,
+            min: -0.1,
+            max: 0.1,
+            step: 0.01,
+            label: "Letterspacing"
+        },
+        alignment: {
+            choices: ["left|Left", "center|Centered", "right|Right"],
+            init: "left",
+            label: "Alignment"
+        },
+        direction: {
+            choices: ["ltr|Left to right", "rtl|Right to left"],
+            init: "ltr",
+            label: "Direction"
+        },
+        language: {
+            choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
+            init: "en-Gb",
+            label: "Language"
+        },
+        opentype: {
+            choices: ["liga|Ligatures", "frac|Fractions"],
+            init: ["liga"],
+            label: "Opentype features"
+        }
+    }
+}
+
+},{}],4:[function(_dereq_,module,exports){
 
 module.exports = {
     "noFonts": "Fontsampler: No fonts were passed in.",
@@ -142,14 +227,13 @@ module.exports = {
     "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure."
 }
 
+},{}],5:[function(_dereq_,module,exports){
 
-},{}],4:[function(_dereq_,module,exports){
-var events = {
+module.exports = {
     "init": "fontsampler.events.init"
 }
 
-module.exports = events
-},{}],5:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
 
 var errors = _dereq_("./errors")
@@ -235,7 +319,7 @@ module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":3}],6:[function(_dereq_,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4}],7:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -245,217 +329,210 @@ module.exports = {
  * @copyright 2019 Johannes Neumeier
  * @license GNU GPLv3
  */
-
-// var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
 var extend = _dereq_("../node_modules/extend")
 
 var Fontloader = _dereq_("./fontloader")
-var Interface = _dereq_("./interface")
+var Interface = _dereq_("./ui")
 var Preloader = _dereq_("./preloader")
-var errors = _dereq_("./errors")
-var events = _dereq_("./events")
 var helpers = _dereq_("./helpers")
 
-function Fontsampler(root, fonts, opt) {
+var errors = _dereq_("./errors")
+var events = _dereq_("./events")
+var _defaults = _dereq_("./defaults")
 
-    console.debug("Fontsampler()", root, fonts, opt, this)
+/**
+ * The main constructor for setting up a new Fontsampler instance
+ * @param Node root 
+ * @param Object | null fonts 
+ * @param Object | null opt 
+ */
+function Fontsampler(_root, _fonts, _options) {
+    console.debug("Fontsampler()", _root, _fonts, _options)
 
+    var ui, options, fonts,
+        preloader = new Preloader(),
+        passedInOptions = false,
+        // deep clone the _defaults
+        defaults = (JSON.parse(JSON.stringify(_defaults))) 
+
+    // Make sure new instances are create with new Fontsampler
+    // this will === window if Fontsampler() is used without
+    // the new keyword
     if (this === window) {
         throw new Error(errors.newInit)
     }
 
-    var extractedFonts,
-        extractedOptions = false,
-        interface,
-        preloader = new Preloader(),
-        defaults
-        
+    // At the very least confirm a valid root element to render to
+    if (!_root) {
+        throw new Error(errors.missingRoot + _root)
+    }
+    this.root = _root
     this.initialized = false
-    
-    // Check for a root element to render to
-    if (!root) {
-        throw new Error(errors.missingRoot + root)
+
+    // Parse fonts and options from the passed in objects or possibly
+    // from the root node data attributes
+    options = parseOptions.call(this, _options)
+    fonts = parseFonts.call(this, _fonts)
+
+    // options.generate = true
+    ui = Interface(this.root, fonts, options)
+
+    function parseFonts(fonts) {
+        var extractedFonts = extractFontsFromDOM.call(this)
+
+        // Extract fonts; Look first on root element, then on select, then in
+        // passed in fonts Array
+        if ((!fonts || fonts.length < 1) && extractedFonts) {
+            fonts = extractedFonts
+        }
+        if (!fonts) {
+            throw new Error(errors.noFonts)
+        }
+        if (!validateFontsFormatting(fonts)) {
+            console.error(fonts)
+            throw new Error(errors.initFontFormatting)
+        }
+
+        return fonts
     }
 
-    // A minimal default setup requiring only passed in font(s) and not generating any
-    // interface elements except a tester input
-    defaults = {
-        initialText: "",
-        multiline: true,
-        lazyload: false,
-        generate: false,
-        classes: {
-            rootClass: "fontsamplerjs",
-            initClass: "fsjs-initialized",
-            loadingClass: "fsjs-loading",
-            preloadingClass: "fsjs-preloading",
-            wrapperClass: "fsjs-wrapper",
-            blockClass: "fsjs-block",
-            elementClass: "fsjs-element",
-            labelClass: "fsjs-label",
-            labelTextClass: "fsjs-label-text",
-            labelValueClass: "fsjs-label-value",
-            labelUnitClass: "fsjs-label-unit",
-            buttonClass: "fsjs-button",
-            buttonSelectedClass: "fsjs-button-selected",
-        },
-        order: [
-            ["fontsize", "lineheight", "letterspacing"],
-            ["fontfamily", "language"],
-            ["alignment", "direction", "opentype"], 
-            "tester"
-        ],
-        ui: {
-            tester: {
-                editable: true,
-                label: false
-            },
-            fontfamily: {
-                label: "Font",
-                init: "",
-            },
-            fontsize: {
-                unit: "px",
-                init: 36,
-                min: 8,
-                max: 96,
-                step: 1,
-                label: "Size"
-            },
-            lineheight: {
-                unit: "%",
-                init: 100,
-                min: 60,
-                max: 120,
-                step: 5,
-                label: "Leading"
-            },
-            letterspacing: {
-                unit: "em",
-                init: 0,
-                min: -0.1,
-                max: 0.1,
-                step: 0.01,
-                label: "Letterspacing"
-            },
-            alignment: {
-                choices: ["left|Left", "center|Centered", "right|Right"],
-                init: "left",
-                label: "Alignment"
-            },
-            direction: {
-                choices: ["ltr|Left to right", "rtl|Right to left"],
-                init: "ltr",
-                label: "Direction"
-            },
-            language: {
-                choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
-                init: "en-Gb",
-                label: "Language"
-            },
-            opentype: {
-                choices: ["liga|Ligatures", "frac|Fractions"],
-                init: ["liga"],
-                label: "Opentype features"
+
+    /**
+     * 
+     * @param {*} opt 
+     * By default:
+     * - dont generate any DOM
+     * - if an element is set either in ui.xxx or order is set, generate those
+     * - if anything is present in the dom, validate and use those
+     * ALWAYS append tester if it is not present
+     */
+    function parseOptions(opt) {
+        var extractedOptions = false,
+            nodesInDom = this.root.querySelectorAll("[data-fsjs]"),
+            blocksInDom = [],
+            blocksInOrder = [],
+            blocksInUI = [],
+            blocks = []
+
+        // Extend or use the default options in order of:
+        // defaults < options < data-options
+        if ("options" in this.root.dataset) {
+            try {
+                extractedOptions = JSON.parse(this.root.dataset.options)
+            } catch (e) {
+                console.error(e)
             }
         }
-    }
 
-    this.root = root
-
-    // Set all defaults.ui.xxx.render = false if not passed in
-    // etc.
-    for (var key in defaults.ui) {
-        if (opt && "generate" in opt) {
-            defaults.ui[key].render = opt.generate
+        // Determine if we got any passed in options at all
+        if (typeof(opt) === "object" && typeof(extractedOptions) === "object") {
+            passedInOptions = extend(true, opt, extractedOptions)
+        } else if (typeof(opt) === "object") {
+            passedInOptions = opt
+        } else if (typeof(extractedOptions) === "object") {
+            passedInOptions = extractedOptions
+        }
+        
+        if (typeof(passedInOptions) === "object") {
+            // If any of the passed in options.ui.xxx are simply "true" instead of
+            // an boolean let’s copy the default values for this ui element
+            if ("ui" in passedInOptions === true) {
+                for (var u in passedInOptions.ui) {
+                    if (passedInOptions.ui.hasOwnProperty(u)) {
+                        if (typeof(passedInOptions.ui[u]) !== "object") {
+                            passedInOptions.ui[u] = defaults.ui[u]
+                        }
+                    }
+                }
+            }
+            // Extend the defaults
+            options = extend(true, defaults, passedInOptions)
         } else {
-            defaults.ui[key].render = !!(opt && opt.ui && key in opt.ui)
+            options = defaults
         }
-    }
-    // Always render a tester by default!
-    defaults.ui.tester.render = true
-    
-    // Extend or use the default options in order of
-    // defaults < options < data-options
-    if ("options" in root.dataset) {
-        try {
-        extractedOptions = JSON.parse(root.dataset.options)
-        } catch (e) {
-            console.error(e)
+        
+        // Go through all DOM UI nodes, passed in ui ´order´ options and ´ui´ options
+        // to determine what blocks are in the Fontsampler, and make sure all defined
+        // blocks get rendered. "Defined" can be a combination of:
+        // · block in the DOM
+        // · block in options.order
+        // · block in options.ui
+        if (nodesInDom.length > 0) {
+            for (var b = 0; b < nodesInDom.length; b++) {
+                blocksInDom[b] = nodesInDom[b].dataset.fsjs
+            }
         }
-    }
+        blocksInOrder = typeof(opt) === "object" && "order" in opt ? helpers.flattenDeep(opt.order) : []
+        blocksInUI = typeof(opt) === "object" && "ui" in opt ? Object.keys(opt.ui) : []
+        blocks = blocksInDom.concat(blocksInOrder, blocksInUI)
+        blocks = helpers.arrayUnique(blocks)
 
-    if (typeof(opt) === "object" && typeof(extractedOptions) === "object") {
-        options = extend(true, defaults, opt, extractedOptions)
-    } else if (typeof(opt) === "object") {
-        options = extend(true, defaults, opt)
-    } else if (typeof(extractedOptions) === "object") {
-        options = extend(true, defaults, extractedOptions)
-    } else {
-        options = defaults
-    }
+        // Always make sure we are rendering at least a tester, no matter the configuration
+        if (blocks.indexOf("tester") === -1) {
+            blocks.push("tester")
+        }
+        
+        // A passed in UI order superseeds, not extends!, the default
+        if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
+            options.order = opt.order
+        } else if (
+            typeof extractedOptions === "object" && "order" in extractedOptions &&
+            Array.isArray(extractedOptions.order) && extractedOptions.order.length) {
+            options.order = extractedOptions.order
+        }
 
-    // A passed in UI order superseeds, not extends!, the default
-    if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
-        options.order = opt.order
-    }
+        // Then: check DOM and UI for any other present blocks and append them
+        // in case they are missing
+        var blocksInOrderNow = helpers.flattenDeep(options.order)
+        for (var i = 0; i < blocks.length; i++) {
+            if (blocksInOrderNow.indexOf(blocks[i]) === -1) {
+                options.order.push(blocks[i])
+            }
+        }
 
-    // Extract fonts; Look first on root element, then on select, then in
-    // passed in fonts Array
-    extractedFonts = extractFontsFromDOM()
-    if ((!fonts || fonts.length < 1) && extractedFonts) {
-        fonts = extractedFonts
+        return options
     }
-    if (!fonts) {
-        throw new Error(errors.noFonts)
-    }
-    if (!validateFontsFormatting(fonts)) {
-        console.error(fonts)
-        throw new Error(errors.initFontFormatting)
-    }
-
-    interface = Interface(root, fonts, options)
 
     // Setup the interface listeners and delegate events back to the interface
     function setupUIEvents() {
         // sliders
         this.root.addEventListener("fontsampler.onfontsizechanged", function() {
-            var val = interface.getCssValue("fontsize")
-            interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
+            var val = ui.getCssValue("fontsize")
+            ui.setInputCss(ui.getCssAttrForKey("fontsize"), val)
         })
         this.root.addEventListener("fontsampler.onlineheightchanged", function() {
-            var val = interface.getCssValue("lineheight")
-            interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
+            var val = ui.getCssValue("lineheight")
+            ui.setInputCss(ui.getCssAttrForKey("lineheight"), val)
         })
         this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
-            var val = interface.getCssValue("letterspacing")
-            interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
+            var val = ui.getCssValue("letterspacing")
+            ui.setInputCss(ui.getCssAttrForKey("letterspacing"), val)
         })
 
         // checkbox
         this.root.addEventListener("fontsampler.onopentypechanged", function() {
-            var val = interface.getOpentype()
-            interface.setInputOpentype(val)
+            var val = ui.getOpentype()
+            ui.setInputOpentype(val)
         })
 
         // dropdowns
         this.root.addEventListener("fontsampler.onfontfamilychanged", function() {
-            var val = interface.getValue("fontfamily")
+            var val = ui.getValue("fontfamily")
             loadFont(val)
         })
         this.root.addEventListener("fontsampler.onlanguagechanged", function() {
-            var val = interface.getValue("language")
-            interface.setInputAttr("lang", val)
+            var val = ui.getValue("language")
+            ui.setInputAttr("lang", val)
         })
 
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
-            var val = interface.getButtongroupValue("alignment")
-            interface.setInputCss("textAlign", val)
+            var val = ui.getButtongroupValue("alignment")
+            ui.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {
-            var val = interface.getButtongroupValue("direction")
-            interface.setInputAttr("dir", val)
+            var val = ui.getButtongroupValue("direction")
+            ui.setInputAttr("dir", val)
         })
     }
 
@@ -487,13 +564,13 @@ function Fontsampler(root, fonts, opt) {
     }
 
     function extractFontsFromDOM() {
-        var select = root.querySelector("[data-property='fontfamily']"),
+        var select = this.root.querySelector("[data-fsjs='fontfamily']"),
             options = [],
             fonts = []
 
         // First try to get data-fonts or data-woff/2 on the root element
         // If such are found, return them
-        var rootFonts = extractFontsFromNode(root, true)
+        var rootFonts = extractFontsFromNode(this.root, true)
         if (rootFonts) {
             return rootFonts
         }
@@ -506,6 +583,7 @@ function Fontsampler(root, fonts, opt) {
 
         options = select.querySelectorAll("option")
         for (i = 0; i < options.length; i++) {
+            console.log("looping options")
             var opt = options[i],
                 extractedFonts = extractFontsFromNode(opt, false)
 
@@ -564,7 +642,7 @@ function Fontsampler(root, fonts, opt) {
 
         preloader.pause()
 
-        interface.setStatusClass(options.loadingClass, true)
+        ui.setStatusClass(options.loadingClass, true)
         files = []
         if (typeof(indexOrKey) === "string") {
             files = fonts.filter(function(value, index) {
@@ -575,8 +653,8 @@ function Fontsampler(root, fonts, opt) {
         }
 
         Fontloader.fromFiles(files, function(f) {
-            interface.setInputCss("fontFamily", f.family)
-            interface.setStatusClass(options.loadingClass, false)
+            ui.setInputCss("fontFamily", f.family)
+            ui.setStatusClass(options.loadingClass, false)
 
             preloader.resume()
         })
@@ -588,22 +666,21 @@ function Fontsampler(root, fonts, opt) {
 
     this.init = function() {
         console.debug("Fontsampler.init()", this, this.root)
-        interface.init()
+        ui.init()
         setupUIEvents.call(this)
         loadFont(0)
 
         if (options.lazyload) {
-            interface.setStatusClass(options.preloadingClass, true)
+            ui.setStatusClass(options.preloadingClass, true)
             preloader.load(fonts, function() {
-                interface.setStatusClass(options.preloadingClass, false)
+                ui.setStatusClass(options.preloadingClass, false)
             })
         }
 
         this.initalized = true
-        helpers.nodeAddClass(root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, options.classes.initClass)
 
-
-        root.dispatchEvent(new CustomEvent(events.init))
+        this.root.dispatchEvent(new CustomEvent(events.init))
 
         // For convenience also have the init method return the instance
         // This way you can create the object and init it, e.g.
@@ -625,19 +702,19 @@ function Fontsampler(root, fonts, opt) {
 
         // Only act if there is a valid callback
         if (typeof(callback) === "function") {
-            root.addEventListener(event, callback)
+            this.root.addEventListener(event, callback)
         }
     }
 
-    this.setText = function (text) {
-        interface.setInputText(text)
+    this.setText = function(text) {
+        ui.setInputText(text)
     }
 
     return this
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./errors":3,"./events":4,"./fontloader":5,"./helpers":7,"./interface":8,"./preloader":9}],7:[function(_dereq_,module,exports){
+},{"../node_modules/extend":1,"./defaults":3,"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./preloader":9,"./ui":11}],8:[function(_dereq_,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -733,13 +810,186 @@ function isNode(node) {
     return typeof(node) === "object" && node !== null && "nodeType" in node
 }
 
+/**
+ * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
+ * @method flattenDeep
+ * @param array {Array}
+ * @return {Array} flatten array
+ */
+function flattenDeep(array) {
+    return array.reduce((acc, current) => {
+        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+    }, []);
+}
+
+function arrayUnique(a) {
+    if (!Array.isArray(a)) {
+        return false
+    }
+    return a.filter(function(value, index, self) {
+        return self.indexOf(value) === index
+    }, a)
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
-    isNode: isNode
+    flattenDeep: flattenDeep,
+    isNode: isNode,
+    arrayUnique: arrayUnique
 }
-},{}],8:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
+var Fontloader = _dereq_("./fontloader")
+
+function Preloader() {
+
+    var queue = [],
+        autoload = true,
+        finishedCallback = null
+
+    function load(fonts, callback) {
+
+        // clone the fonts array
+        queue = fonts.slice(0)
+        autoload = true
+
+        if (typeof(callback) === "function") {
+            finishedCallback = callback
+        }
+
+        loadNext()
+    }
+
+    function pause() {
+        autoload = false
+    }
+
+    function resume() {
+        autoload = true
+        if (queue.length > 0) {
+            loadNext()
+        } else {
+            if (finishedCallback) {
+                finishedCallback()
+            }
+        }
+    }
+
+    function loadNext() {
+        if (queue.length > 0 && autoload) {
+            Fontloader.fromFiles(queue[0].files, function () {
+                queue.shift()
+
+                if (queue.length === 0 && finishedCallback) {
+                    finishedCallback()
+                }
+                
+                if (queue.length > 0 && autoload) {
+                    loadNext()
+                }
+            })
+        }
+    }
+
+    return {
+        load: load,
+        pause: pause,
+        resume: resume
+    }
+}
+
+
+module.exports = Preloader
+},{"./fontloader":6}],10:[function(_dereq_,module,exports){
+/**
+ * Helper module to deal with caret position
+ */
+function Selection () {
+
+    // from https://stackoverflow.com/a/4812022/999162
+    var setSelectionByCharacterOffsets = null;
+
+    if (window.getSelection && document.createRange) {
+        setSelectionByCharacterOffsets = function (containerEl, start, end) {
+            var charIndex = 0,
+                range = document.createRange();
+            range.setStart(containerEl, 0);
+            range.collapse(true);
+            var nodeStack = [containerEl],
+                node, foundStart = false,
+                stop = false;
+
+            while (!stop && (node = nodeStack.pop())) {
+                if (node.nodeType == 3) {
+                    var nextCharIndex = charIndex + node.length;
+                    if (!foundStart && start >= charIndex && start <= nextCharIndex) {
+                        range.setStart(node, start - charIndex);
+                        foundStart = true;
+                    }
+                    if (foundStart && end >= charIndex && end <= nextCharIndex) {
+                        range.setEnd(node, end - charIndex);
+                        stop = true;
+                    }
+                    charIndex = nextCharIndex;
+                } else {
+                    var i = node.childNodes.length;
+                    while (i--) {
+                        nodeStack.push(node.childNodes[i]);
+                    }
+                }
+            }
+
+            var sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        };
+    } else if (document.selection) {
+        setSelectionByCharacterOffsets = function (containerEl, start, end) {
+            var textRange = document.body.createTextRange();
+            textRange.moveToElementText(containerEl);
+            textRange.collapse(true);
+            textRange.moveEnd("character", end);
+            textRange.moveStart("character", start);
+            textRange.select();
+        };
+    }
+
+
+    // From https://stackoverflow.com/a/4812022/999162
+    function getCaretCharacterOffsetWithin(element) {
+        var caretOffset = 0;
+        var doc = element.ownerDocument || element.document;
+        var win = doc.defaultView || doc.parentWindow;
+        var sel;
+        if (typeof win.getSelection != "undefined") {
+            sel = win.getSelection();
+            if (sel.rangeCount > 0) {
+                var range = win.getSelection().getRangeAt(0);
+                var preCaretRange = range.cloneRange();
+                preCaretRange.selectNodeContents(element);
+                preCaretRange.setEnd(range.endContainer, range.endOffset);
+                caretOffset = preCaretRange.toString().length;
+            }
+        } else if ((sel = doc.selection) && sel.type != "Control") {
+            var textRange = sel.createRange();
+            var preCaretTextRange = doc.body.createTextRange();
+            preCaretTextRange.moveToElementText(element);
+            preCaretTextRange.setEndPoint("EndToEnd", textRange);
+            caretOffset = preCaretTextRange.text.length;
+        }
+        return caretOffset;
+    }
+
+    return {
+        setCaret: setSelectionByCharacterOffsets,
+        getCaret: getCaretCharacterOffsetWithin
+    };
+
+}
+
+module.exports = Selection
+},{}],11:[function(_dereq_,module,exports){
 /**
  * A wrapper around the Fontsampler interface
  * 
@@ -765,13 +1015,15 @@ module.exports = {
  *      [data-fsjs=_property_].fsjs-element-_property_
  * 
  */
-
-var UIElements = _dereq_("./uielements")
-var helpers = _dereq_("./helpers")
-var errors = _dereq_("./errors")
 var selection = _dereq_("./selection")
 
-function Interface(_root, fonts, options) {
+var UIElements = _dereq_("./uielements")
+
+var helpers = _dereq_("./helpers")
+var errors = _dereq_("./errors")
+
+
+function UI(root, fonts, options) {
 
     var ui = {
             tester: "textfield",
@@ -790,21 +1042,23 @@ function Interface(_root, fonts, options) {
             "letterspacing": "letterSpacing"
         },
         blocks = {},
-        root = null,
         uifactory = null,
         input = null,
         originalText = ""
 
     function init() {
-        console.debug("Fontsampler.Interface.init()", _root, fonts, options)
+        console.debug("Fontsampler.Interface.init()", root, fonts, options)
 
-        root = _root
         helpers.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
 
         // The fontfamily is just being defined without the options, which
         // are the fonts passed in. let’s make this transformation behind
-        // the scenes so we can use the re-usable "dropdown" ui
+        // the scenes so we can use the re-usable "dropdown" ui by defining
+        // the needed choices
+        if (options.ui.fontfamily && typeof(options.ui.fontfamily) === "boolean") {
+            options.ui.fontfamily = {}
+        }
         options.ui.fontfamily.choices = fonts.map(function(value) {
             return value.name
         })
@@ -817,12 +1071,13 @@ function Interface(_root, fonts, options) {
         }
         options.originalText = originalText
 
-        // If no valid UI order is passed in fall back to the ui elements
-        // Their order might be random, but it ensures each required element
-        // is at least present
-        if (!options.order || !Array.isArray(options.order)) {
-            options.order = Object.keys(ui)
-        }
+
+        // // If no valid UI order is passed in fall back to the ui elements
+        // // Their order might be random, but it ensures each required element
+        // // is at least present
+        // if (!options.order || !Array.isArray(options.order)) {
+        //     options.order = Object.keys(ui)
+        // }
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -832,19 +1087,8 @@ function Interface(_root, fonts, options) {
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
-            // console.log(options.order[i], elementA.childNodes, elementA.childNodes.length, elementA.isConnected)
             if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
                 root.appendChild(elementA)
-            }
-        }
-        for (var keyB in options.ui) {
-            if (options.ui.hasOwnProperty(keyB)) {
-                if (keyB in blocks === false) {
-                    var elementB = parseOrder(options.ui[keyB])
-                    if (helpers.isNode(elementB) && elementB.childNodes.length > 0 && !elementB.isConnected) {
-                        root.appendChild(elementB)
-                    }
-                }
             }
         }
 
@@ -904,7 +1148,7 @@ function Interface(_root, fonts, options) {
             return block
         } else if (Array.isArray(key)) {
             wrapper = document.createElement("div")
-            wrapper.className = options.classes.wrapperClass + " " + key
+            wrapper.className = options.classes.wrapperClass
 
             for (var i = 0; i < key.length; i++) {
                 child = parseOrder(key[i])
@@ -944,7 +1188,7 @@ function Interface(_root, fonts, options) {
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
-
+            
             if (options.ui[key].label && !label) {
                 // create a label if needed
                 label = uifactory.label(opt.label, opt.unit, opt.init, key)
@@ -963,13 +1207,13 @@ function Interface(_root, fonts, options) {
                 // or check the existing element
                 sanitizeElement(element, key)
             }
-
+            
             // check the block itself
             sanitizeBlock(block, key)
             blocks[key] = block
-
+            
             return false
-        } else if (!block && options.generate || !block && key === "tester") {
+        } else if (!block) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -1009,10 +1253,10 @@ function Interface(_root, fonts, options) {
 
     function sanitizeBlock(block, key) {
         var classes = [
-            options.classes.blockClass,
-            options.classes.blockClass + "-" + key,
-            options.classes.blockClass + "-type-" + ui[key]
-        ]
+                options.classes.blockClass,
+                options.classes.blockClass + "-" + key,
+                options.classes.blockClass + "-type-" + ui[key]
+            ]
 
         helpers.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
@@ -1064,6 +1308,7 @@ function Interface(_root, fonts, options) {
 
         if (type === "slider") {
             element.addEventListener("change", onChange)
+            element.addEventListener("change", onSlide)
             element.val = opt.init
             setInputCss(keyToCss[key], opt.init + opt.unit)
         } else if (type === "dropdown") {
@@ -1132,16 +1377,25 @@ function Interface(_root, fonts, options) {
      * @param {*} e 
      */
     function onChange(e) {
-        var property = e.target.dataset.fsjs
+        var key = e.target.dataset.fsjs
 
-        sendEvent(property)
+        sendEvent(key)
+    }
+
+    function onSlide(e) {
+        var key = e.target.dataset.fsjs,
+            label = root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
+
+        if (label) {
+            label.textContent = getValue(key)
+        }
     }
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        var property = "opentype"
+        var key = "opentype"
 
-        sendEvent(property)
+        sendEvent(key)
     }
 
     /**
@@ -1321,158 +1575,8 @@ function Interface(_root, fonts, options) {
         setStatusClass: setStatusClass
     }
 }
-module.exports = Interface
-},{"./errors":3,"./helpers":7,"./selection":10,"./uielements":11}],9:[function(_dereq_,module,exports){
-var Fontloader = _dereq_("./fontloader")
-
-function Preloader() {
-
-    var queue = [],
-        autoload = true,
-        finishedCallback = null
-
-    function load(fonts, callback) {
-
-        // clone the fonts array
-        queue = fonts.slice(0)
-        autoload = true
-
-        if (typeof(callback) === "function") {
-            finishedCallback = callback
-        }
-
-        loadNext()
-    }
-
-    function pause() {
-        autoload = false
-    }
-
-    function resume() {
-        autoload = true
-        if (queue.length > 0) {
-            loadNext()
-        } else {
-            if (finishedCallback) {
-                finishedCallback()
-            }
-        }
-    }
-
-    function loadNext() {
-        if (queue.length > 0 && autoload) {
-            Fontloader.fromFiles(queue[0].files, function () {
-                queue.shift()
-
-                if (queue.length === 0 && finishedCallback) {
-                    finishedCallback()
-                }
-                
-                if (queue.length > 0 && autoload) {
-                    loadNext()
-                }
-            })
-        }
-    }
-
-    return {
-        load: load,
-        pause: pause,
-        resume: resume
-    }
-}
-
-
-module.exports = Preloader
-},{"./fontloader":5}],10:[function(_dereq_,module,exports){
-/**
- * Helper module to deal with caret position
- */
-function Selection () {
-
-    // from https://stackoverflow.com/a/4812022/999162
-    var setSelectionByCharacterOffsets = null;
-
-    if (window.getSelection && document.createRange) {
-        setSelectionByCharacterOffsets = function (containerEl, start, end) {
-            var charIndex = 0,
-                range = document.createRange();
-            range.setStart(containerEl, 0);
-            range.collapse(true);
-            var nodeStack = [containerEl],
-                node, foundStart = false,
-                stop = false;
-
-            while (!stop && (node = nodeStack.pop())) {
-                if (node.nodeType == 3) {
-                    var nextCharIndex = charIndex + node.length;
-                    if (!foundStart && start >= charIndex && start <= nextCharIndex) {
-                        range.setStart(node, start - charIndex);
-                        foundStart = true;
-                    }
-                    if (foundStart && end >= charIndex && end <= nextCharIndex) {
-                        range.setEnd(node, end - charIndex);
-                        stop = true;
-                    }
-                    charIndex = nextCharIndex;
-                } else {
-                    var i = node.childNodes.length;
-                    while (i--) {
-                        nodeStack.push(node.childNodes[i]);
-                    }
-                }
-            }
-
-            var sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-        };
-    } else if (document.selection) {
-        setSelectionByCharacterOffsets = function (containerEl, start, end) {
-            var textRange = document.body.createTextRange();
-            textRange.moveToElementText(containerEl);
-            textRange.collapse(true);
-            textRange.moveEnd("character", end);
-            textRange.moveStart("character", start);
-            textRange.select();
-        };
-    }
-
-
-    // From https://stackoverflow.com/a/4812022/999162
-    function getCaretCharacterOffsetWithin(element) {
-        var caretOffset = 0;
-        var doc = element.ownerDocument || element.document;
-        var win = doc.defaultView || doc.parentWindow;
-        var sel;
-        if (typeof win.getSelection != "undefined") {
-            sel = win.getSelection();
-            if (sel.rangeCount > 0) {
-                var range = win.getSelection().getRangeAt(0);
-                var preCaretRange = range.cloneRange();
-                preCaretRange.selectNodeContents(element);
-                preCaretRange.setEnd(range.endContainer, range.endOffset);
-                caretOffset = preCaretRange.toString().length;
-            }
-        } else if ((sel = doc.selection) && sel.type != "Control") {
-            var textRange = sel.createRange();
-            var preCaretTextRange = doc.body.createTextRange();
-            preCaretTextRange.moveToElementText(element);
-            preCaretTextRange.setEndPoint("EndToEnd", textRange);
-            caretOffset = preCaretTextRange.text.length;
-        }
-        return caretOffset;
-    }
-
-    return {
-        setCaret: setSelectionByCharacterOffsets,
-        getCaret: getCaretCharacterOffsetWithin
-    };
-
-}
-
-module.exports = Selection
-},{}],11:[function(_dereq_,module,exports){
+module.exports = UI
+},{"./errors":4,"./helpers":8,"./selection":10,"./uielements":12}],12:[function(_dereq_,module,exports){
 
 var helpers = _dereq_("./helpers")
 /**
@@ -1540,22 +1644,31 @@ function UIElements(root, options) {
         return input
     }
 
-    function dropdown(key, opt) {
-        var dropdown = document.createElement("select")
-        dropdown.dataset.fsjs = key
+    function dropdown(key, opt, node) {
+        var dropdown = helpers.isNode(node) ? node : document.createElement("select")
 
-        for (var o in opt.choices) {
-            var option = document.createElement("option"),
-                choice = parseChoice(opt.choices[o])
+        if ("choices" in opt === false || opt.choices.length < 1) {
+            return false
+        }
+
+        for (var c = 0; c < opt.choices.length; c++) {
+            var choice = parseChoice(opt.choices[c]),
+                option = dropdown.querySelector("option[value='" + choice.val + "']")
+                
+            if (!helpers.isNode(option)) {
+                option = document.createElement("option")
+                option.appendChild(document.createTextNode(choice.text))
+                dropdown.appendChild(option)
+            }
 
             option.value = choice.val
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
             }
-            option.appendChild(document.createTextNode(choice.text))
-            dropdown.appendChild(option)
         }
 
+        dropdown.dataset.fsjs = key
+        
         return dropdown
     }
 
@@ -1691,5 +1804,5 @@ function UIElements(root, options) {
 }
 
 module.exports = UIElements
-},{"./helpers":7}]},{},[6])(6)
+},{"./helpers":8}]},{},[7])(7)
 });

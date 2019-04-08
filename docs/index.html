@@ -139,14 +139,11 @@ var <em>options</em> = {
             min: 60,
             max: 120,
         },
-        fontfamily: {
-            label: "Pick a font"
-        }
-    },
-
-    <em>// Using the ´generate´ option any UI elements not in the ´ui´ option</em>
-    <em>// will be automatically instantiated</em>
-    // generate: true
+        <em>// Instead of defining the specifics of a ui element,
+        // simply setting in to true will make it
+        // get rendered in the UI with defaults</em>
+        fontfamily: true
+    }
 }
 
 var fonts = [
@@ -174,7 +171,7 @@ Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
         of Fontsampler.
     </p>
     <p>To link Fontsampler to existing DOM nodes, the UI elements need to have specific
-        data-property attributes to be recognized. Missing attributes (such as min, max, step,
+        data-fsjs attributes to be recognized. Missing attributes (such as min, max, step,
         data-unit on sliders) will be automatically added, but you can also use them to configure
         the Fontsampler.
     </p>
@@ -186,14 +183,14 @@ Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
     <code>
 …
 For the type tester element:
-&lt;div <em>data-property="tester"</em>&gt;Type here to test&lt;/div&gt;
+&lt;div <em>data-fsjs="tester"</em>&gt;Type here to test&lt;/div&gt;
 …
 For fontsize, linheight, letterspacing:
 &lt;label for="fontsize"&gt;…&lt;span class="fontsampler-label-value"&gt;12&lt;/span&gt;px&lt;/label&gt;
-&lt;input <em>data-property="fontsize" min="8" max="96" step="1" data-init="14" data-unit="px"</em>&gt;
+&lt;input <em>data-fsjs="fontsize" min="8" max="96" step="1" data-init="14" data-unit="px"</em>&gt;
 …
 For the fontfamily dropdown
-&lt;select <em>data-property="fontfamily"</em>&gt;
+&lt;select <em>data-fsjs="fontfamily"</em>&gt;
     &lt;option value="My font name" <em>data-fontname</em>="My font name"
         <em>data-woff</em>="path/to/font-file.woff" 
         <em>data-woff2</em>="path/to/font-file.woff2"&gt;My font name&lt;/option&gt;
@@ -204,9 +201,9 @@ For the fontfamily dropdown
     <div id="demo-dom" class="demo">
         <div>
             <div>
-                <select autocomplete="off" data-property="fontfamily">
-                    <option value="Alegreya Regular" data-name="Alegreya Regular" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2" selected="selected">Alegreya Regular</option>
-                    <option value="Alegreya Italic" data-name="Alegreya Italic" data-woff="./fonts/alegreya/alegreya-v12-latin-italic.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-italic.woff2">Alegreya Italic</option>
+                <select autocomplete="off" data-fsjs="fontfamily">
+                    <option value="Alegreya Regular" data-fontname="Alegreya Regular" data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2" selected="selected">Alegreya Regular</option>
+                    <option value="Alegreya Italic" data-fontname="Alegreya Italic" data-woff="./fonts/alegreya/alegreya-v12-latin-italic.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-italic.woff2">Alegreya Italic</option>
                 </select>
             </div>
             <div>
@@ -214,7 +211,7 @@ For the fontfamily dropdown
                     <span class="fontsampler-label-text">Size</span>
                     <span class="label"><span class="fontsampler-label-value">8</span><span class="fontsampler-label-unit">px</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="fontsize" data-unit="px" min="8" max="96" step="1" data-init="48">
+                        <input autocomplete="off" type="range" data-fsjs="fontsize" data-unit="px" min="8" max="96" step="1" data-init="48">
                     </div>
                 </label>
             </div>
@@ -223,7 +220,7 @@ For the fontfamily dropdown
                     <span class="fontsampler-label-text">Leading</span>
                     <span class="label"><span class="fontsampler-label-value">120</span><span class="fontsampler-label-unit">%</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="lineheight" data-unit="%" min="60" max="200" step="10" data-init="120">
+                        <input autocomplete="off" type="range" data-fsjs="lineheight" data-unit="%" min="60" max="200" step="10" data-init="120">
                     </div>
                 </label>
             </div>
@@ -232,12 +229,12 @@ For the fontfamily dropdown
                     <span class="fontsampler-label-text">Letterspacing</span>
                     <span class="label"><span class="fontsampler-label-value">120</span><span class="fontsampler-label-unit">%</span></span>
                     <div class="range">
-                        <input autocomplete="off" type="range" data-property="letterspacing" data-unit="em" min="-0.05" max="0.05" step="0.01" data-init="0">
+                        <input autocomplete="off" type="range" data-fsjs="letterspacing" data-unit="em" min="-0.05" max="0.05" step="0.01" data-init="0">
                     </div>
                 </label>
             </div>
         </div>
-        <div data-property="tester" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+        <div data-fsjs="tester" contenteditable="true" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             <span>Demo from DOM & no skin applied</span>
         </div>
     </div>

@@ -1200,11 +1200,11 @@ var between = exports.between = function between(pos, min, max) {
 });
 
 },{}],3:[function(_dereq_,module,exports){
-var events = {
+
+module.exports = {
     "init": "fontsampler.events.init"
 }
 
-module.exports = events
 },{}],4:[function(_dereq_,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
@@ -1301,11 +1301,34 @@ function isNode(node) {
     return typeof(node) === "object" && node !== null && "nodeType" in node
 }
 
+/**
+ * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
+ * @method flattenDeep
+ * @param array {Array}
+ * @return {Array} flatten array
+ */
+function flattenDeep(array) {
+    return array.reduce((acc, current) => {
+        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+    }, []);
+}
+
+function arrayUnique(a) {
+    if (!Array.isArray(a)) {
+        return false
+    }
+    return a.filter(function(value, index, self) {
+        return self.indexOf(value) === index
+    }, a)
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
-    isNode: isNode
+    flattenDeep: flattenDeep,
+    isNode: isNode,
+    arrayUnique: arrayUnique
 }
 },{}],5:[function(_dereq_,module,exports){
 var rangeSlider = _dereq_("../node_modules/rangeslider-pure/dist/range-slider")
@@ -1331,6 +1354,8 @@ function Skin(FS) {
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,
+                // utilise the more granular events offered by the skin
+                // default html range inputs only trigger on change
                 onSlide: updateSlider,
                 onSlideEnd: updateSlider
             })

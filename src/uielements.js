@@ -65,22 +65,31 @@ function UIElements(root, options) {
         return input
     }
 
-    function dropdown(key, opt) {
-        var dropdown = document.createElement("select")
-        dropdown.dataset.fsjs = key
+    function dropdown(key, opt, node) {
+        var dropdown = helpers.isNode(node) ? node : document.createElement("select")
 
-        for (var o in opt.choices) {
-            var option = document.createElement("option"),
-                choice = parseChoice(opt.choices[o])
+        if ("choices" in opt === false || opt.choices.length < 1) {
+            return false
+        }
+
+        for (var c = 0; c < opt.choices.length; c++) {
+            var choice = parseChoice(opt.choices[c]),
+                option = dropdown.querySelector("option[value='" + choice.val + "']")
+                
+            if (!helpers.isNode(option)) {
+                option = document.createElement("option")
+                option.appendChild(document.createTextNode(choice.text))
+                dropdown.appendChild(option)
+            }
 
             option.value = choice.val
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
             }
-            option.appendChild(document.createTextNode(choice.text))
-            dropdown.appendChild(option)
         }
 
+        dropdown.dataset.fsjs = key
+        
         return dropdown
     }
 

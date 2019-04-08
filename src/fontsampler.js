@@ -7,217 +7,210 @@
  * @copyright 2019 Johannes Neumeier
  * @license GNU GPLv3
  */
-
-// var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
 var extend = require("../node_modules/extend")
 
 var Fontloader = require("./fontloader")
-var Interface = require("./interface")
+var Interface = require("./ui")
 var Preloader = require("./preloader")
-var errors = require("./errors")
-var events = require("./events")
 var helpers = require("./helpers")
 
-function Fontsampler(root, fonts, opt) {
+var errors = require("./errors")
+var events = require("./events")
+var _defaults = require("./defaults")
 
-    console.debug("Fontsampler()", root, fonts, opt, this)
+/**
+ * The main constructor for setting up a new Fontsampler instance
+ * @param Node root 
+ * @param Object | null fonts 
+ * @param Object | null opt 
+ */
+function Fontsampler(_root, _fonts, _options) {
+    console.debug("Fontsampler()", _root, _fonts, _options)
 
+    var ui, options, fonts,
+        preloader = new Preloader(),
+        passedInOptions = false,
+        // deep clone the _defaults
+        defaults = (JSON.parse(JSON.stringify(_defaults))) 
+
+    // Make sure new instances are create with new Fontsampler
+    // this will === window if Fontsampler() is used without
+    // the new keyword
     if (this === window) {
         throw new Error(errors.newInit)
     }
 
-    var extractedFonts,
-        extractedOptions = false,
-        interface,
-        preloader = new Preloader(),
-        defaults
-        
+    // At the very least confirm a valid root element to render to
+    if (!_root) {
+        throw new Error(errors.missingRoot + _root)
+    }
+    this.root = _root
     this.initialized = false
-    
-    // Check for a root element to render to
-    if (!root) {
-        throw new Error(errors.missingRoot + root)
+
+    // Parse fonts and options from the passed in objects or possibly
+    // from the root node data attributes
+    options = parseOptions.call(this, _options)
+    fonts = parseFonts.call(this, _fonts)
+
+    // options.generate = true
+    ui = Interface(this.root, fonts, options)
+
+    function parseFonts(fonts) {
+        var extractedFonts = extractFontsFromDOM.call(this)
+
+        // Extract fonts; Look first on root element, then on select, then in
+        // passed in fonts Array
+        if ((!fonts || fonts.length < 1) && extractedFonts) {
+            fonts = extractedFonts
+        }
+        if (!fonts) {
+            throw new Error(errors.noFonts)
+        }
+        if (!validateFontsFormatting(fonts)) {
+            console.error(fonts)
+            throw new Error(errors.initFontFormatting)
+        }
+
+        return fonts
     }
 
-    // A minimal default setup requiring only passed in font(s) and not generating any
-    // interface elements except a tester input
-    defaults = {
-        initialText: "",
-        multiline: true,
-        lazyload: false,
-        generate: false,
-        classes: {
-            rootClass: "fontsamplerjs",
-            initClass: "fsjs-initialized",
-            loadingClass: "fsjs-loading",
-            preloadingClass: "fsjs-preloading",
-            wrapperClass: "fsjs-wrapper",
-            blockClass: "fsjs-block",
-            elementClass: "fsjs-element",
-            labelClass: "fsjs-label",
-            labelTextClass: "fsjs-label-text",
-            labelValueClass: "fsjs-label-value",
-            labelUnitClass: "fsjs-label-unit",
-            buttonClass: "fsjs-button",
-            buttonSelectedClass: "fsjs-button-selected",
-        },
-        order: [
-            ["fontsize", "lineheight", "letterspacing"],
-            ["fontfamily", "language"],
-            ["alignment", "direction", "opentype"], 
-            "tester"
-        ],
-        ui: {
-            tester: {
-                editable: true,
-                label: false
-            },
-            fontfamily: {
-                label: "Font",
-                init: "",
-            },
-            fontsize: {
-                unit: "px",
-                init: 36,
-                min: 8,
-                max: 96,
-                step: 1,
-                label: "Size"
-            },
-            lineheight: {
-                unit: "%",
-                init: 100,
-                min: 60,
-                max: 120,
-                step: 5,
-                label: "Leading"
-            },
-            letterspacing: {
-                unit: "em",
-                init: 0,
-                min: -0.1,
-                max: 0.1,
-                step: 0.01,
-                label: "Letterspacing"
-            },
-            alignment: {
-                choices: ["left|Left", "center|Centered", "right|Right"],
-                init: "left",
-                label: "Alignment"
-            },
-            direction: {
-                choices: ["ltr|Left to right", "rtl|Right to left"],
-                init: "ltr",
-                label: "Direction"
-            },
-            language: {
-                choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
-                init: "en-Gb",
-                label: "Language"
-            },
-            opentype: {
-                choices: ["liga|Ligatures", "frac|Fractions"],
-                init: ["liga"],
-                label: "Opentype features"
+
+    /**
+     * 
+     * @param {*} opt 
+     * By default:
+     * - dont generate any DOM
+     * - if an element is set either in ui.xxx or order is set, generate those
+     * - if anything is present in the dom, validate and use those
+     * ALWAYS append tester if it is not present
+     */
+    function parseOptions(opt) {
+        var extractedOptions = false,
+            nodesInDom = this.root.querySelectorAll("[data-fsjs]"),
+            blocksInDom = [],
+            blocksInOrder = [],
+            blocksInUI = [],
+            blocks = []
+
+        // Extend or use the default options in order of:
+        // defaults < options < data-options
+        if ("options" in this.root.dataset) {
+            try {
+                extractedOptions = JSON.parse(this.root.dataset.options)
+            } catch (e) {
+                console.error(e)
             }
         }
-    }
 
-    this.root = root
-
-    // Set all defaults.ui.xxx.render = false if not passed in
-    // etc.
-    for (var key in defaults.ui) {
-        if (opt && "generate" in opt) {
-            defaults.ui[key].render = opt.generate
+        // Determine if we got any passed in options at all
+        if (typeof(opt) === "object" && typeof(extractedOptions) === "object") {
+            passedInOptions = extend(true, opt, extractedOptions)
+        } else if (typeof(opt) === "object") {
+            passedInOptions = opt
+        } else if (typeof(extractedOptions) === "object") {
+            passedInOptions = extractedOptions
+        }
+        
+        if (typeof(passedInOptions) === "object") {
+            // If any of the passed in options.ui.xxx are simply "true" instead of
+            // an boolean let’s copy the default values for this ui element
+            if ("ui" in passedInOptions === true) {
+                for (var u in passedInOptions.ui) {
+                    if (passedInOptions.ui.hasOwnProperty(u)) {
+                        if (typeof(passedInOptions.ui[u]) !== "object") {
+                            passedInOptions.ui[u] = defaults.ui[u]
+                        }
+                    }
+                }
+            }
+            // Extend the defaults
+            options = extend(true, defaults, passedInOptions)
         } else {
-            defaults.ui[key].render = !!(opt && opt.ui && key in opt.ui)
+            options = defaults
         }
-    }
-    // Always render a tester by default!
-    defaults.ui.tester.render = true
-    
-    // Extend or use the default options in order of
-    // defaults < options < data-options
-    if ("options" in root.dataset) {
-        try {
-        extractedOptions = JSON.parse(root.dataset.options)
-        } catch (e) {
-            console.error(e)
+        
+        // Go through all DOM UI nodes, passed in ui ´order´ options and ´ui´ options
+        // to determine what blocks are in the Fontsampler, and make sure all defined
+        // blocks get rendered. "Defined" can be a combination of:
+        // · block in the DOM
+        // · block in options.order
+        // · block in options.ui
+        if (nodesInDom.length > 0) {
+            for (var b = 0; b < nodesInDom.length; b++) {
+                blocksInDom[b] = nodesInDom[b].dataset.fsjs
+            }
         }
-    }
+        blocksInOrder = typeof(opt) === "object" && "order" in opt ? helpers.flattenDeep(opt.order) : []
+        blocksInUI = typeof(opt) === "object" && "ui" in opt ? Object.keys(opt.ui) : []
+        blocks = blocksInDom.concat(blocksInOrder, blocksInUI)
+        blocks = helpers.arrayUnique(blocks)
 
-    if (typeof(opt) === "object" && typeof(extractedOptions) === "object") {
-        options = extend(true, defaults, opt, extractedOptions)
-    } else if (typeof(opt) === "object") {
-        options = extend(true, defaults, opt)
-    } else if (typeof(extractedOptions) === "object") {
-        options = extend(true, defaults, extractedOptions)
-    } else {
-        options = defaults
-    }
+        // Always make sure we are rendering at least a tester, no matter the configuration
+        if (blocks.indexOf("tester") === -1) {
+            blocks.push("tester")
+        }
+        
+        // A passed in UI order superseeds, not extends!, the default
+        if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
+            options.order = opt.order
+        } else if (
+            typeof extractedOptions === "object" && "order" in extractedOptions &&
+            Array.isArray(extractedOptions.order) && extractedOptions.order.length) {
+            options.order = extractedOptions.order
+        }
 
-    // A passed in UI order superseeds, not extends!, the default
-    if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
-        options.order = opt.order
-    }
+        // Then: check DOM and UI for any other present blocks and append them
+        // in case they are missing
+        var blocksInOrderNow = helpers.flattenDeep(options.order)
+        for (var i = 0; i < blocks.length; i++) {
+            if (blocksInOrderNow.indexOf(blocks[i]) === -1) {
+                options.order.push(blocks[i])
+            }
+        }
 
-    // Extract fonts; Look first on root element, then on select, then in
-    // passed in fonts Array
-    extractedFonts = extractFontsFromDOM()
-    if ((!fonts || fonts.length < 1) && extractedFonts) {
-        fonts = extractedFonts
+        return options
     }
-    if (!fonts) {
-        throw new Error(errors.noFonts)
-    }
-    if (!validateFontsFormatting(fonts)) {
-        console.error(fonts)
-        throw new Error(errors.initFontFormatting)
-    }
-
-    interface = Interface(root, fonts, options)
 
     // Setup the interface listeners and delegate events back to the interface
     function setupUIEvents() {
         // sliders
         this.root.addEventListener("fontsampler.onfontsizechanged", function() {
-            var val = interface.getCssValue("fontsize")
-            interface.setInputCss(interface.getCssAttrForKey("fontsize"), val)
+            var val = ui.getCssValue("fontsize")
+            ui.setInputCss(ui.getCssAttrForKey("fontsize"), val)
         })
         this.root.addEventListener("fontsampler.onlineheightchanged", function() {
-            var val = interface.getCssValue("lineheight")
-            interface.setInputCss(interface.getCssAttrForKey("lineheight"), val)
+            var val = ui.getCssValue("lineheight")
+            ui.setInputCss(ui.getCssAttrForKey("lineheight"), val)
         })
         this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
-            var val = interface.getCssValue("letterspacing")
-            interface.setInputCss(interface.getCssAttrForKey("letterspacing"), val)
+            var val = ui.getCssValue("letterspacing")
+            ui.setInputCss(ui.getCssAttrForKey("letterspacing"), val)
         })
 
         // checkbox
         this.root.addEventListener("fontsampler.onopentypechanged", function() {
-            var val = interface.getOpentype()
-            interface.setInputOpentype(val)
+            var val = ui.getOpentype()
+            ui.setInputOpentype(val)
         })
 
         // dropdowns
         this.root.addEventListener("fontsampler.onfontfamilychanged", function() {
-            var val = interface.getValue("fontfamily")
+            var val = ui.getValue("fontfamily")
             loadFont(val)
         })
         this.root.addEventListener("fontsampler.onlanguagechanged", function() {
-            var val = interface.getValue("language")
-            interface.setInputAttr("lang", val)
+            var val = ui.getValue("language")
+            ui.setInputAttr("lang", val)
         })
 
         // buttongroups
         this.root.addEventListener("fontsampler.onalignmentchanged", function() {
-            var val = interface.getButtongroupValue("alignment")
-            interface.setInputCss("textAlign", val)
+            var val = ui.getButtongroupValue("alignment")
+            ui.setInputCss("textAlign", val)
         })
         this.root.addEventListener("fontsampler.ondirectionchanged", function() {
-            var val = interface.getButtongroupValue("direction")
-            interface.setInputAttr("dir", val)
+            var val = ui.getButtongroupValue("direction")
+            ui.setInputAttr("dir", val)
         })
     }
 
@@ -249,13 +242,13 @@ function Fontsampler(root, fonts, opt) {
     }
 
     function extractFontsFromDOM() {
-        var select = root.querySelector("[data-property='fontfamily']"),
+        var select = this.root.querySelector("[data-fsjs='fontfamily']"),
             options = [],
             fonts = []
 
         // First try to get data-fonts or data-woff/2 on the root element
         // If such are found, return them
-        var rootFonts = extractFontsFromNode(root, true)
+        var rootFonts = extractFontsFromNode(this.root, true)
         if (rootFonts) {
             return rootFonts
         }
@@ -268,6 +261,7 @@ function Fontsampler(root, fonts, opt) {
 
         options = select.querySelectorAll("option")
         for (i = 0; i < options.length; i++) {
+            console.log("looping options")
             var opt = options[i],
                 extractedFonts = extractFontsFromNode(opt, false)
 
@@ -326,7 +320,7 @@ function Fontsampler(root, fonts, opt) {
 
         preloader.pause()
 
-        interface.setStatusClass(options.loadingClass, true)
+        ui.setStatusClass(options.loadingClass, true)
         files = []
         if (typeof(indexOrKey) === "string") {
             files = fonts.filter(function(value, index) {
@@ -337,8 +331,8 @@ function Fontsampler(root, fonts, opt) {
         }
 
         Fontloader.fromFiles(files, function(f) {
-            interface.setInputCss("fontFamily", f.family)
-            interface.setStatusClass(options.loadingClass, false)
+            ui.setInputCss("fontFamily", f.family)
+            ui.setStatusClass(options.loadingClass, false)
 
             preloader.resume()
         })
@@ -350,22 +344,21 @@ function Fontsampler(root, fonts, opt) {
 
     this.init = function() {
         console.debug("Fontsampler.init()", this, this.root)
-        interface.init()
+        ui.init()
         setupUIEvents.call(this)
         loadFont(0)
 
         if (options.lazyload) {
-            interface.setStatusClass(options.preloadingClass, true)
+            ui.setStatusClass(options.preloadingClass, true)
             preloader.load(fonts, function() {
-                interface.setStatusClass(options.preloadingClass, false)
+                ui.setStatusClass(options.preloadingClass, false)
             })
         }
 
         this.initalized = true
-        helpers.nodeAddClass(root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, options.classes.initClass)
 
-
-        root.dispatchEvent(new CustomEvent(events.init))
+        this.root.dispatchEvent(new CustomEvent(events.init))
 
         // For convenience also have the init method return the instance
         // This way you can create the object and init it, e.g.
@@ -387,12 +380,12 @@ function Fontsampler(root, fonts, opt) {
 
         // Only act if there is a valid callback
         if (typeof(callback) === "function") {
-            root.addEventListener(event, callback)
+            this.root.addEventListener(event, callback)
         }
     }
 
-    this.setText = function (text) {
-        interface.setInputText(text)
+    this.setText = function(text) {
+        ui.setInputText(text)
     }
 
     return this
