@@ -155,6 +155,7 @@
   border: 1px solid #CCC;
   border-radius: 2px;
   padding: 0.1em 0.5em 0;
+  padding-right: 1.5em;
   line-height: 2em;
   -o-text-overflow: ellipsis;
   text-overflow: ellipsis;

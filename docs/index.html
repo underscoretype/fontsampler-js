@@ -445,8 +445,11 @@ ui: {
 
     // The drop-down for picking fonts
     fontfamily: {
-        // Currently only has this option
-        label: "Font"
+        label: "Font",
+
+        // Supply the exact name of the Font (fontname, not file!) to be selected
+        // and loaded first, by default the first font passed in
+        init: "" 
     },
 
     // The set of buttons controlling alignment

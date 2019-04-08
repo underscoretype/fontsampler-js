@@ -50,6 +50,7 @@ $dk-disabled-color: #BBBBBB !default;
     border: $borderWidth solid $dk-border-color;
     border-radius: $dk-border-radius;
     padding: $buttonPadding;
+    padding-right: 1.5em;
     line-height: $buttonHeight;
     @include dk-txtflow(ellipsis);
 

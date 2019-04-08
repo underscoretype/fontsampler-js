@@ -27,6 +27,7 @@ function Fontsampler(root, fonts, opt) {
     }
 
     var extractedFonts,
+        extractedOptions = false,
         interface,
         preloader = new Preloader(),
         defaults
@@ -72,7 +73,8 @@ function Fontsampler(root, fonts, opt) {
                 label: false
             },
             fontfamily: {
-                label: "Font"
+                label: "Font",
+                init: "",
             },
             fontsize: {
                 unit: "px",
@@ -123,7 +125,7 @@ function Fontsampler(root, fonts, opt) {
 
     this.root = root
 
-    // defaults.ui.fontsize.render = false if not passed in
+    // Set all defaults.ui.xxx.render = false if not passed in
     // etc.
     for (var key in defaults.ui) {
         if (opt && "generate" in opt) {
@@ -134,10 +136,23 @@ function Fontsampler(root, fonts, opt) {
     }
     // Always render a tester by default!
     defaults.ui.tester.render = true
+    
+    // Extend or use the default options in order of
+    // defaults < options < data-options
+    if ("options" in root.dataset) {
+        try {
+        extractedOptions = JSON.parse(root.dataset.options)
+        } catch (e) {
+            console.error(e)
+        }
+    }
 
-    // Extend or use the default options
-    if (typeof opt === "object") {
+    if (typeof(opt) === "object" && typeof(extractedOptions) === "object") {
+        options = extend(true, defaults, opt, extractedOptions)
+    } else if (typeof(opt) === "object") {
         options = extend(true, defaults, opt)
+    } else if (typeof(extractedOptions) === "object") {
+        options = extend(true, defaults, extractedOptions)
     } else {
         options = defaults
     }

@@ -74,6 +74,9 @@ function UIElements(root, options) {
                 choice = parseChoice(opt.choices[o])
 
             option.value = choice.val
+            if ("init" in opt && opt.init === choice.text) {
+                option.selected = true
+            }
             option.appendChild(document.createTextNode(choice.text))
             dropdown.appendChild(option)
         }

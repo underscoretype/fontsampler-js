@@ -199,7 +199,6 @@ function Interface(_root, fonts, options) {
             opt = options.ui[key]
 
         if (block) {
-            console.log(key, "block in DOM")
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
