@@ -1,0 +1,330 @@
+@charset "UTF-8";
+.fsjs-skin {
+  transition: opacity 0.2s ease-out;
+  opacity: 0;
+  /* The bare minimum styling applied to all demo Fontsamplers */
+  /**
+   * A customized and trimmed down version of the rangeSlider.js SCSS
+   */
+}
+.fsjs-skin.fsjs-initialized {
+  opacity: 1;
+  display: block;
+}
+.fsjs-skin .fsjs-block-tester {
+  transition: opacity 0.2s ease-out;
+  opacity: 1;
+}
+.fsjs-skin.loading .fsjs-block-tester {
+  opacity: 0;
+}
+.fsjs-skin > .fsjs-wrapper {
+  display: flex;
+  justify-content: space-between;
+}
+.fsjs-skin .fsjs-block-tester {
+  display: block;
+}
+.fsjs-skin .fsjs-block {
+  box-sizing: border-box;
+  padding: 0 5px;
+  position: relative;
+  margin: 5px;
+  width: 100%;
+}
+.fsjs-skin .fsjs-label {
+  line-height: 1.5em;
+}
+.fsjs-skin .fsjs-block-type-slider .fsjs-label,
+.fsjs-skin .fsjs-block-type-slidergroup .fsjs-label {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+}
+.fsjs-skin .fsjs-block-type-slider .fsjs-label span:first-child,
+.fsjs-skin .fsjs-block-type-slidergroup .fsjs-label span:first-child {
+  margin-right: auto;
+}
+.fsjs-skin .fsjs-block-type-slider .fsjs-label .fsjs-label-unit:before,
+.fsjs-skin .fsjs-block-type-slidergroup .fsjs-label .fsjs-label-unit:before {
+  content: " ";
+}
+.fsjs-skin .fsjs-block-opentype .fsjs-label {
+  display: block;
+  justify-content: flex-start;
+}
+.fsjs-skin [contenteditable] {
+  outline: none;
+}
+.fsjs-skin .fsjs-button, .fsjs-skin .fsjs-block-type-buttongroup button {
+  background: #FDFDFD;
+  border: 1px solid #CCC;
+  border-radius: 2px;
+  color: inherit;
+  cursor: pointer;
+  flex-grow: 1;
+  font-family: inherit;
+  font-size: inherit;
+  font-style: inherit;
+  line-height: 2em;
+  padding: 0.1em 0.5em 0;
+}
+.fsjs-skin .fsjs-button:hover, .fsjs-skin .fsjs-block-type-buttongroup button:hover, .fsjs-skin .fsjs-button:focus, .fsjs-skin .fsjs-block-type-buttongroup button:focus {
+  background: #f0f0f0;
+}
+.fsjs-skin .fsjs-button.fsjs-button-selected, .fsjs-skin .fsjs-block-type-buttongroup button.fsjs-button-selected {
+  background: #f0f0f0;
+}
+.fsjs-skin .fsjs-block-type-buttongroup > [data-property] {
+  display: flex;
+}
+.fsjs-skin .fsjs-block-type-buttongroup button {
+  border-radius: 0;
+}
+.fsjs-skin .fsjs-block-type-buttongroup button:first-of-type {
+  border-top-left-radius: 2px;
+  border-bottom-left-radius: 2px;
+}
+.fsjs-skin .fsjs-block-type-buttongroup button:last-of-type {
+  border-top-right-radius: 2px;
+  border-bottom-right-radius: 2px;
+}
+.fsjs-skin .fsjs-block-type-buttongroup button + button {
+  margin-left: -1px;
+}
+.fsjs-skin .fsjs-block-type-checkboxes [data-fsjs] label {
+  cursor: pointer;
+  padding: 5px 0;
+  display: block;
+}
+.fsjs-skin .fsjs-block-type-checkboxes [data-fsjs] label:hover input[type=checkbox] + span:before, .fsjs-skin .fsjs-block-type-checkboxes [data-fsjs] label:focus input[type=checkbox] + span:before {
+  background: #f0f0f0;
+}
+.fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+}
+.fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox] + span {
+  position: relative;
+  padding-left: 23px;
+}
+.fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox] + span:before, .fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox] + span:after {
+  content: " ";
+  display: block;
+  border: 1px solid #333;
+  border-radius: 2px;
+  position: absolute;
+  left: 0;
+  top: -2px;
+  padding: 4px;
+  height: 10px;
+  width: 10px;
+}
+.fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox]:checked + span:after {
+  border-radius: 0;
+  background: #333;
+  padding: 0;
+  top: 2px;
+  left: 4px;
+}
+.fsjs-skin .dk-select,
+.fsjs-skin .dk-select *,
+.fsjs-skin .dk-select *:before,
+.fsjs-skin .dk-select *:after,
+.fsjs-skin .dk-select-multi,
+.fsjs-skin .dk-select-multi *,
+.fsjs-skin .dk-select-multi *:before,
+.fsjs-skin .dk-select-multi *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.fsjs-skin .dk-select,
+.fsjs-skin .dk-select-multi {
+  position: relative;
+  display: block;
+  vertical-align: middle;
+  cursor: pointer;
+}
+.fsjs-skin .dk-selected {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  position: relative;
+  background-color: #FDFDFD;
+  border: 1px solid #CCC;
+  border-radius: 2px;
+  padding: 0.1em 0.5em 0;
+  padding-right: 1.5em;
+  line-height: 2em;
+  -o-text-overflow: ellipsis;
+  text-overflow: ellipsis;
+}
+.fsjs-skin .dk-selected:before, .fsjs-skin .dk-selected:after {
+  content: "";
+  display: block;
+  position: absolute;
+  right: 0;
+}
+.fsjs-skin .dk-selected:before {
+  top: 50%;
+  border: solid transparent;
+  border-width: 0.25em 0.25em 0;
+  border-top-color: #333;
+  margin: -0.125em 0.5em 0 0;
+}
+.fsjs-skin .dk-selected:after {
+  top: 0;
+  height: 100%;
+  border-left: 1px solid #CCC;
+  margin: 0 1.5em 0 0;
+}
+.fsjs-skin .dk-selected-disabled {
+  color: #BBBBBB;
+}
+.fsjs-skin .dk-select .dk-select-options {
+  position: absolute;
+  display: none;
+  left: 0;
+  right: 0;
+}
+.fsjs-skin .dk-select-open-up .dk-select-options {
+  border-radius: 2px 2px 0 0;
+  margin-bottom: -1px;
+  bottom: 100%;
+}
+.fsjs-skin .dk-select-open-down .dk-select-options {
+  border-radius: 0 0 2px 2px;
+  margin-top: -1px;
+  top: 100%;
+}
+.fsjs-skin .dk-select-multi .dk-select-options {
+  max-height: 10em;
+}
+.fsjs-skin .dk-select-options {
+  background-color: white;
+  border: 1px solid #CCC;
+  border-radius: 2px;
+  list-style: none;
+  margin: 0;
+  max-height: 75vh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 0;
+  width: auto;
+  z-index: 100;
+}
+.fsjs-skin .dk-select-options-highlight .dk-option-selected {
+  background-color: transparent;
+  color: inherit;
+}
+.fsjs-skin .dk-option {
+  padding: 0.1em 0.5em 0;
+  line-height: 2em;
+}
+.fsjs-skin .dk-select-options .dk-option-highlight {
+  background-color: #f0f0f0;
+}
+.fsjs-skin .dk-select-options .dk-option-disabled {
+  color: #BBBBBB;
+  background-color: transparent;
+}
+.fsjs-skin .dk-select-options .dk-option-hidden {
+  display: none;
+}
+.fsjs-skin .dk-select-open-up .dk-select-options,
+.fsjs-skin .dk-select-open-down .dk-select-options,
+.fsjs-skin .dk-select-multi:focus .dk-select-options {
+  display: block;
+}
+.fsjs-skin .dk-selected:hover,
+.fsjs-skin .dk-selected:focus {
+  outline: none;
+  background: #f0f0f0;
+}
+.fsjs-skin .dk-select-disabled {
+  opacity: 0.6;
+  color: #BBBBBB;
+  cursor: not-allowed;
+}
+.fsjs-skin .dk-select-disabled .dk-selected:hover, .fsjs-skin .dk-select-disabled .dk-selected:focus {
+  border-color: inherit;
+}
+.fsjs-skin .dk-select-disabled .dk-selected:hover:before, .fsjs-skin .dk-select-disabled .dk-selected:focus:before {
+  border-top-color: inherit;
+}
+.fsjs-skin .dk-select-disabled .dk-selected:hover:after, .fsjs-skin .dk-select-disabled .dk-selected:focus:after {
+  border-left-color: inherit;
+}
+.fsjs-skin select[data-dkcacheid] {
+  display: none;
+}
+.fsjs-skin .rangeSlider {
+  margin: 0.5em auto;
+}
+.fsjs-skin .rangeSlider,
+.fsjs-skin .rangeSlider__fill {
+  display: block;
+  border-radius: 2px;
+}
+.fsjs-skin .rangeSlider {
+  position: relative;
+  background: #CCC;
+}
+.fsjs-skin .rangeSlider__horizontal {
+  height: 1px;
+  width: 100%;
+}
+.fsjs-skin .rangeSlider--disabled {
+  filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=40);
+  opacity: 0.4;
+}
+.fsjs-skin .rangeSlider__fill {
+  background: #CCC;
+  position: absolute;
+}
+.fsjs-skin .rangeSlider__fill__horizontal {
+  height: 100%;
+  top: 0;
+  left: 0;
+}
+.fsjs-skin .rangeSlider__handle {
+  cursor: pointer;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  background: #333;
+  border-radius: 50%;
+}
+.fsjs-skin .rangeSlider__handle__horizontal {
+  top: -4.5px;
+}
+.fsjs-skin .rangeSlider__handle:after {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: auto;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 0%);
+  background: transparent;
+  border-radius: 50%;
+}
+.fsjs-skin .rangeSlider__handle:active {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.12));
+}
+.fsjs-skin .rangeSlider__buffer {
+  position: absolute;
+  top: 3px;
+  height: 14px;
+  background: #2c3e50;
+  border-radius: 10px;
+}
