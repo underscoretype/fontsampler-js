@@ -187,6 +187,12 @@ function Fontsampler(_root, _fonts, _options) {
             ui.setInputCss(ui.getCssAttrForKey("letterspacing"), val)
         })
 
+        // slider groups
+        this.root.addEventListener("fontsampler.onvariationchanged", function () {
+            var val = ui.getVariation()
+            ui.setInputVariation(val)
+        })
+
         // checkbox
         this.root.addEventListener("fontsampler.onopentypechanged", function() {
             var val = ui.getOpentype()

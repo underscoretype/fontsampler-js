@@ -42,7 +42,8 @@ function UI(root, fonts, options) {
             alignment: "buttongroup",
             direction: "buttongroup",
             language: "dropdown",
-            opentype: "checkboxes"
+            opentype: "checkboxes",
+            variation: "slidergroup"
         },
         keyToCss = {
             "fontsize": "fontSize",
@@ -79,13 +80,6 @@ function UI(root, fonts, options) {
         }
         options.originalText = originalText
 
-
-        // // If no valid UI order is passed in fall back to the ui elements
-        // // Their order might be random, but it ensures each required element
-        // // is at least present
-        // if (!options.order || !Array.isArray(options.order)) {
-        //     options.order = Object.keys(ui)
-        // }
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -336,16 +330,40 @@ function UI(root, fonts, options) {
                 }
             }
         } else if (type === "checkboxes") {
+            // currently only opentype feature checkboxes
             var checkboxes = element.querySelectorAll("[data-feature]")
             if (checkboxes.length > 0) {
                 var features = {}
                 for (var c = 0; c < checkboxes.length; c++) {
-                    checkboxes[c].addEventListener("change", onCheck)
-                    if ("features" in checkboxes[c].dataset) {
-                        features[checkboxes[c].dataset.features] = checkboxes[c].checked ? "1" : "0"
+                    var checkbox = checkboxes[c]
+                    checkbox.addEventListener("change", onCheck)
+                    if ("features" in checkbox.dataset) {
+                        features[checkbox.dataset.features] = checkbox.checked ? "1" : "0"
                     }
                 }
                 setInputOpentype(features)
+            }
+        } else if (type === "slidergroup") {
+            // currently only variable font slider group
+            var nestedSliders = element.querySelectorAll("[data-fsjs-slider]")
+            if (nestedSliders.length > 0) {
+                var axes = {}
+                for (var a = 0; a < nestedSliders.length; a++) {
+                    var nestedSlider = nestedSliders[a]
+                    nestedSlider.addEventListener("change", function (e) {
+                        sendEvent(e.target.parentNode.dataset.fsjs)
+                    })
+                    nestedSlider.addEventListener("change", function (e) {
+                        var label = root.querySelector("[data-fsjs-for='" + e.target.dataset.axis + "'] .fsjs-label-value")
+                        if (label) {
+                            label.textContent = getVariation(e.target.dataset.axis)
+                        }
+                    })
+                    // set init values
+
+                    // element.val = opt.init
+                    // setInputCss(keyToCss[key], opt.init + opt.unit)
+                }
             }
         }
 
@@ -413,7 +431,6 @@ function UI(root, fonts, options) {
     function onClick(e) {
         var parent = e.currentTarget.parentNode,
             property = parent.dataset.fsjs,
-            // customEvent = new CustomEvent("fontsampler.on" + property + "clicked"),
             buttons = parent.querySelectorAll("[data-choice]")
 
         if (property in ui && ui[property] === "buttongroup") {
@@ -493,6 +510,35 @@ function UI(root, fonts, options) {
         }
     }
 
+    /**
+     * Return the current variation settings as object
+     * 
+     * If Axis is passed, only that axis’ numerical value is returned
+     * @param {*} axis 
+     */
+    function getVariation(axis) {
+        if (!blocks.variation) {
+            return false
+        }
+
+        var variations = blocks.variation.querySelectorAll("[data-axis]"),
+            input,
+            va = {}
+
+        if (variations) {
+            for (var v = 0; v < variations.length; v++) {
+                input = variations[v]
+                va[input.dataset.axis] = input.value
+            }
+        }
+
+        if (typeof(axis) === "string" && axis in va) {
+            return va[axis]
+        }
+
+        return va
+    }
+
     function getButtongroupValue(key) {
         var element = getElement(key),
             selected
@@ -545,13 +591,25 @@ function UI(root, fonts, options) {
         var parsed = [],
             val
         for (var key in features) {
-            if (features.hasOwnProperty(key) && key && key !== "undefined") {
+            if (features.hasOwnProperty(key) && key && typeof(key) !== "undefined") {
                 parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }
         }
         val = parsed.join(",")
 
         input.style["font-feature-settings"] = val
+    }
+    
+    function setInputVariation(variations) {
+        var parsed = []
+        for (var key in variations) {
+            if (variations.hasOwnProperty(key) && key && typeof(key) !== "undefined") {
+                parsed.push('"' + key + '" ' + (variations[key]))
+            }
+        }
+        val = parsed.join(",")
+
+        input.style["font-variation-settings"] = val
     }
 
     function setInputText(text) {
@@ -574,11 +632,13 @@ function UI(root, fonts, options) {
         getCssValue: getCssValue,
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,
+        getVariation: getVariation,
         getCssAttrForKey: getCssAttrForKey,
         getKeyForCssAttr: getKeyForCssAttr,
         setInputCss: setInputCss,
         setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,
+        setInputVariation: setInputVariation,
         setInputText: setInputText,
         setStatusClass: setStatusClass
     }

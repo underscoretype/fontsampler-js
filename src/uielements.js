@@ -14,19 +14,21 @@ function UIElements(root, options) {
             text = document.createElement("span"),
             val, unit
 
-        label.dataset.for = relatedInput
+        label.dataset.fsjsFor = relatedInput
         helpers.nodeAddClass(label, options.classes.labelClass)
 
         text.className = options.classes.labelTextClass
         text.appendChild(document.createTextNode(labelText))
         label.appendChild(text)
 
-        if (typeof(labelUnit) === "string" && labelValue !== "") {
+        if (labelValue !== "") {
             val = document.createElement("span")
             val.className = options.classes.labelValueClass
             val.appendChild(document.createTextNode(labelValue))
             label.appendChild(val)
+        }
 
+        if (typeof(labelUnit) === "string") {
             unit = document.createElement("span")
             unit.className = options.classes.labelUnitClass
             unit.appendChild(document.createTextNode(labelUnit))
@@ -60,9 +62,40 @@ function UIElements(root, options) {
             input.dataset.init = opt.init
         }
 
-        input.dataset.fsjs = key
+        if (key) {
+            input.dataset.fsjs = key
+        }
+        input.dataset.fsjsSlider = true
 
         return input
+    }
+
+    function slidergroup(key, opt, node) {
+        // console.warn("slidergroup", key, opt)
+
+        var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+
+        for (var s = 0; s < opt.axes.length; s++) {
+
+            if (opt.axes[s].label) {
+                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].code + "']")
+                if (!helpers.isNode(label)) {
+                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].code)
+                    slidergroup.appendChild(label)
+                }
+            }
+
+            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
+            if (!helpers.isNode(slider)) {
+                slider = this.slider(false, opt.axes[s])
+                slidergroup.appendChild(slider)
+            }
+            slider.dataset.axis = opt.axes[s].code
+        }
+
+        // slidergroup.data.fsjs = key
+
+        return slidergroup
     }
 
     function dropdown(key, opt, node) {
@@ -217,6 +250,7 @@ function UIElements(root, options) {
     return {
         dropdown: dropdown,
         slider: slider,
+        slidergroup: slidergroup,
         label: label,
         textfield: textfield,
         buttongroup: buttongroup,

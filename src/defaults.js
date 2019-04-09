@@ -78,6 +78,9 @@ module.exports = {
             choices: ["liga|Ligatures", "frac|Fractions"],
             init: ["liga"],
             label: "Opentype features"
+        },
+        variable: {
+            axes: []
         }
     }
 }

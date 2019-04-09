@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
+    <meta charset="utf8">
+    <!-- Just some styling for this documentaiton page -->
+    <link rel="stylesheet" href="assets/demo.css">
+
+    <!-- Fontsampler -->
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <!-- /Fontsampler -->
+</head>
+
+<body>
+    <header>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <h1><a href="./index.html">fontsampler-js</a> &rsaquo; lazyloading</h1>
+        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+    </header>
+
+    <h2>Variable Font demo</h2>
+    
+    <div id="demo-variable" class="demo">Variable Font support</div>
+    <div id="demo-variable-axes" class="demo">Variable Font support for any number of defined axes</div>
+    <p>Fontsampler supports any number of (manually defined) axes and arbitrary min, max, init and step values for those.
+        The above example shows only a few of <a href="https://github.com/TypeNetwork/Amstelvar">Amstelvar</a>’s axes.</p>
+
+    <footer>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <em>fontsampler-js is brought to you by Underscore</em><br>
+        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        <p><a href="../LICENCE.txt">Licensed under GNU GPL-3</a></p>
+    </footer>
+    
+    <script>
+        window.onload = function() {
+            var fonts = [{
+                        name: "Work Sans Variable",
+                        files: [
+                            "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+                        ]
+                    }],
+                options = {
+                    ui: {
+                        variation: {
+                            axes: [{
+                                code: "wght",
+                                name: "Weight",
+                                instances: ["250|Thin", "275|Extra Light", "300|Light", "400|Regular", "500|Medium", "600|SemiBold", "700|Bold", "800|ExtraBold", "900|Black"],
+                                init: 400,
+                                min: 0,
+                                max: 900,
+                                step: 1,
+                                label: "Weight"
+                            }]
+                        }
+                    }
+                }
+                    
+            var fs = new Fontsampler(document.getElementById("demo-variable"), fonts, options)
+            FontsamplerSkin(fs)
+            fs.init()
+
+
+            var fonts2 = [{
+                        name: "Work Sans Variable",
+                        files: [
+                            "./fonts/amstelvar/AmstelvarAlpha-VF.woff2"
+                        ]
+                    }],
+                options2 = {
+                    ui: {
+                        variation: {
+                            axes: [
+                                {
+                                    code: "wght",
+                                    // instances: ["250|Thin", "275|Extra Light", "300|Light", "400|Regular", "500|Medium", "600|SemiBold", "700|Bold", "800|ExtraBold", "900|Black"],
+                                    init: 400,
+                                    min: 0,
+                                    max: 900,
+                                    step: 1,
+                                    label: "Weight"
+                                },
+                                {
+                                    code: "opsz",
+                                    init: 14.0,
+                                    min: 10.0,
+                                    max: 72.0,
+                                    step: 0.5,
+                                    label: "Optical size",
+                                },
+                                {
+                                    code: "wdth",
+                                    min: 35.0,
+                                    init: 100.0,
+                                    max: 100.0,
+                                    label: "Width",
+                                }
+                            ]
+                        }
+                    }
+                }
+                    
+            var fs = new Fontsampler(document.getElementById("demo-variable-axes"), fonts2, options2)
+            FontsamplerSkin(fs)
+            fs.init()
+        }
+    </script>
+
+</body>
+
+</html>

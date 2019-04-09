@@ -17,7 +17,7 @@ function Skin(FS) {
 
         helpers.nodeAddClass(FS.root, "fsjs-skin")
 
-        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs]")
+        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-slider]")
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,

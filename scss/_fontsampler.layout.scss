@@ -23,7 +23,8 @@
     line-height: $labelHeight;
 }
 
-.fsjs-block-type-slider {
+.fsjs-block-type-slider,
+.fsjs-block-type-slidergroup {
     .fsjs-label {
         display: flex;
         justify-content: flex-end;
