@@ -71,9 +71,17 @@ function UIElements(root, options) {
     }
 
     function slidergroup(key, opt, node) {
-        // console.warn("slidergroup", key, opt)
-
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+
+        if ("instances" in opt && Array.isArray(opt.instances)) {
+            var dropdown = slidergroup.querySelector("[data-fsjs='instances']")
+
+            if (!helpers.isNode(dropdown)) {
+                opt.choices = opt.instances
+                dropdown = this.dropdown("instances", opt)
+                slidergroup.appendChild(dropdown)
+            }
+        }
 
         for (var s = 0; s < opt.axes.length; s++) {
 
@@ -93,20 +101,17 @@ function UIElements(root, options) {
             slider.dataset.axis = opt.axes[s].code
         }
 
-        // slidergroup.data.fsjs = key
-
         return slidergroup
     }
 
     function dropdown(key, opt, node) {
         var dropdown = helpers.isNode(node) ? node : document.createElement("select")
-
         if ("choices" in opt === false || opt.choices.length < 1) {
             return false
         }
 
         for (var c = 0; c < opt.choices.length; c++) {
-            var choice = parseChoice(opt.choices[c]),
+            var choice = parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
             if (!helpers.isNode(option)) {
@@ -162,7 +167,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             var button = document.createElement("button"),
-                choice = parseChoice(opt.choices[o])
+                choice = parseParts(opt.choices[o])
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
@@ -183,7 +188,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             if (opt.choices.hasOwnProperty(o)) {
-                var choice = parseChoice(opt.choices[o]),
+                var choice = parseParts(opt.choices[o]),
                     label = document.createElement("label"),
                     checkbox = document.createElement("input"),
                     text = document.createElement("span")
@@ -215,7 +220,7 @@ function UIElements(root, options) {
      * @param string choice 
      * @return obj {val, text}
      */
-    function parseChoice(choice) {
+    function parseParts(choice) {
         var parts, val, text
 
         if (choice.indexOf("|") !== -1) {

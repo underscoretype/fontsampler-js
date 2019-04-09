@@ -227,7 +227,8 @@ module.exports = {
     "invalidEvent": "Fontsampler: Invalid event type. You can only register Fontsampler events on the Fontsampler instance.",
     "newInit": "Fontsampler: Instantiated Fontsampler without 'new' keyword. Create Fontsamplers using new Fontsampler(…)",
     "dataFontsJsonInvalid": "Fontsampler: The data-fonts JSON failed to parse.",
-    "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure."
+    "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure.",
+    "invalidVariation": "Fontsampler: Invalid variation instance values"
 }
 
 },{}],5:[function(_dereq_,module,exports){
@@ -592,7 +593,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         options = select.querySelectorAll("option")
         for (i = 0; i < options.length; i++) {
-            console.log("looping options")
             var opt = options[i],
                 extractedFonts = extractFontsFromNode(opt, false)
 
@@ -1031,7 +1031,6 @@ var UIElements = _dereq_("./uielements")
 var helpers = _dereq_("./helpers")
 var errors = _dereq_("./errors")
 
-
 function UI(root, fonts, options) {
 
     var ui = {
@@ -1080,7 +1079,6 @@ function UI(root, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
-
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -1191,7 +1189,7 @@ function UI(root, fonts, options) {
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
-            
+
             if (options.ui[key].label && !label) {
                 // create a label if needed
                 label = uifactory.label(opt.label, opt.unit, opt.init, key)
@@ -1210,11 +1208,11 @@ function UI(root, fonts, options) {
                 // or check the existing element
                 sanitizeElement(element, key)
             }
-            
+
             // check the block itself
             sanitizeBlock(block, key)
             blocks[key] = block
-            
+
             return false
         } else if (!block) {
             // for missing blocks that should get rendered create them
@@ -1256,10 +1254,10 @@ function UI(root, fonts, options) {
 
     function sanitizeBlock(block, key) {
         var classes = [
-                options.classes.blockClass,
-                options.classes.blockClass + "-" + key,
-                options.classes.blockClass + "-type-" + ui[key]
-            ]
+            options.classes.blockClass,
+            options.classes.blockClass + "-" + key,
+            options.classes.blockClass + "-type-" + ui[key]
+        ]
 
         helpers.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
@@ -1346,19 +1344,40 @@ function UI(root, fonts, options) {
             }
         } else if (type === "slidergroup") {
             // currently only variable font slider group
+            var nestedDropdown = element.querySelector("[data-fsjs='instances']")
+            if (nestedDropdown) {
+                nestedDropdown.addEventListener("change", function(e) {
+                    var axes = e.target.value.split(",")
+                    for (var v = 0; v < axes.length; v++) {
+                        var axis = axes[v].split(" "),
+                            slider = element.querySelector("[data-fsjs-slider][data-axis='" + axis[0] + "']")
+
+                        if (!isValidAxisAndValue(axis[0], axis[1])) {
+                            console.warn(axis)
+                            console.warn(errors.invalidVariation)
+                            continue
+                        }
+
+                        slider.value = axis[1]
+
+                        // manually trigger a HTMLEvents.change to propagate the changes
+                        var evt = document.createEvent("HTMLEvents");
+                        evt.initEvent("change", false, true);
+                        slider.dispatchEvent(evt);
+                        sendEvent("variation")
+                    }
+                })
+            }
+
             var nestedSliders = element.querySelectorAll("[data-fsjs-slider]")
-            if (nestedSliders.length > 0) {
-                var axes = {}
+            if (nestedSliders && nestedSliders.length > 0) {
                 for (var a = 0; a < nestedSliders.length; a++) {
                     var nestedSlider = nestedSliders[a]
-                    nestedSlider.addEventListener("change", function (e) {
+                    nestedSlider.addEventListener("change", function(e) {
                         sendEvent(e.target.parentNode.dataset.fsjs)
                     })
-                    nestedSlider.addEventListener("change", function (e) {
-                        var label = root.querySelector("[data-fsjs-for='" + e.target.dataset.axis + "'] .fsjs-label-value")
-                        if (label) {
-                            label.textContent = getVariation(e.target.dataset.axis)
-                        }
+                    nestedSlider.addEventListener("change", function(e) {
+                        refreshAxisLabelValue(e.target.dataset.axis)
                     })
                     // set init values
 
@@ -1369,6 +1388,31 @@ function UI(root, fonts, options) {
         }
 
         return true
+    }
+
+    function isValidAxisAndValue(axis, value) {
+        if (!Array.isArray(options.ui.variation.axes)) {
+            return false
+        }
+
+        for (var a = 0; a < options.ui.variation.axes.length; a++) {
+            var axisoptions = options.ui.variation.axes[a]
+            if (axisoptions.code !== axis) {
+                continue
+            }
+            if (value < axisoptions.min || value > axisoptions.max) {
+                return false
+            } else {
+                return true
+            }
+        }
+    }
+
+    function refreshAxisLabelValue(axis) {
+        var label = root.querySelector("[data-fsjs-for='" + axis + "'] .fsjs-label-value")
+        if (label) {
+            label.textContent = getVariation(axis)
+        }
     }
 
     function getElement(key, node) {
@@ -1600,7 +1644,7 @@ function UI(root, fonts, options) {
 
         input.style["font-feature-settings"] = val
     }
-    
+
     function setInputVariation(variations) {
         var parsed = []
         for (var key in variations) {
@@ -1719,9 +1763,17 @@ function UIElements(root, options) {
     }
 
     function slidergroup(key, opt, node) {
-        // console.warn("slidergroup", key, opt)
-
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+
+        if ("instances" in opt && Array.isArray(opt.instances)) {
+            var dropdown = slidergroup.querySelector("[data-fsjs='instances']")
+
+            if (!helpers.isNode(dropdown)) {
+                opt.choices = opt.instances
+                dropdown = this.dropdown("instances", opt)
+                slidergroup.appendChild(dropdown)
+            }
+        }
 
         for (var s = 0; s < opt.axes.length; s++) {
 
@@ -1741,20 +1793,17 @@ function UIElements(root, options) {
             slider.dataset.axis = opt.axes[s].code
         }
 
-        // slidergroup.data.fsjs = key
-
         return slidergroup
     }
 
     function dropdown(key, opt, node) {
         var dropdown = helpers.isNode(node) ? node : document.createElement("select")
-
         if ("choices" in opt === false || opt.choices.length < 1) {
             return false
         }
 
         for (var c = 0; c < opt.choices.length; c++) {
-            var choice = parseChoice(opt.choices[c]),
+            var choice = parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
             if (!helpers.isNode(option)) {
@@ -1810,7 +1859,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             var button = document.createElement("button"),
-                choice = parseChoice(opt.choices[o])
+                choice = parseParts(opt.choices[o])
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
@@ -1831,7 +1880,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             if (opt.choices.hasOwnProperty(o)) {
-                var choice = parseChoice(opt.choices[o]),
+                var choice = parseParts(opt.choices[o]),
                     label = document.createElement("label"),
                     checkbox = document.createElement("input"),
                     text = document.createElement("span")
@@ -1863,7 +1912,7 @@ function UIElements(root, options) {
      * @param string choice 
      * @return obj {val, text}
      */
-    function parseChoice(choice) {
+    function parseParts(choice) {
         var parts, val, text
 
         if (choice.indexOf("|") !== -1) {

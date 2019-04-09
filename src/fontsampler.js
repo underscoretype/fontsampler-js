@@ -267,7 +267,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         options = select.querySelectorAll("option")
         for (i = 0; i < options.length; i++) {
-            console.log("looping options")
             var opt = options[i],
                 extractedFonts = extractFontsFromNode(opt, false)
 

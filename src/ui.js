@@ -30,7 +30,6 @@ var UIElements = require("./uielements")
 var helpers = require("./helpers")
 var errors = require("./errors")
 
-
 function UI(root, fonts, options) {
 
     var ui = {
@@ -79,7 +78,6 @@ function UI(root, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
-
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -190,7 +188,7 @@ function UI(root, fonts, options) {
             // if a block is found, try get its element and optional label
             element = getElement(key, block)
             label = getLabel(key, block)
-            
+
             if (options.ui[key].label && !label) {
                 // create a label if needed
                 label = uifactory.label(opt.label, opt.unit, opt.init, key)
@@ -209,11 +207,11 @@ function UI(root, fonts, options) {
                 // or check the existing element
                 sanitizeElement(element, key)
             }
-            
+
             // check the block itself
             sanitizeBlock(block, key)
             blocks[key] = block
-            
+
             return false
         } else if (!block) {
             // for missing blocks that should get rendered create them
@@ -255,10 +253,10 @@ function UI(root, fonts, options) {
 
     function sanitizeBlock(block, key) {
         var classes = [
-                options.classes.blockClass,
-                options.classes.blockClass + "-" + key,
-                options.classes.blockClass + "-type-" + ui[key]
-            ]
+            options.classes.blockClass,
+            options.classes.blockClass + "-" + key,
+            options.classes.blockClass + "-type-" + ui[key]
+        ]
 
         helpers.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
@@ -345,19 +343,40 @@ function UI(root, fonts, options) {
             }
         } else if (type === "slidergroup") {
             // currently only variable font slider group
+            var nestedDropdown = element.querySelector("[data-fsjs='instances']")
+            if (nestedDropdown) {
+                nestedDropdown.addEventListener("change", function(e) {
+                    var axes = e.target.value.split(",")
+                    for (var v = 0; v < axes.length; v++) {
+                        var axis = axes[v].split(" "),
+                            slider = element.querySelector("[data-fsjs-slider][data-axis='" + axis[0] + "']")
+
+                        if (!isValidAxisAndValue(axis[0], axis[1])) {
+                            console.warn(axis)
+                            console.warn(errors.invalidVariation)
+                            continue
+                        }
+
+                        slider.value = axis[1]
+
+                        // manually trigger a HTMLEvents.change to propagate the changes
+                        var evt = document.createEvent("HTMLEvents");
+                        evt.initEvent("change", false, true);
+                        slider.dispatchEvent(evt);
+                        sendEvent("variation")
+                    }
+                })
+            }
+
             var nestedSliders = element.querySelectorAll("[data-fsjs-slider]")
-            if (nestedSliders.length > 0) {
-                var axes = {}
+            if (nestedSliders && nestedSliders.length > 0) {
                 for (var a = 0; a < nestedSliders.length; a++) {
                     var nestedSlider = nestedSliders[a]
-                    nestedSlider.addEventListener("change", function (e) {
+                    nestedSlider.addEventListener("change", function(e) {
                         sendEvent(e.target.parentNode.dataset.fsjs)
                     })
-                    nestedSlider.addEventListener("change", function (e) {
-                        var label = root.querySelector("[data-fsjs-for='" + e.target.dataset.axis + "'] .fsjs-label-value")
-                        if (label) {
-                            label.textContent = getVariation(e.target.dataset.axis)
-                        }
+                    nestedSlider.addEventListener("change", function(e) {
+                        refreshAxisLabelValue(e.target.dataset.axis)
                     })
                     // set init values
 
@@ -368,6 +387,31 @@ function UI(root, fonts, options) {
         }
 
         return true
+    }
+
+    function isValidAxisAndValue(axis, value) {
+        if (!Array.isArray(options.ui.variation.axes)) {
+            return false
+        }
+
+        for (var a = 0; a < options.ui.variation.axes.length; a++) {
+            var axisoptions = options.ui.variation.axes[a]
+            if (axisoptions.code !== axis) {
+                continue
+            }
+            if (value < axisoptions.min || value > axisoptions.max) {
+                return false
+            } else {
+                return true
+            }
+        }
+    }
+
+    function refreshAxisLabelValue(axis) {
+        var label = root.querySelector("[data-fsjs-for='" + axis + "'] .fsjs-label-value")
+        if (label) {
+            label.textContent = getVariation(axis)
+        }
     }
 
     function getElement(key, node) {
@@ -599,7 +643,7 @@ function UI(root, fonts, options) {
 
         input.style["font-feature-settings"] = val
     }
-    
+
     function setInputVariation(variations) {
         var parsed = []
         for (var key in variations) {

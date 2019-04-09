@@ -43,9 +43,18 @@ function Skin(FS) {
 
     function updateSlider(position /*, value*/ ) {
         var key = this.element.dataset.fsjs,
-            label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
+            eventKey = key,
+            label
 
-        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + key + "changed"))
+        // Catch special case for variable font axis sliders
+        if (typeof(key) === "undefined") {
+            key = this.element.dataset.axis
+            eventKey = "variation"
+        }
+
+        label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
+
+        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + eventKey + "changed"))
 
         if (label) {
             label.textContent = position

@@ -9,5 +9,6 @@ module.exports = {
     "invalidEvent": "Fontsampler: Invalid event type. You can only register Fontsampler events on the Fontsampler instance.",
     "newInit": "Fontsampler: Instantiated Fontsampler without 'new' keyword. Create Fontsamplers using new Fontsampler(…)",
     "dataFontsJsonInvalid": "Fontsampler: The data-fonts JSON failed to parse.",
-    "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure."
+    "invalidDOMOptions": "Fontsampler: Could not parse data-options on Fontsampler root node. Make sure it is valid JSON and follows the default options structure.",
+    "invalidVariation": "Fontsampler: Invalid variation instance values"
 }
