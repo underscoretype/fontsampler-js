@@ -1,2 +1,11 @@
 node_modules
 *.ttx
+*.woff*
+node_modules
+src
+dist
+.vscode
+scss
+.js*
+package*
+docs
