@@ -50,13 +50,24 @@
                             axes: [{
                                 code: "wght",
                                 name: "Weight",
-                                instances: ["250|Thin", "275|Extra Light", "300|Light", "400|Regular", "500|Medium", "600|SemiBold", "700|Bold", "800|ExtraBold", "900|Black"],
                                 init: 400,
                                 min: 0,
                                 max: 900,
                                 step: 1,
                                 label: "Weight"
-                            }]
+                            }],
+                            instances: [
+                                "wght 250.0|Thin",
+                                "wght 275.0|ExtraLight",
+                                "wght 300.0|Light",
+                                "wght 400.0|Regular",
+                                "wght 500.0|Medium",
+                                "wght 600.0|SemiBold",
+                                "wght 700.0|Bold",
+                                "wght 800.0|ExtraBold",
+                                "wght 900.0|Black"
+                            ],
+                            init: "Regular"
                         }
                     }
                 }
@@ -78,7 +89,6 @@
                             axes: [
                                 {
                                     code: "wght",
-                                    // instances: ["250|Thin", "275|Extra Light", "300|Light", "400|Regular", "500|Medium", "600|SemiBold", "700|Bold", "800|ExtraBold", "900|Black"],
                                     init: 400,
                                     min: 0,
                                     max: 900,
@@ -100,7 +110,13 @@
                                     max: 100.0,
                                     label: "Width",
                                 }
-                            ]
+                            ],
+                            // instances: [
+                            //     {
+                            //         name: "Bold condensed small size",
+                            //         value: 
+                            //     }
+                            // ]
                         }
                     }
                 }

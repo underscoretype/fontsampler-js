@@ -32,6 +32,9 @@
   margin: 5px;
   width: 100%;
 }
+.fsjs-skin [data-fsjs=variation] .fsjs-label {
+  margin-top: 10px;
+}
 .fsjs-skin .fsjs-label {
   line-height: 1.5em;
 }
