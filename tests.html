@@ -26,15 +26,15 @@
     <h1>Miscellenious tests</h1>
 
     <div id="demo-woff" class="demo" data-fontname="Alegreya Regular"
-        data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2"
+        data-woff="fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="fonts/alegreya/alegreya-v12-latin-regular.woff2"
         >No existing DOM UI, single font from data-woff, data-woff2 & data-fontname, no options</div>
 
     <div id="demo-data-fonts" class="demo" 
-        data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
+        data-fonts='[{ "name": "Alegreya Regular", "files": ["fonts/alegreya/alegreya-v12-latin-regular.woff", "fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["fonts/alegreya/alegreya-v12-latin-italic.woff", "fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
         >No existing DOM UI, fonts from data-fonts, no options</div>
 
     <div id="demo-data-fonts-options" class="demo"
-        data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
+        data-fonts='[{ "name": "Alegreya Regular", "files": ["fonts/alegreya/alegreya-v12-latin-regular.woff", "fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["fonts/alegreya/alegreya-v12-latin-italic.woff", "fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'
         >No existing DOM UI, fonts from data-fonts & options from data-options</div>
 
     <div id="demo-js-order" class="demo">No existing DOM UI, fonts from JS, options with only order in JS</div>
@@ -61,7 +61,7 @@
         <div data-fsjs-block="fontfamily"></div>
     </div>
     <div id="demo-woff-unskinned" class="demo" data-fontname="Alegreya Regular"
-        data-woff="./fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="./fonts/alegreya/alegreya-v12-latin-regular.woff2"
+        data-woff="fonts/alegreya/alegreya-v12-latin-regular.woff" data-woff2="fonts/alegreya/alegreya-v12-latin-regular.woff2"
         >
         <div data-fsjs-block="tester"><div data-fsjs="tester">UNSKINNED - Existing DOM UI, single font from data-woff, data-woff2 & data-fontname, no options</div></div>
         <div data-fsjs-block="fontfamily"><select data-fsjs="fontfamily"></select></div>
@@ -79,11 +79,11 @@
 
             var fonts = [{
                     "name": "Alegreya Regular", 
-                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]
+                    "files": ["fonts/alegreya/alegreya-v12-latin-regular.woff", "fonts/alegreya/alegreya-v12-latin-regular.woff2"]
                 }, 
                 { 
                     "name": "Alegreya Italic", 
-                    "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]
+                    "files": ["fonts/alegreya/alegreya-v12-latin-italic.woff", "fonts/alegreya/alegreya-v12-latin-italic.woff2"]
                 }]
             var optionsOrder = { "order": ["tester", ["fontsize", "lineheight", "fontfamily"]] }
             var optionsUI = { "ui": { "tester": true, "fontsize": true, "lineheight": true, "fontfamily": true }}
