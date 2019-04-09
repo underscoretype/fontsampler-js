@@ -16,7 +16,7 @@ Currently work in progress and pre-release. API not stable and likely to change.
 
 ## Licence
 
-Licensed under GNU GPL-3
+Licensed under [Apache License 2.0](LICENSE.txt)
 
 ### Licenses for fonts included in the demo
 * [Alegreya](https://github.com/huertatipografica/Alegreya/) by [Huerta Tipografica](https://www.huertatipografica.com/) ([License](https://github.com/huertatipografica/Alegreya/blob/master/LICENSE.md))
