@@ -1,5 +1,6 @@
 
 var helpers = require("./helpers")
+
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
@@ -73,30 +74,27 @@ function UIElements(root, options) {
     function slidergroup(key, opt, node) {
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
 
-        if ("instances" in opt && Array.isArray(opt.instances)) {
-            var dropdown = slidergroup.querySelector("[data-fsjs='instances']")
-
-            if (!helpers.isNode(dropdown)) {
-                opt.choices = opt.instances
-                dropdown = this.dropdown("instances", opt)
-                slidergroup.appendChild(dropdown)
-            }
-        }
-
         for (var s = 0; s < opt.axes.length; s++) {
+            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].code + "']")
+
+            if (!helpers.isNode(wrapper)) {
+                wrapper = document.createElement("div")
+                wrapper.dataset.axisBlock = opt.axes[s].code
+                slidergroup.appendChild(wrapper)
+            }
 
             if (opt.axes[s].label) {
                 var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].code + "']")
                 if (!helpers.isNode(label)) {
                     label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].code)
-                    slidergroup.appendChild(label)
+                    wrapper.appendChild(label)
                 }
             }
 
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
-                slidergroup.appendChild(slider)
+                wrapper.appendChild(slider)
             }
             slider.dataset.axis = opt.axes[s].code
         }
@@ -111,7 +109,7 @@ function UIElements(root, options) {
         }
 
         for (var c = 0; c < opt.choices.length; c++) {
-            var choice = parseParts(opt.choices[c]),
+            var choice = helpers.parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
             if (!helpers.isNode(option)) {
@@ -123,6 +121,10 @@ function UIElements(root, options) {
             option.value = choice.val
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
+            }
+
+            if ("instance" in opt) {
+                option.dataset.instance = opt.instance
             }
         }
 
@@ -167,7 +169,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             var button = document.createElement("button"),
-                choice = parseParts(opt.choices[o])
+                choice = helpers.parseParts(opt.choices[o])
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
@@ -188,7 +190,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             if (opt.choices.hasOwnProperty(o)) {
-                var choice = parseParts(opt.choices[o]),
+                var choice = helpers.parseParts(opt.choices[o]),
                     label = document.createElement("label"),
                     checkbox = document.createElement("input"),
                     text = document.createElement("span")
@@ -210,32 +212,6 @@ function UIElements(root, options) {
         }
 
         return group
-    }
-
-    /**
-     * Split an input choice into value and text or return only the value as 
-     * both if no separator is used to provide a readable label
-     * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
-     * but: "left" becomes { val: "left", text: "left"}
-     * @param string choice 
-     * @return obj {val, text}
-     */
-    function parseParts(choice) {
-        var parts, val, text
-
-        if (choice.indexOf("|") !== -1) {
-            parts = choice.split("|")
-            val = parts[0]
-            text = parts[1]
-        } else {
-            val = choice
-            text = choice
-        }
-
-        return {
-            val: val,
-            text: text
-        }
     }
 
     function setMissingAttributes(node, attributes) {

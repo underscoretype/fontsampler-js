@@ -114,11 +114,40 @@ function arrayUnique(a) {
     }, a)
 }
 
+
+
+/**
+ * Split an input choice into value and text or return only the value as 
+ * both if no separator is used to provide a readable label
+ * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
+ * but: "left" becomes { val: "left", text: "left"}
+ * @param string choice 
+ * @return obj {val, text}
+ */
+function parseParts(choice) {
+    var parts, val, text
+
+    if (choice.indexOf("|") !== -1) {
+        parts = choice.split("|")
+        val = parts[0]
+        text = parts[1]
+    } else {
+        val = choice
+        text = choice
+    }
+
+    return {
+        val: val,
+        text: text
+    }
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
     flattenDeep: flattenDeep,
     isNode: isNode,
-    arrayUnique: arrayUnique
+    arrayUnique: arrayUnique,
+    parseParts: parseParts
 }

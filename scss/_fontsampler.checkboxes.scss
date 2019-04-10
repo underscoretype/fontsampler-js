@@ -23,6 +23,24 @@ $checkboxPadding: 4px;
         opacity: 0;
     }
 
+    label.fsjs-checkbox-inactive {
+        pointer-events: none;
+        color: $disabledColor;
+
+        input[type=checkbox] + span {
+            
+            &:before,
+            &:after {
+                border-color: $disabledColor;
+            }
+        }
+        input[type=checkbox]:checked + span {
+            &:after {
+                background: $disabledColor;
+            }
+        }
+    }
+
     input[type=checkbox] + span {
         position: relative;
         padding-left: $checkboxSize * 1.5 + $checkboxPadding * 2;

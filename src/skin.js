@@ -29,16 +29,27 @@ function Skin(FS) {
         }
 
         var selectInputs = FS.root.querySelectorAll("select[data-fsjs]")
+        var dropdowns = []
         if (selectInputs.length) {
             for (var i in selectInputs) {
                 if (selectInputs.hasOwnProperty(i)) {
-                    new Dropkick(selectInputs[i], {
+                    dropdowns.push(new Dropkick(selectInputs[i], {
                         mobile: true
-                    })
+                    }))
                 }
-
             }
         }
+        FS.registerEventhandler(events.languageChanged, function (e) {
+            var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
+            if (languageDropdown && dropdowns) {
+                for (var d = 0; d < dropdowns.length; d++) {
+                    var dropdown = dropdowns[d]
+                    if (dropdown.sel, dropdown.sel === languageDropdown) {
+                        dropdown.select(languageDropdown.value)
+                    }
+                }
+            }
+        })
     }
 
     function updateSlider(position /*, value*/ ) {
@@ -51,6 +62,8 @@ function Skin(FS) {
             key = this.element.dataset.axis
             eventKey = "variation"
         }
+
+        console.log("update slider")
 
         label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
 

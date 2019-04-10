@@ -1202,7 +1202,8 @@ var between = exports.between = function between(pos, min, max) {
 },{}],3:[function(_dereq_,module,exports){
 
 module.exports = {
-    "init": "fontsampler.events.init"
+    "init": "fontsampler.events.init",
+    "languageChanged": "fontsampler.events.languagechanged"
 }
 
 },{}],4:[function(_dereq_,module,exports){
@@ -1322,13 +1323,42 @@ function arrayUnique(a) {
     }, a)
 }
 
+
+
+/**
+ * Split an input choice into value and text or return only the value as 
+ * both if no separator is used to provide a readable label
+ * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
+ * but: "left" becomes { val: "left", text: "left"}
+ * @param string choice 
+ * @return obj {val, text}
+ */
+function parseParts(choice) {
+    var parts, val, text
+
+    if (choice.indexOf("|") !== -1) {
+        parts = choice.split("|")
+        val = parts[0]
+        text = parts[1]
+    } else {
+        val = choice
+        text = choice
+    }
+
+    return {
+        val: val,
+        text: text
+    }
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
     flattenDeep: flattenDeep,
     isNode: isNode,
-    arrayUnique: arrayUnique
+    arrayUnique: arrayUnique,
+    parseParts: parseParts
 }
 },{}],5:[function(_dereq_,module,exports){
 var rangeSlider = _dereq_("../node_modules/rangeslider-pure/dist/range-slider")
@@ -1362,16 +1392,27 @@ function Skin(FS) {
         }
 
         var selectInputs = FS.root.querySelectorAll("select[data-fsjs]")
+        var dropdowns = []
         if (selectInputs.length) {
             for (var i in selectInputs) {
                 if (selectInputs.hasOwnProperty(i)) {
-                    new Dropkick(selectInputs[i], {
+                    dropdowns.push(new Dropkick(selectInputs[i], {
                         mobile: true
-                    })
+                    }))
                 }
-
             }
         }
+        FS.registerEventhandler(events.languageChanged, function (e) {
+            var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
+            if (languageDropdown && dropdowns) {
+                for (var d = 0; d < dropdowns.length; d++) {
+                    var dropdown = dropdowns[d]
+                    if (dropdown.sel, dropdown.sel === languageDropdown) {
+                        dropdown.select(languageDropdown.value)
+                    }
+                }
+            }
+        })
     }
 
     function updateSlider(position /*, value*/ ) {
@@ -1384,6 +1425,8 @@ function Skin(FS) {
             key = this.element.dataset.axis
             eventKey = "variation"
         }
+
+        console.log("update slider")
 
         label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
 

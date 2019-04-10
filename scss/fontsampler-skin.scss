@@ -1,5 +1,6 @@
 $baseColor: #333;
 $accentColor: #0AF;
+$disabledColor: #DDD;
 $bgColor: #FDFDFD;
 $bgColorHover: darken($bgColor, 5%);
 
@@ -51,5 +52,21 @@ $elementMargin: 5px;
     // @import "_choices";
     @import "_dropkick";
     @import "_rangeslider";
+
+    .fsjs-slider-inactive {
+        .fsjs-label {
+            color: $disabledColor;
+        }
+
+        .rangeSlider {
+            pointer-events: none;
+            background-color: $disabledColor;
+
+            .rangeSlider__handle,
+            .rangeSlider__fill {
+                background-color: $disabledColor;
+            }
+        }
+    }
 
 }

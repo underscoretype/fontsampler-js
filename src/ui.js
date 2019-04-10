@@ -29,6 +29,7 @@ var UIElements = require("./uielements")
 
 var helpers = require("./helpers")
 var errors = require("./errors")
+var events = require("./events")
 
 function UI(root, fonts, options) {
 
@@ -279,6 +280,11 @@ function UI(root, fonts, options) {
             text.textContent = options.ui[key].label
         }
 
+        console.error(ui[key])
+        if (["slider"].indexOf(ui[key]) === -1) {
+            value.textContent = ""   
+        }
+
         if (value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             value.textContent = element.value
@@ -360,9 +366,7 @@ function UI(root, fonts, options) {
                         slider.value = axis[1]
 
                         // manually trigger a HTMLEvents.change to propagate the changes
-                        var evt = document.createEvent("HTMLEvents");
-                        evt.initEvent("change", false, true);
-                        slider.dispatchEvent(evt);
+                        sendNativeEvent("change", slider)
                         sendEvent("variation")
                     }
                 })
@@ -378,10 +382,6 @@ function UI(root, fonts, options) {
                     nestedSlider.addEventListener("change", function(e) {
                         refreshAxisLabelValue(e.target.dataset.axis)
                     })
-                    // set init values
-
-                    // element.val = opt.init
-                    // setInputCss(keyToCss[key], opt.init + opt.unit)
                 }
             }
         }
@@ -489,6 +489,13 @@ function UI(root, fonts, options) {
 
     function sendEvent(type) {
         root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
+    }
+
+    function sendNativeEvent(type, node) {
+        var evt = document.createEvent("HTMLEvents")
+
+        evt.initEvent(type, false, true)
+        node.dispatchEvent(evt)
     }
 
     function onKey(event) {
@@ -656,9 +663,68 @@ function UI(root, fonts, options) {
         input.style["font-variation-settings"] = val
     }
 
+    function setActiveAxes(axes) {
+        var sliders = getBlock("variation").querySelectorAll("[data-axis]")
+        if (sliders) {
+            for (var s = 0; s < sliders.length; s++) {
+                if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1) {
+                    helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                } else {
+                    helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                }
+            }
+        }
+    }
+
+    function setActivateLanguage(lang) {
+        var dropdown = getElement("language")
+
+        if (dropdown && typeof(lang) === "string") {
+            var languageChoices = options.ui.language.choices.map(function (value) {
+                return value.split("|")[0]
+            })
+            if (languageChoices.lang !== -1) {
+                dropdown.value = lang
+                dropdown.querySelector("option[value='" + lang + "']").selected = true
+                sendNativeEvent("change", dropdown)
+                root.dispatchEvent(new CustomEvent(events.languageChanged))
+            }
+        }
+    }
+
+    function setActiveOpentype(features) {
+        var block = getBlock("opentype")
+            checkboxes = false
+            
+        if (block) {
+            checkboxes = block.querySelectorAll("[data-feature]")
+        }
+        if (checkboxes) {
+            for (var c = 0; c < checkboxes.length; c++) {
+                if (Array.isArray(features)) {
+                    if (features.indexOf(checkboxes[c].dataset.feature) === -1) {
+                        helpers.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    } else {
+                        helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    }
+                } else {
+                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")        
+                }
+            }
+        }
+    }
+
     function setInputText(text) {
         if (text && input) {
             input.textContent = text
+        }
+    }
+
+    function setLabelValue(key, value) {
+        var labelValue = root.querySelector("[data-fsjs-for='" + key + "'] ." + options.classes.labelValueClass)
+
+        if (labelValue) {
+            labelValue.textContent = value
         }
     }
 
@@ -684,7 +750,14 @@ function UI(root, fonts, options) {
         setInputOpentype: setInputOpentype,
         setInputVariation: setInputVariation,
         setInputText: setInputText,
-        setStatusClass: setStatusClass
+        setStatusClass: setStatusClass,
+        setActiveAxes: setActiveAxes,
+        setActivateLanguage: setActivateLanguage,
+        setActiveOpentype: setActiveOpentype,
+        setLabelValue: setLabelValue,
+
+        sendEvent: sendEvent,
+        sendNativeEvent: sendNativeEvent
     }
 }
 module.exports = UI

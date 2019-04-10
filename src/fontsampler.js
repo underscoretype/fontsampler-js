@@ -31,7 +31,7 @@ function Fontsampler(_root, _fonts, _options) {
         preloader = new Preloader(),
         passedInOptions = false,
         // deep clone the _defaults
-        defaults = (JSON.parse(JSON.stringify(_defaults))) 
+        defaults = (JSON.parse(JSON.stringify(_defaults)))
 
     // Make sure new instances are create with new Fontsampler
     // this will === window if Fontsampler() is used without
@@ -51,9 +51,42 @@ function Fontsampler(_root, _fonts, _options) {
     // from the root node data attributes
     options = parseOptions.call(this, _options)
     fonts = parseFonts.call(this, _fonts)
+    fonts = parseFontInstances.call(this, fonts)
 
     // options.generate = true
     ui = Interface(this.root, fonts, options)
+
+    function parseFontInstances(fonts) {
+        console.warn("before", fonts)
+        var parsed = []
+
+        for (var f = 0; f < fonts.length; f++) {
+            var font = fonts[f]
+
+            if ("instances" in font === true && Array.isArray(font.instances)) {
+                for (var v = 0; v < font.instances.length; v++) {
+                    var parts = helpers.parseParts(font.instances[v])
+                    axes = parts.val.split(",").map(function (value/*, index*/) {
+                        var parts = value.split(" ")
+                        return parts[0]
+                    })
+                    parsed.push({
+                        name: parts.text,
+                        files: font.files,
+                        instance: parts.val,
+                        axes: axes,
+                        language: font.language,
+                        features: font.features
+                    })
+                }
+            } else {
+                font.axes = font.axes ? font.axes : []
+                parsed.push(font)
+            }
+        }
+
+        return parsed
+    }
 
     function parseFonts(fonts) {
         var extractedFonts = extractFontsFromDOM.call(this)
@@ -73,7 +106,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         return fonts
     }
-
 
     /**
      * 
@@ -110,12 +142,12 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(extractedOptions) === "object") {
             passedInOptions = extractedOptions
         }
-        
+
         if (typeof(passedInOptions) === "object") {
             // If any of the passed in options.ui.xxx are simply "true" instead of
             // an boolean let’s copy the default values for this ui element
             if ("ui" in passedInOptions === true) {
-                for (var u in passedInOptions.ui) {
+                for (var u in passedInOptions.ui) {
                     if (passedInOptions.ui.hasOwnProperty(u)) {
                         if (typeof(passedInOptions.ui[u]) !== "object") {
                             passedInOptions.ui[u] = defaults.ui[u]
@@ -128,7 +160,7 @@ function Fontsampler(_root, _fonts, _options) {
         } else {
             options = defaults
         }
-        
+
         // Go through all DOM UI nodes, passed in ui ´order´ options and ´ui´ options
         // to determine what blocks are in the Fontsampler, and make sure all defined
         // blocks get rendered. "Defined" can be a combination of:
@@ -149,7 +181,7 @@ function Fontsampler(_root, _fonts, _options) {
         if (blocks.indexOf("tester") === -1) {
             blocks.push("tester")
         }
-        
+
         // A passed in UI order superseeds, not extends!, the default
         if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
             options.order = opt.order
@@ -188,7 +220,7 @@ function Fontsampler(_root, _fonts, _options) {
         })
 
         // slider groups
-        this.root.addEventListener("fontsampler.onvariationchanged", function () {
+        this.root.addEventListener("fontsampler.onvariationchanged", function() {
             var val = ui.getVariation()
             ui.setInputVariation(val)
         })
@@ -321,23 +353,49 @@ function Fontsampler(_root, _fonts, _options) {
     }
 
     function loadFont(indexOrKey) {
-        console.debug("Fontsampler.loadFont", indexOrKey)
+        console.debug("Fontsampler.loadFont", indexOrKey, this)
+        var font
 
         preloader.pause()
-
         ui.setStatusClass(options.loadingClass, true)
-        files = []
+
         if (typeof(indexOrKey) === "string") {
-            files = fonts.filter(function(value, index) {
+            font = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
-            }).pop().files
+            }).pop()
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
-            files = fonts[indexOrKey].files
+            font = fonts[indexOrKey]
         }
 
-        Fontloader.fromFiles(files, function(f) {
+        console.log(font)
+        
+        Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
             ui.setStatusClass(options.loadingClass, false)
+            
+            // update UI to font’s capabilities
+            ui.setActiveAxes(font.axes)
+            if (font.instance) {
+                var va = {}
+                var parts = font.instance.split(",")
+                for (var p = 0; p < parts.length; p++) {
+                    var split = parts[p].trim().split(" ")
+                    va[split[0]] = split[1]
+                    var input = _root.querySelector("[data-axis='" + split[0] + "']")
+                    if (input) {
+                        input.value = split[1]
+                        ui.sendNativeEvent("change", input)
+                    }
+                    console.log(split[0], split[1])
+                    ui.setLabelValue(split[0], split[1])
+                }
+                ui.setInputVariation(va)
+            }
+
+            ui.setActiveOpentype(font.features)
+            if (typeof(font.language) === "string") {
+                ui.setActivateLanguage(font.language)
+            }
 
             preloader.resume()
         })
@@ -348,10 +406,15 @@ function Fontsampler(_root, _fonts, _options) {
      */
 
     this.init = function() {
-        console.debug("Fontsampler.init()", this, this.root)
+
+        var initialFont = 0
+        if ("init" in options.ui.fontfamily === true && typeof(options.ui.fontfamily) === "string") {
+            initialFont = options.ui.fontfamily.init
+        }
+        console.debug("Fontsampler.init()", this, this.root, "initial", initialFont)
         ui.init()
         setupUIEvents.call(this)
-        loadFont(0)
+        loadFont.call(this, initialFont)
 
         if (options.lazyload) {
             ui.setStatusClass(options.preloadingClass, true)
