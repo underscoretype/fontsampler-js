@@ -6,6 +6,15 @@
     <meta charset="utf8">
     <!-- Just some styling for this documentaiton page -->
     <link rel="stylesheet" href="assets/demo.css">
+    <style type="text/css">
+    [data-fsjs=opentype] {
+        display: flex;
+        justify-content: flex-start;
+    }
+    [data-fsjs=opentype] label {
+        margin-right: 1em;
+    }
+    </style>
 
     <!-- Fontsampler -->
     <script src="dist/fontsampler.js"></script>
@@ -39,38 +48,63 @@
     <script>
         window.onload = function() {
             var fonts = [{
-                        name: "Work Sans Variable",
-                        files: [
-                            "./fonts/work-sans/WorkSans-Roman-VF.woff2"
-                        ]
-                    }],
-                options = {
-                    ui: {
-                        variation: {
-                            axes: [{
-                                code: "wght",
-                                name: "Weight",
-                                init: 400,
-                                min: 0,
-                                max: 900,
-                                step: 1,
-                                label: "Weight"
-                            }],
-                            instances: [
-                                "wght 250.0|Thin",
-                                "wght 275.0|ExtraLight",
-                                "wght 300.0|Light",
-                                "wght 400.0|Regular",
-                                "wght 500.0|Medium",
-                                "wght 600.0|SemiBold",
-                                "wght 700.0|Bold",
-                                "wght 800.0|ExtraBold",
-                                "wght 900.0|Black"
-                            ],
-                            init: "Regular"
-                        }
+                    "name": "Work Sans",
+                    "files": [
+                        "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+                    ],
+                    "instances": [
+                        "wght 250|Work Sans Thin",
+                        "wght 275|Work Sans ExtraLight",
+                        "wght 300|Work Sans Light",
+                        "wght 400|Work Sans Regular",
+                        "wght 500|Work Sans Medium",
+                        "wght 600|Work Sans SemiBold",
+                        "wght 700|Work Sans Bold",
+                        "wght 800|Work Sans ExtraBold",
+                        "wght 900|Work Sans Black"
+                    ],
+                    "language": "ar-afb",
+                    "features": ["rlig", "calt"]
+                },
+                {
+                    "name": "Alegreya Regular", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff"],
+                    "features": ["liga", "dlig"],
+                    "language": "en-gb"
+                }, 
+                { 
+                    "name": "Alegreya Italic", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff"],
+                    "features": ["liga", "dlig"],
+                    "language": "en-gb"
+                }
+            ],
+            options = {
+                order: ["tester", ["fontfamily", "language"], ["fontsize", "variation"], "opentype"],
+                ui: {
+                    fontfamily: {
+                        "init": "Work Sans SemiBold"
+                    },
+                    language: {
+                        "choices": ["en-gb|English", "ar-afb|Arabic"],
+                        "init": "en-gb"
+                    },
+                    opentype: {
+                        "choices": ["liga", "dlig", "rlig", "calt"]
+                    },
+                    fontsize: true,
+                    variation: {
+                        axes: [{
+                            code: "wght",
+                            init: 400,
+                            min: 0,
+                            max: 900,
+                            step: 1,
+                            label: "Weight"
+                        }]
                     }
                 }
+            }
                     
             var fs = new Fontsampler(document.getElementById("demo-variable"), fonts, options)
             FontsamplerSkin(fs)
@@ -81,7 +115,8 @@
                         name: "Work Sans Variable",
                         files: [
                             "./fonts/amstelvar/AmstelvarAlpha-VF.woff2"
-                        ]
+                        ],
+                        axes: ["wght", "opsz", "wdth"]
                     }],
                 options2 = {
                     ui: {
@@ -108,15 +143,10 @@
                                     min: 35.0,
                                     init: 100.0,
                                     max: 100.0,
+                                    step: 1,
                                     label: "Width",
                                 }
                             ],
-                            // instances: [
-                            //     {
-                            //         name: "Bold condensed small size",
-                            //         value: 
-                            //     }
-                            // ]
                         }
                     }
                 }

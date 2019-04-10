@@ -234,7 +234,8 @@ module.exports = {
 },{}],5:[function(_dereq_,module,exports){
 
 module.exports = {
-    "init": "fontsampler.events.init"
+    "init": "fontsampler.events.init",
+    "languageChanged": "fontsampler.events.languagechanged"
 }
 
 },{}],6:[function(_dereq_,module,exports){
@@ -357,7 +358,7 @@ function Fontsampler(_root, _fonts, _options) {
         preloader = new Preloader(),
         passedInOptions = false,
         // deep clone the _defaults
-        defaults = (JSON.parse(JSON.stringify(_defaults))) 
+        defaults = (JSON.parse(JSON.stringify(_defaults)))
 
     // Make sure new instances are create with new Fontsampler
     // this will === window if Fontsampler() is used without
@@ -377,9 +378,42 @@ function Fontsampler(_root, _fonts, _options) {
     // from the root node data attributes
     options = parseOptions.call(this, _options)
     fonts = parseFonts.call(this, _fonts)
+    fonts = parseFontInstances.call(this, fonts)
 
     // options.generate = true
     ui = Interface(this.root, fonts, options)
+
+    function parseFontInstances(fonts) {
+        console.warn("before", fonts)
+        var parsed = []
+
+        for (var f = 0; f < fonts.length; f++) {
+            var font = fonts[f]
+
+            if ("instances" in font === true && Array.isArray(font.instances)) {
+                for (var v = 0; v < font.instances.length; v++) {
+                    var parts = helpers.parseParts(font.instances[v])
+                    axes = parts.val.split(",").map(function (value/*, index*/) {
+                        var parts = value.split(" ")
+                        return parts[0]
+                    })
+                    parsed.push({
+                        name: parts.text,
+                        files: font.files,
+                        instance: parts.val,
+                        axes: axes,
+                        language: font.language,
+                        features: font.features
+                    })
+                }
+            } else {
+                font.axes = font.axes ? font.axes : []
+                parsed.push(font)
+            }
+        }
+
+        return parsed
+    }
 
     function parseFonts(fonts) {
         var extractedFonts = extractFontsFromDOM.call(this)
@@ -399,7 +433,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         return fonts
     }
-
 
     /**
      * 
@@ -436,12 +469,12 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(extractedOptions) === "object") {
             passedInOptions = extractedOptions
         }
-        
+
         if (typeof(passedInOptions) === "object") {
             // If any of the passed in options.ui.xxx are simply "true" instead of
             // an boolean let’s copy the default values for this ui element
             if ("ui" in passedInOptions === true) {
-                for (var u in passedInOptions.ui) {
+                for (var u in passedInOptions.ui) {
                     if (passedInOptions.ui.hasOwnProperty(u)) {
                         if (typeof(passedInOptions.ui[u]) !== "object") {
                             passedInOptions.ui[u] = defaults.ui[u]
@@ -454,7 +487,7 @@ function Fontsampler(_root, _fonts, _options) {
         } else {
             options = defaults
         }
-        
+
         // Go through all DOM UI nodes, passed in ui ´order´ options and ´ui´ options
         // to determine what blocks are in the Fontsampler, and make sure all defined
         // blocks get rendered. "Defined" can be a combination of:
@@ -475,7 +508,7 @@ function Fontsampler(_root, _fonts, _options) {
         if (blocks.indexOf("tester") === -1) {
             blocks.push("tester")
         }
-        
+
         // A passed in UI order superseeds, not extends!, the default
         if (typeof opt === "object" && "order" in opt && Array.isArray(opt.order) && opt.order.length) {
             options.order = opt.order
@@ -514,7 +547,7 @@ function Fontsampler(_root, _fonts, _options) {
         })
 
         // slider groups
-        this.root.addEventListener("fontsampler.onvariationchanged", function () {
+        this.root.addEventListener("fontsampler.onvariationchanged", function() {
             var val = ui.getVariation()
             ui.setInputVariation(val)
         })
@@ -647,23 +680,49 @@ function Fontsampler(_root, _fonts, _options) {
     }
 
     function loadFont(indexOrKey) {
-        console.debug("Fontsampler.loadFont", indexOrKey)
+        console.debug("Fontsampler.loadFont", indexOrKey, this)
+        var font
 
         preloader.pause()
-
         ui.setStatusClass(options.loadingClass, true)
-        files = []
+
         if (typeof(indexOrKey) === "string") {
-            files = fonts.filter(function(value, index) {
+            font = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
-            }).pop().files
+            }).pop()
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
-            files = fonts[indexOrKey].files
+            font = fonts[indexOrKey]
         }
 
-        Fontloader.fromFiles(files, function(f) {
+        console.log(font)
+        
+        Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
             ui.setStatusClass(options.loadingClass, false)
+            
+            // update UI to font’s capabilities
+            ui.setActiveAxes(font.axes)
+            if (font.instance) {
+                var va = {}
+                var parts = font.instance.split(",")
+                for (var p = 0; p < parts.length; p++) {
+                    var split = parts[p].trim().split(" ")
+                    va[split[0]] = split[1]
+                    var input = _root.querySelector("[data-axis='" + split[0] + "']")
+                    if (input) {
+                        input.value = split[1]
+                        ui.sendNativeEvent("change", input)
+                    }
+                    console.log(split[0], split[1])
+                    ui.setLabelValue(split[0], split[1])
+                }
+                ui.setInputVariation(va)
+            }
+
+            ui.setActiveOpentype(font.features)
+            if (typeof(font.language) === "string") {
+                ui.setActivateLanguage(font.language)
+            }
 
             preloader.resume()
         })
@@ -674,10 +733,15 @@ function Fontsampler(_root, _fonts, _options) {
      */
 
     this.init = function() {
-        console.debug("Fontsampler.init()", this, this.root)
+
+        var initialFont = 0
+        if ("init" in options.ui.fontfamily === true && typeof(options.ui.fontfamily) === "string") {
+            initialFont = options.ui.fontfamily.init
+        }
+        console.debug("Fontsampler.init()", this, this.root, "initial", initialFont)
         ui.init()
         setupUIEvents.call(this)
-        loadFont(0)
+        loadFont.call(this, initialFont)
 
         if (options.lazyload) {
             ui.setStatusClass(options.preloadingClass, true)
@@ -840,13 +904,42 @@ function arrayUnique(a) {
     }, a)
 }
 
+
+
+/**
+ * Split an input choice into value and text or return only the value as 
+ * both if no separator is used to provide a readable label
+ * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
+ * but: "left" becomes { val: "left", text: "left"}
+ * @param string choice 
+ * @return obj {val, text}
+ */
+function parseParts(choice) {
+    var parts, val, text
+
+    if (choice.indexOf("|") !== -1) {
+        parts = choice.split("|")
+        val = parts[0]
+        text = parts[1]
+    } else {
+        val = choice
+        text = choice
+    }
+
+    return {
+        val: val,
+        text: text
+    }
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
     flattenDeep: flattenDeep,
     isNode: isNode,
-    arrayUnique: arrayUnique
+    arrayUnique: arrayUnique,
+    parseParts: parseParts
 }
 },{}],9:[function(_dereq_,module,exports){
 var Fontloader = _dereq_("./fontloader")
@@ -1030,6 +1123,7 @@ var UIElements = _dereq_("./uielements")
 
 var helpers = _dereq_("./helpers")
 var errors = _dereq_("./errors")
+var events = _dereq_("./events")
 
 function UI(root, fonts, options) {
 
@@ -1280,6 +1374,11 @@ function UI(root, fonts, options) {
             text.textContent = options.ui[key].label
         }
 
+        console.error(ui[key])
+        if (["slider"].indexOf(ui[key]) === -1) {
+            value.textContent = ""   
+        }
+
         if (value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             value.textContent = element.value
@@ -1361,9 +1460,7 @@ function UI(root, fonts, options) {
                         slider.value = axis[1]
 
                         // manually trigger a HTMLEvents.change to propagate the changes
-                        var evt = document.createEvent("HTMLEvents");
-                        evt.initEvent("change", false, true);
-                        slider.dispatchEvent(evt);
+                        sendNativeEvent("change", slider)
                         sendEvent("variation")
                     }
                 })
@@ -1379,10 +1476,6 @@ function UI(root, fonts, options) {
                     nestedSlider.addEventListener("change", function(e) {
                         refreshAxisLabelValue(e.target.dataset.axis)
                     })
-                    // set init values
-
-                    // element.val = opt.init
-                    // setInputCss(keyToCss[key], opt.init + opt.unit)
                 }
             }
         }
@@ -1490,6 +1583,13 @@ function UI(root, fonts, options) {
 
     function sendEvent(type) {
         root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
+    }
+
+    function sendNativeEvent(type, node) {
+        var evt = document.createEvent("HTMLEvents")
+
+        evt.initEvent(type, false, true)
+        node.dispatchEvent(evt)
     }
 
     function onKey(event) {
@@ -1657,9 +1757,68 @@ function UI(root, fonts, options) {
         input.style["font-variation-settings"] = val
     }
 
+    function setActiveAxes(axes) {
+        var sliders = getBlock("variation").querySelectorAll("[data-axis]")
+        if (sliders) {
+            for (var s = 0; s < sliders.length; s++) {
+                if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1) {
+                    helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                } else {
+                    helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                }
+            }
+        }
+    }
+
+    function setActivateLanguage(lang) {
+        var dropdown = getElement("language")
+
+        if (dropdown && typeof(lang) === "string") {
+            var languageChoices = options.ui.language.choices.map(function (value) {
+                return value.split("|")[0]
+            })
+            if (languageChoices.lang !== -1) {
+                dropdown.value = lang
+                dropdown.querySelector("option[value='" + lang + "']").selected = true
+                sendNativeEvent("change", dropdown)
+                root.dispatchEvent(new CustomEvent(events.languageChanged))
+            }
+        }
+    }
+
+    function setActiveOpentype(features) {
+        var block = getBlock("opentype")
+            checkboxes = false
+            
+        if (block) {
+            checkboxes = block.querySelectorAll("[data-feature]")
+        }
+        if (checkboxes) {
+            for (var c = 0; c < checkboxes.length; c++) {
+                if (Array.isArray(features)) {
+                    if (features.indexOf(checkboxes[c].dataset.feature) === -1) {
+                        helpers.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    } else {
+                        helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    }
+                } else {
+                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")        
+                }
+            }
+        }
+    }
+
     function setInputText(text) {
         if (text && input) {
             input.textContent = text
+        }
+    }
+
+    function setLabelValue(key, value) {
+        var labelValue = root.querySelector("[data-fsjs-for='" + key + "'] ." + options.classes.labelValueClass)
+
+        if (labelValue) {
+            labelValue.textContent = value
         }
     }
 
@@ -1685,13 +1844,21 @@ function UI(root, fonts, options) {
         setInputOpentype: setInputOpentype,
         setInputVariation: setInputVariation,
         setInputText: setInputText,
-        setStatusClass: setStatusClass
+        setStatusClass: setStatusClass,
+        setActiveAxes: setActiveAxes,
+        setActivateLanguage: setActivateLanguage,
+        setActiveOpentype: setActiveOpentype,
+        setLabelValue: setLabelValue,
+
+        sendEvent: sendEvent,
+        sendNativeEvent: sendNativeEvent
     }
 }
 module.exports = UI
-},{"./errors":4,"./helpers":8,"./selection":10,"./uielements":12}],12:[function(_dereq_,module,exports){
+},{"./errors":4,"./events":5,"./helpers":8,"./selection":10,"./uielements":12}],12:[function(_dereq_,module,exports){
 
 var helpers = _dereq_("./helpers")
+
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
  * 
@@ -1765,30 +1932,27 @@ function UIElements(root, options) {
     function slidergroup(key, opt, node) {
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
 
-        if ("instances" in opt && Array.isArray(opt.instances)) {
-            var dropdown = slidergroup.querySelector("[data-fsjs='instances']")
-
-            if (!helpers.isNode(dropdown)) {
-                opt.choices = opt.instances
-                dropdown = this.dropdown("instances", opt)
-                slidergroup.appendChild(dropdown)
-            }
-        }
-
         for (var s = 0; s < opt.axes.length; s++) {
+            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].code + "']")
+
+            if (!helpers.isNode(wrapper)) {
+                wrapper = document.createElement("div")
+                wrapper.dataset.axisBlock = opt.axes[s].code
+                slidergroup.appendChild(wrapper)
+            }
 
             if (opt.axes[s].label) {
                 var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].code + "']")
                 if (!helpers.isNode(label)) {
                     label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].code)
-                    slidergroup.appendChild(label)
+                    wrapper.appendChild(label)
                 }
             }
 
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
-                slidergroup.appendChild(slider)
+                wrapper.appendChild(slider)
             }
             slider.dataset.axis = opt.axes[s].code
         }
@@ -1803,7 +1967,7 @@ function UIElements(root, options) {
         }
 
         for (var c = 0; c < opt.choices.length; c++) {
-            var choice = parseParts(opt.choices[c]),
+            var choice = helpers.parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
             if (!helpers.isNode(option)) {
@@ -1815,6 +1979,10 @@ function UIElements(root, options) {
             option.value = choice.val
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
+            }
+
+            if ("instance" in opt) {
+                option.dataset.instance = opt.instance
             }
         }
 
@@ -1859,7 +2027,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             var button = document.createElement("button"),
-                choice = parseParts(opt.choices[o])
+                choice = helpers.parseParts(opt.choices[o])
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
@@ -1880,7 +2048,7 @@ function UIElements(root, options) {
 
         for (var o in opt.choices) {
             if (opt.choices.hasOwnProperty(o)) {
-                var choice = parseParts(opt.choices[o]),
+                var choice = helpers.parseParts(opt.choices[o]),
                     label = document.createElement("label"),
                     checkbox = document.createElement("input"),
                     text = document.createElement("span")
@@ -1902,32 +2070,6 @@ function UIElements(root, options) {
         }
 
         return group
-    }
-
-    /**
-     * Split an input choice into value and text or return only the value as 
-     * both if no separator is used to provide a readable label
-     * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
-     * but: "left" becomes { val: "left", text: "left"}
-     * @param string choice 
-     * @return obj {val, text}
-     */
-    function parseParts(choice) {
-        var parts, val, text
-
-        if (choice.indexOf("|") !== -1) {
-            parts = choice.split("|")
-            val = parts[0]
-            text = parts[1]
-        } else {
-            val = choice
-            text = choice
-        }
-
-        return {
-            val: val,
-            text: text
-        }
     }
 
     function setMissingAttributes(node, attributes) {

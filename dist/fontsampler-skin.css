@@ -32,9 +32,6 @@
   margin: 5px;
   width: 100%;
 }
-.fsjs-skin [data-fsjs=variation] .fsjs-label {
-  margin-top: 10px;
-}
 .fsjs-skin .fsjs-label {
   line-height: 1.5em;
 }
@@ -109,6 +106,16 @@
   height: 1px;
   overflow: hidden;
   opacity: 0;
+}
+.fsjs-skin .fsjs-block-type-checkboxes label.fsjs-checkbox-inactive {
+  pointer-events: none;
+  color: #DDD;
+}
+.fsjs-skin .fsjs-block-type-checkboxes label.fsjs-checkbox-inactive input[type=checkbox] + span:before, .fsjs-skin .fsjs-block-type-checkboxes label.fsjs-checkbox-inactive input[type=checkbox] + span:after {
+  border-color: #DDD;
+}
+.fsjs-skin .fsjs-block-type-checkboxes label.fsjs-checkbox-inactive input[type=checkbox]:checked + span:after {
+  background: #DDD;
 }
 .fsjs-skin .fsjs-block-type-checkboxes input[type=checkbox] + span {
   position: relative;
@@ -330,4 +337,15 @@
   height: 14px;
   background: #2c3e50;
   border-radius: 10px;
+}
+.fsjs-skin .fsjs-slider-inactive .fsjs-label {
+  color: #DDD;
+}
+.fsjs-skin .fsjs-slider-inactive .rangeSlider {
+  pointer-events: none;
+  background-color: #DDD;
+}
+.fsjs-skin .fsjs-slider-inactive .rangeSlider .rangeSlider__handle,
+.fsjs-skin .fsjs-slider-inactive .rangeSlider .rangeSlider__fill {
+  background-color: #DDD;
 }
