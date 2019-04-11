@@ -25,7 +25,7 @@
 .fsjs-skin .fsjs-block-tester {
   display: block;
 }
-.fsjs-skin .fsjs-block {
+.fsjs-skin .fsjs-block, .fsjs-skin [data-axis-block] {
   box-sizing: border-box;
   padding: 0 5px;
   position: relative;
@@ -309,6 +309,7 @@
   position: absolute;
   background: #333;
   border-radius: 50%;
+  left: 0;
 }
 .fsjs-skin .rangeSlider__handle__horizontal {
   top: -4.5px;
@@ -327,16 +328,6 @@
   transform: translate(-50%, 0%);
   background: transparent;
   border-radius: 50%;
-}
-.fsjs-skin .rangeSlider__handle:active {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.12));
-}
-.fsjs-skin .rangeSlider__buffer {
-  position: absolute;
-  top: 3px;
-  height: 14px;
-  background: #2c3e50;
-  border-radius: 10px;
 }
 .fsjs-skin .fsjs-slider-inactive .fsjs-label {
   color: #DDD;

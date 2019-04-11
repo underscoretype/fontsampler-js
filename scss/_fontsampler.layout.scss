@@ -11,7 +11,7 @@
 }
 
 // All UI elements
-.fsjs-block {
+.fsjs-block, [data-axis-block] {
     box-sizing: border-box;
     padding: $elementPadding;
     position: relative;
