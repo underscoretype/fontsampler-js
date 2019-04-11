@@ -276,21 +276,20 @@ function UI(root, fonts, options) {
             unit = label.querySelector("." + options.classes.labelUnitClass),
             element = getElement(key)
 
-        if (text && text.textContent === "") {
+        if (helpers.isNode(text) && text.textContent === "") {
             text.textContent = options.ui[key].label
         }
 
-        console.error(ui[key])
-        if (["slider"].indexOf(ui[key]) === -1) {
+        if (helpers.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
             value.textContent = ""   
         }
 
-        if (value && value.textContent === "") {
+        if (helpers.isNode(value) && value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             value.textContent = element.value
         }
 
-        if (unit && unit.textContent === "") {
+        if (helpers.isNode(unit) && unit && unit.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             unit.textContent = element.dataset.unit
         }
@@ -664,13 +663,18 @@ function UI(root, fonts, options) {
     }
 
     function setActiveAxes(axes) {
-        var sliders = getBlock("variation").querySelectorAll("[data-axis]")
-        if (sliders) {
-            for (var s = 0; s < sliders.length; s++) {
-                if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1) {
-                    helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
-                } else {
-                    helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+        var block = getBlock("variation"),
+            sliders
+
+        if (block) {
+            sliders = block.querySelectorAll("[data-axis]")
+            if (sliders) {
+                for (var s = 0; s < sliders.length; s++) {
+                    if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1) {
+                        helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                    } else {
+                        helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                    }
                 }
             }
         }
