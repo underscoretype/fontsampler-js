@@ -75,12 +75,15 @@ FontsamplerSkin(<em>fs</em>)
         var fonts = [{
             name: "IBM Plex Sans Light",
             files: [
-                "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff",
-                "./fonts/ibm-plex-sans/IBMPlexSans-Light-Latin1.woff2"
+                "./fonts/ibm-plex-sans/IBMPlexSans-Light.woff",
+                "./fonts/ibm-plex-sans/IBMPlexSans-Light.woff2"
             ]
         }]
+        var options = {
+            order: [["fontsize", "lineheight", "letterspacing"], ["fontfamily", "language", "opentype"], "tester"]
+        }
         var demo = document.getElementById("demo")
-        var fs = new Fontsampler(demo, fonts, { generate: true })
+        var fs = new Fontsampler(demo, fonts, options)
         FontsamplerSkin(fs)
         fs.init()
     </script>

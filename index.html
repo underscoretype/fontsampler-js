@@ -594,8 +594,7 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
                 { name: "Alegreya Bold Italic", files: ["./fonts/alegreya/alegreya-v12-latin-700italic.woff", "./fonts/alegreya/alegreya-v12-latin-700italic.woff2"]},
             ],
             optionsFull = {
-                order: [ ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment"], ["tester"] ],
-                generate: true
+                order: [ ["fontsize", "lineheight", "letterspacing"], ["fontfamily", "alignment"], ["tester"] ]
             }
             var fs = new Fontsampler(document.getElementById("demo-full"), alegreyaFonts, optionsFull)
             FontsamplerSkin(fs)
@@ -657,7 +656,7 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
             FontsamplerSkin(fs)
             fs.init()
 
-            var fs = new Fontsampler(document.getElementById("demo-style-inherit"), fonts, { generate: true })
+            var fs = new Fontsampler(document.getElementById("demo-style-inherit"), fonts, { order: ["tester", ["fontsize", "language", "opentype"]] })
             FontsamplerSkin(fs)
             fs.init()
 
