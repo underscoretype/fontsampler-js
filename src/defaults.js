@@ -88,7 +88,7 @@ module.exports = {
             label: "Opentype features",
             render: true,
         },
-        variable: {
+        variation: {
             axes: [],
             render: true
         }

@@ -5,7 +5,7 @@ var helpers = require("./helpers")
 
 function Skin(FS) {
 
-    FS.registerEventhandler(events.init, init)
+    FS.root.addEventListener(events.init, init)
 
     function init() {
         console.debug("Skin.init()", FS)
@@ -39,36 +39,28 @@ function Skin(FS) {
                 }
             }
         }
-        FS.registerEventhandler(events.languageChanged, function (e) {
-            var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
-            if (languageDropdown && dropdowns) {
-                for (var d = 0; d < dropdowns.length; d++) {
-                    var dropdown = dropdowns[d]
-                    if (dropdown.sel, dropdown.sel === languageDropdown) {
-                        dropdown.select(languageDropdown.value)
-                    }
-                }
-            }
-        })
+        // FS.registerEventhandler(events.languageChanged, function (e) {
+        //     var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
+        //     if (languageDropdown && dropdowns) {
+        //         for (var d = 0; d < dropdowns.length; d++) {
+        //             var dropdown = dropdowns[d]
+        //             if (dropdown.sel, dropdown.sel === languageDropdown) {
+        //                 dropdown.select(languageDropdown.value)
+        //             }
+        //         }
+        //     }
+        // })
     }
 
     function updateSlider(position /*, value*/ ) {
-        var key = this.element.dataset.fsjs,
-            eventKey = key,
-            label
+        var key = this.element.dataset.fsjs
 
         // Catch special case for variable font axis sliders
         if (typeof(key) === "undefined") {
             key = this.element.dataset.axis
-            eventKey = "variation"
-        }
-
-        label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
-
-        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + eventKey + "changed"))
-
-        if (label) {
-            label.textContent = position
+            FS.setVariation(key, position)
+        } else {
+            FS.setValue(key, position)
         }
     }
 

@@ -32,9 +32,9 @@
         "auto": true
       },
       {
-        "label": "npm run "scss-compressed"",
+        "label": "npm run scss-compressed",
         "type": "npm",
-        "script": ""scss-compressed"",
+        "script": "scss-compressed",
         "auto": true
       },
       {

@@ -245,6 +245,35 @@ function parseParts(choice) {
     }
 }
 
+/**
+ * Number clamp to min—max with fallback for when any input value is not a number
+ * @param {*} value 
+ * @param {*} min 
+ * @param {*} max 
+ * @param {*} fallback 
+ */
+function clamp(value, min, max, fallback) {    
+    value = parseFloat(value)
+    min = parseFloat(min)
+    max = parseFloat(max)
+    
+    if (isNaN(value) || isNaN(min) || isNaN(max)) {
+        if (typeof(fallback) !== "undefined") {
+            value = fallback
+        } else {
+            return value
+        }
+    } 
+    
+    if (value < min) {
+        value = min
+    } else if (value > max) {
+        value = max
+    }
+
+    return value
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
@@ -254,6 +283,7 @@ module.exports = {
     flattenDeep: flattenDeep,
     arrayUnique: arrayUnique,
     parseParts: parseParts,
+    clamp: clamp,
 
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,

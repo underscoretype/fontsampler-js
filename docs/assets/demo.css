@@ -115,3 +115,13 @@ footer {
     height: auto;
     max-width: 150px;
 }
+
+.half {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 -10em;
+}
+.half .demo {
+    box-sizing: border-box;
+    width: 45%;
+}

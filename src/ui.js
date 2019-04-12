@@ -48,7 +48,8 @@ function UI(root, fonts, options) {
         keyToCss = {
             "fontsize": "fontSize",
             "lineheight": "lineHeight",
-            "letterspacing": "letterSpacing"
+            "letterspacing": "letterSpacing",
+            "alignment": "text-align"
         },
         blocks = {},
         uifactory = null,
@@ -213,10 +214,7 @@ function UI(root, fonts, options) {
             sanitizeBlock(block, key)
             blocks[key] = block
 
-            console.warn(options.ui[key].render, key)
-
             if (options.ui[key].render !== true) {
-                console.warn("remove block", block, block.parentNode, block.parentNode.childNodes)
                 blocks[key] = false
                 if (block.parentNode) {
                     block.parentNode.removeChild(block)
@@ -225,7 +223,11 @@ function UI(root, fonts, options) {
             }
 
             return false
-        } else if (!block && options.ui[key].render === true) {
+        } else if (!block && (
+                options.ui[key].render === true || 
+                (key === "variation" && options.ui.variations.render === true) 
+            )
+        ) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -328,12 +330,11 @@ function UI(root, fonts, options) {
         }
 
         if (type === "slider") {
-            element.addEventListener("change", onChange)
             element.addEventListener("change", onSlide)
-            element.val = opt.init
-            setInputCss(keyToCss[key], opt.init + opt.unit)
+            setValue(key, opt.init)
         } else if (type === "dropdown") {
             element.addEventListener("change", onChange)
+            setValue(key, opt.init)
             // TODO init values to tester
         } else if (type === "buttongroup") {
             var buttons = element.querySelectorAll("[data-choice]")
@@ -348,6 +349,7 @@ function UI(root, fonts, options) {
                     }
                 }
             }
+            setValue(key, options.ui[key].init)
         } else if (type === "checkboxes") {
             // currently only opentype feature checkboxes
             var checkboxes = element.querySelectorAll("[data-feature]")
@@ -364,39 +366,11 @@ function UI(root, fonts, options) {
             }
         } else if (type === "slidergroup") {
             // currently only variable font slider group
-            var nestedDropdown = element.querySelector("[data-fsjs='instances']")
-            if (nestedDropdown) {
-                nestedDropdown.addEventListener("change", function(e) {
-                    var axes = e.target.value.split(",")
-                    for (var v = 0; v < axes.length; v++) {
-                        var axis = axes[v].split(" "),
-                            slider = element.querySelector("[data-fsjs-slider][data-axis='" + axis[0] + "']")
-
-                        if (!isValidAxisAndValue(axis[0], axis[1])) {
-                            console.warn(axis)
-                            console.error(errors.invalidVariation)
-                            continue
-                        }
-
-                        slider.value = axis[1]
-
-                        // manually trigger a HTMLEvents.change to propagate the changes
-                        sendNativeEvent("change", slider)
-                        sendEvent("variation")
-                    }
-                })
-            }
-
-            var nestedSliders = element.querySelectorAll("[data-fsjs-slider]")
+            var nestedSliders = element.querySelectorAll("[data-fsjs-ui='slider']")
             if (nestedSliders && nestedSliders.length > 0) {
                 for (var a = 0; a < nestedSliders.length; a++) {
                     var nestedSlider = nestedSliders[a]
-                    nestedSlider.addEventListener("change", function(e) {
-                        sendEvent(e.target.parentNode.dataset.fsjs)
-                    })
-                    nestedSlider.addEventListener("change", function(e) {
-                        refreshAxisLabelValue(e.target.dataset.axis)
-                    })
+                    nestedSlider.addEventListener("change", onSlideVariation)
                 }
             }
         }
@@ -422,15 +396,8 @@ function UI(root, fonts, options) {
         }
     }
 
-    function refreshAxisLabelValue(axis) {
-        var label = root.querySelector("[data-fsjs-for='" + axis + "'] .fsjs-label-value")
-        if (label) {
-            label.textContent = getVariation(axis)
-        }
-    }
-
     function getElement(key, node) {
-        if (typeof(node) === "undefined") {
+        if (typeof(node) === "undefined" || key in ui === false) {
             node = root
         }
         var element = root.querySelector("[data-fsjs='" + key + "']")
@@ -439,7 +406,7 @@ function UI(root, fonts, options) {
     }
 
     function getBlock(key, node) {
-        if (typeof(node) === "undefined") {
+        if (typeof(node) === "undefined" || key in ui === false) {
             node = root
         }
         var block = root.querySelector("[data-fsjs-block='" + key + "']")
@@ -457,30 +424,26 @@ function UI(root, fonts, options) {
     }
 
     /**
-     * Catch-all UI element event listener firing a scoped CustomEvent based
-     * on the element’s property
-     * @param {*} e 
+     * Internal event listeners reacting to different UI element’s events
+     * and passing them on to trigger the appropriate changes
      */
     function onChange(e) {
-        var key = e.target.dataset.fsjs
+        console.log("onChange")
+        // sendEvent(e.target.dataset.fsjs)
+        setValue(e.target.dataset.fsjs, e.target.value)
+    }
 
-        sendEvent(key)
+    function onSlideVariation(e) {
+        setVariation(e.target.dataset.axis, e.target.value)
     }
 
     function onSlide(e) {
-        var key = e.target.dataset.fsjs,
-            label = root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
-
-        if (label) {
-            label.textContent = getValue(key)
-        }
+        setValue(e.target.dataset.fsjs)
     }
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        var key = "opentype"
-
-        sendEvent(key)
+        sendEvent("opentype")
     }
 
     /**
@@ -497,8 +460,7 @@ function UI(root, fonts, options) {
                 helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
             }
             helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
-
-            sendEvent(property)
+            setValue(property, e.currentTarget.dataset.choice)
         }
     }
 
@@ -537,8 +499,8 @@ function UI(root, fonts, options) {
      * Get a UI element value
      * @param {*} property 
      */
-    function getValue(property) {
-        var element = getElement(property)
+    function getValue(key) {
+        var element = getElement(key)
 
         if (element) {
             return element.value
@@ -549,10 +511,10 @@ function UI(root, fonts, options) {
 
     /**
      * Get a UI element value with CSS unit
-     * @param {*} property 
+     * @param {*} key 
      */
-    function getCssValue(property) {
-        var element = getElement(property)
+    function getCssValue(key) {
+        var element = getElement(key)
 
         return element ? element.value + element.dataset.unit : ""
     }
@@ -638,6 +600,92 @@ function UI(root, fonts, options) {
         }
 
         return false
+    }
+
+
+    function setValue(key, value) {
+        console.warn("setValue", key, value)
+        var element = getElement(key)
+
+        switch (key) {
+            case "fontsize":
+            case "lineheight":
+            case "letterspacing":
+                if (typeof(value) === "undefined") {
+                    // no value means get and use the element value
+                    value = getValue(key)
+                } else {
+                    // if a value was passed in check if it is within bounds,
+                    // valid and if the slider needs an update (via native event)
+                    value = helpers.clamp(value, options.ui[key].min, 
+                        options.ui[key].max, options.ui[key].init)
+
+                    if (element.value.toString() !== value.toString()) {
+                        element.value = value
+                        sendNativeEvent("change", element)
+                    }
+                }
+
+                setLabelValue(key, value)
+                setInputCss(keyToCss[key], value + options.ui[key].unit)
+            break;
+
+            case "variation":
+            break;
+
+            case "opentype":
+                setInputOpentype(value)
+            break;
+
+            case "language":
+                setInputAttr("lang", value)
+            break;
+
+            case "fontfamily":
+                root.dispatchEvent(new CustomEvent(events.fontChanged))
+            break;
+
+            case "alignment":
+                setInputCss(keyToCss[key], value)
+            break;
+            
+            case "direction":
+                setInputAttr("dir", value)
+            break;
+
+            case "tester":
+            break;
+        }
+    }
+
+    function setVariation(axis, val) {
+        var v = getVariation(),
+            label,
+            opt
+
+        if (isValidAxisAndValue(axis, val)) {
+            // TODO refactor to: getAxisDefaults() and also use
+            // it on axis setup / options parsing
+            opt = options.ui.variation.axes[axis]
+            if (!opt) {
+                opt = {
+                    min: 100,
+                    max: 900
+                }
+            }
+            if (typeof(opt.min) === "undefined") {
+                opt.min = 100
+            }
+            if (typeof(opt.max) === "undefined") {
+                opt.max = 900
+            }
+            
+            v[axis] = helpers.clamp(val, opt.min, opt.max)
+
+            setLabelValue(axis, val)            
+            setInputVariation(v)
+        }
+
     }
 
     /**
@@ -759,6 +807,10 @@ function UI(root, fonts, options) {
     return {
         init: init,
         getValue: getValue,
+        setValue: setValue,
+
+        setVariation: setVariation,
+
         getCssValue: getCssValue,
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,

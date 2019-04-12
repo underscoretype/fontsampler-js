@@ -1203,7 +1203,10 @@ var between = exports.between = function between(pos, min, max) {
 
 module.exports = {
     "init": "fontsampler.events.init",
-    "languageChanged": "fontsampler.events.languagechanged"
+    "languageChanged": "fontsampler.events.languagechanged",
+    "fontChanged": "fontsampler.events.fontchanged",
+    "fontLoaded": "fontsampler.events.fontloaded",
+    "fontsPreloaded": "fontsampler.events.fontspreloaded"
 }
 
 },{}],4:[function(_dereq_,module,exports){
@@ -1454,6 +1457,35 @@ function parseParts(choice) {
     }
 }
 
+/**
+ * Number clamp to min—max with fallback for when any input value is not a number
+ * @param {*} value 
+ * @param {*} min 
+ * @param {*} max 
+ * @param {*} fallback 
+ */
+function clamp(value, min, max, fallback) {    
+    value = parseFloat(value)
+    min = parseFloat(min)
+    max = parseFloat(max)
+    
+    if (isNaN(value) || isNaN(min) || isNaN(max)) {
+        if (typeof(fallback) !== "undefined") {
+            value = fallback
+        } else {
+            return value
+        }
+    } 
+    
+    if (value < min) {
+        value = min
+    } else if (value > max) {
+        value = max
+    }
+
+    return value
+}
+
 module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
@@ -1463,6 +1495,7 @@ module.exports = {
     flattenDeep: flattenDeep,
     arrayUnique: arrayUnique,
     parseParts: parseParts,
+    clamp: clamp,
 
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
@@ -1475,7 +1508,7 @@ var helpers = _dereq_("./helpers")
 
 function Skin(FS) {
 
-    FS.registerEventhandler(events.init, init)
+    FS.root.addEventListener(events.init, init)
 
     function init() {
         console.debug("Skin.init()", FS)
@@ -1509,36 +1542,28 @@ function Skin(FS) {
                 }
             }
         }
-        FS.registerEventhandler(events.languageChanged, function (e) {
-            var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
-            if (languageDropdown && dropdowns) {
-                for (var d = 0; d < dropdowns.length; d++) {
-                    var dropdown = dropdowns[d]
-                    if (dropdown.sel, dropdown.sel === languageDropdown) {
-                        dropdown.select(languageDropdown.value)
-                    }
-                }
-            }
-        })
+        // FS.registerEventhandler(events.languageChanged, function (e) {
+        //     var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
+        //     if (languageDropdown && dropdowns) {
+        //         for (var d = 0; d < dropdowns.length; d++) {
+        //             var dropdown = dropdowns[d]
+        //             if (dropdown.sel, dropdown.sel === languageDropdown) {
+        //                 dropdown.select(languageDropdown.value)
+        //             }
+        //         }
+        //     }
+        // })
     }
 
     function updateSlider(position /*, value*/ ) {
-        var key = this.element.dataset.fsjs,
-            eventKey = key,
-            label
+        var key = this.element.dataset.fsjs
 
         // Catch special case for variable font axis sliders
         if (typeof(key) === "undefined") {
             key = this.element.dataset.axis
-            eventKey = "variation"
-        }
-
-        label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
-
-        FS.root.dispatchEvent(new CustomEvent("fontsampler.on" + eventKey + "changed"))
-
-        if (label) {
-            label.textContent = position
+            FS.setVariation(key, position)
+        } else {
+            FS.setValue(key, position)
         }
     }
 

@@ -72,6 +72,8 @@ function UIElements(root, options) {
 
     function slidergroup(key, opt, node) {
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+        
+        console.warn("slidergroup", key, opt)
 
         for (var s = 0; s < opt.axes.length; s++) {
             var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].code + "']")

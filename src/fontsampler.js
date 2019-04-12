@@ -205,25 +205,6 @@ function Fontsampler(_root, _fonts, _options) {
 
     // Setup the interface listeners and delegate events back to the interface
     function setupUIEvents() {
-        // sliders
-        this.root.addEventListener("fontsampler.onfontsizechanged", function() {
-            var val = ui.getCssValue("fontsize")
-            ui.setInputCss(ui.getCssAttrForKey("fontsize"), val)
-        })
-        this.root.addEventListener("fontsampler.onlineheightchanged", function() {
-            var val = ui.getCssValue("lineheight")
-            ui.setInputCss(ui.getCssAttrForKey("lineheight"), val)
-        })
-        this.root.addEventListener("fontsampler.onletterspacingchanged", function() {
-            var val = ui.getCssValue("letterspacing")
-            ui.setInputCss(ui.getCssAttrForKey("letterspacing"), val)
-        })
-
-        // slider groups
-        this.root.addEventListener("fontsampler.onvariationchanged", function() {
-            var val = ui.getVariation()
-            ui.setInputVariation(val)
-        })
 
         // checkbox
         this.root.addEventListener("fontsampler.onopentypechanged", function() {
@@ -232,13 +213,9 @@ function Fontsampler(_root, _fonts, _options) {
         })
 
         // dropdowns
-        this.root.addEventListener("fontsampler.onfontfamilychanged", function() {
+        this.root.addEventListener(events.fontChanged, function () {
             var val = ui.getValue("fontfamily")
             loadFont(val)
-        })
-        this.root.addEventListener("fontsampler.onlanguagechanged", function() {
-            var val = ui.getValue("language")
-            ui.setInputAttr("lang", val)
         })
 
         // buttongroups
@@ -266,6 +243,8 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
+
+        console.warn("font", fonts)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
@@ -294,6 +273,8 @@ function Fontsampler(_root, _fonts, _options) {
                 ui.setActivateLanguage(font.language)
             }
 
+            _root.dispatchEvent(new CustomEvent(events.fontLoaded))
+
             preloader.resume()
         })
     }
@@ -306,7 +287,9 @@ function Fontsampler(_root, _fonts, _options) {
         console.debug("Fontsampler.init()", this, this.root)
 
         var initialFont = 0
-        if ("init" in options.ui.fontfamily === true && typeof(options.ui.fontfamily) === "string") {
+        if ("init" in options.ui.fontfamily === true && 
+            typeof(options.ui.fontfamily.init) === "string" &&
+            options.ui.fontfamily.init !== "") {
             initialFont = options.ui.fontfamily.init
         }
         ui.init()
@@ -317,6 +300,7 @@ function Fontsampler(_root, _fonts, _options) {
             ui.setStatusClass(options.preloadingClass, true)
             preloader.load(fonts, function() {
                 ui.setStatusClass(options.preloadingClass, false)
+                _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
             })
         }
 
@@ -337,20 +321,32 @@ function Fontsampler(_root, _fonts, _options) {
         }
     }
 
-    this.registerEventhandler = function(event, callback) {
-        // Validate that only fontsampler.events.… are passed in
-        if (Object.values(events).indexOf(event) === -1) {
-            throw new Error(errors.invalidEvent)
-        }
+    // this.registerEventhandler = function(event, callback) {
+    //     // Validate that only fontsampler.events.… are passed in
+    //     if (Object.values(events).indexOf(event) === -1) {
+    //         throw new Error(errors.invalidEvent)
+    //     }
 
-        // Only act if there is a valid callback
-        if (typeof(callback) === "function") {
-            this.root.addEventListener(event, callback)
-        }
-    }
+    //     // Only act if there is a valid callback
+    //     if (typeof(callback) === "function") {
+    //         this.root.addEventListener(event, callback)
+    //     }
+    // }
 
     this.setText = function(text) {
         ui.setInputText(text)
+    }
+
+    this.getValue = function (key) {
+        return ui.getValue(key)
+    }
+
+    this.setValue = function (key, value) {
+        return ui.setValue(key, value)
+    }
+
+    this.setVariation = function (key, value) {
+        return ui.setVariation(key, value)
     }
 
     return this
