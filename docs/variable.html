@@ -38,6 +38,8 @@
     <p>Fontsampler supports any number of (manually defined) axes and arbitrary min, max, init and step values for those.
         The above example shows only a few of <a href="https://github.com/TypeNetwork/Amstelvar">Amstelvar</a>’s axes.</p>
 
+    <div id="three" class="demo">test</div>
+
     <footer>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
         <em>fontsampler-js is brought to you by Underscore</em><br>
@@ -47,7 +49,17 @@
     
     <script>
         window.onload = function() {
-            var fonts = [{
+
+            var fonts3 = [
+                {
+                    name: "Plex Sans Bold",
+                    files: [
+                        "./fonts/ibm-plex-sans/IBMPlexSans-Bold.woff"
+                    ]
+                }
+            ]
+            var fonts = [
+                {
                     "name": "Work Sans",
                     "files": [
                         "./fonts/work-sans/WorkSans-Roman-VF.woff2"
@@ -111,13 +123,14 @@
             fs.init()
 
 
-            var fonts2 = [{
-                        name: "Work Sans Variable",
-                        files: [
-                            "./fonts/amstelvar/AmstelvarAlpha-VF.woff2"
-                        ],
-                        axes: ["wght", "opsz", "wdth"]
-                    }],
+            var fonts2 = [
+                {
+                    name: "Amstelvar Variable",
+                    files: [
+                        "./fonts/amstelvar/AmstelvarAlpha-VF.woff2"
+                    ],
+                    axes: ["wght", "opsz", "wdth"]
+                }],
                 options2 = {
                     ui: {
                         variation: {
@@ -154,6 +167,9 @@
             var fs2 = new Fontsampler(document.getElementById("demo-variable-axes"), fonts2, options2)
             FontsamplerSkin(fs2)
             fs2.init()
+
+
+            var fs3 = new Fontsampler(document.getElementById("three"), fonts3).init()
         }
     </script>
 

@@ -58,14 +58,18 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
+    }).catch(function () {
+        console.error(font, file)
+        console.error(new Error(errors.fileNotfound))
     })
-
+    
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
         }).catch(function() {
-            throw new Error(errors.fileNotfound + file)
+            console.error(font, file)
+            console.error(new Error(errors.fileNotfound))
         })
     } else {
         var newStyle = document.createElement("style");

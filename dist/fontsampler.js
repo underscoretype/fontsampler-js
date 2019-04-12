@@ -230,7 +230,7 @@ module.exports = {
 module.exports = {
     "noFonts": "Fontsampler: No fonts were passed in.",
     "initFontFormatting": "Fontsampler: Passed in fonts are not in expected format. Expected [ { name: 'Font Name', files: [ 'fontfile.woff', 'fontfile.woff2' ] }, … ]",
-    "fileNotfound": "Fontsampler: The passed in file could not be found: ",
+    "fileNotfound": "Fontsampler: The passed in file could not be loaded.",
     "missingRoot": "Fontsampler: Passed in root element invalid: ",
     "tooManyFiles": "Fontsampler: Supplied more than one woff or woff2 for a font: ",
     "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
@@ -309,14 +309,18 @@ function loadFont(file, callback) {
         if (typeof(callback) === "function") {
             callback(f)
         }
+    }).catch(function () {
+        console.error(font, file)
+        console.error(new Error(errors.fileNotfound))
     })
-
+    
     if (FontFace) {
         var ff = new FontFace(family, "url(" + file + ")")
         ff.load().then(function() {
             document.fonts.add(ff)
         }).catch(function() {
-            throw new Error(errors.fileNotfound + file)
+            console.error(font, file)
+            console.error(new Error(errors.fileNotfound))
         })
     } else {
         var newStyle = document.createElement("style");
@@ -390,6 +394,7 @@ function Fontsampler(_root, _fonts, _options) {
     fonts = parseFonts.call(this, _fonts)
     fonts = parseFontInstances.call(this, fonts)
 
+
     // options.generate = true
     ui = Interface(this.root, fonts, options)
 
@@ -425,7 +430,7 @@ function Fontsampler(_root, _fonts, _options) {
     }
 
     function parseFonts(fonts) {
-        var extractedFonts = extractFontsFromDOM.call(this)
+        var extractedFonts = helpers.extractFontsFromDOM(this.root)
 
         // Extract fonts; Look first on root element, then on select, then in
         // passed in fonts Array
@@ -435,7 +440,7 @@ function Fontsampler(_root, _fonts, _options) {
         if (!fonts) {
             throw new Error(errors.noFonts)
         }
-        if (!validateFontsFormatting(fonts)) {
+        if (!helpers.validateFontsFormatting(fonts)) {
             console.error(fonts)
             throw new Error(errors.initFontFormatting)
         }
@@ -586,106 +591,6 @@ function Fontsampler(_root, _fonts, _options) {
             var val = ui.getButtongroupValue("direction")
             ui.setInputAttr("dir", val)
         })
-    }
-
-    /**
-     * Check fonts are passed in with correct structure, e.g.
-     * fonts: [ { "Font Name" : [ "fontfile.woff", "fontfile.woff2" ] } ]
-     * 
-     * TODO: Check that at most only one woff and one woff2 is passed in
-     * 
-     * @param {*} fonts 
-     */
-    function validateFontsFormatting(fonts) {
-        if (typeof(fonts) !== "object" || !Array.isArray(fonts)) {
-            return false
-        }
-
-        for (var i = 0; i < fonts.length; i++) {
-            var font = fonts[i]
-            if (typeof(font) !== "object") {
-                return false
-            }
-
-            if (!font.name || !font.files || !Array.isArray(font.files) || font.files.length <= 0) {
-                return false
-            }
-        }
-
-        return true
-    }
-
-    function extractFontsFromDOM() {
-        var select = this.root.querySelector("[data-fsjs='fontfamily']"),
-            options = [],
-            fonts = []
-
-        // First try to get data-fonts or data-woff/2 on the root element
-        // If such are found, return them
-        var rootFonts = extractFontsFromNode(this.root, true)
-        if (rootFonts) {
-            return rootFonts
-        }
-
-        // Otherwise check if there is a dropdown with options that have
-        // data-woff/2 elements
-        if (!select) {
-            return false
-        }
-
-        options = select.querySelectorAll("option")
-        for (i = 0; i < options.length; i++) {
-            var opt = options[i],
-                extractedFonts = extractFontsFromNode(opt, false)
-
-            if (fonts) {
-                fonts = fonts.concat(extractedFonts)
-            }
-        }
-
-        if (fonts) {
-            return fonts
-        }
-
-        return false
-    }
-
-    function extractFontsFromNode(node, ignoreName) {
-        var fonts = [],
-            singleFont = {
-                "name": "Default",
-                "files": []
-            }
-
-        // prever a data-fonts json_encoded array
-        if (node.dataset.fonts) {
-            try {
-                fonts = JSON.parse(node.dataset.fonts)
-                return fonts
-            } catch (error) {
-                console.error(node.dataset.fonts)
-                throw new Error(errors.dataFontsJsonInvalid)
-            }
-        }
-
-        // else see if a single font can be extracted
-        if (node.dataset.name) {
-            singleFont.name = node.dataset.name
-        }
-
-        if (node.dataset.woff) {
-            singleFont.files.push(node.dataset.woff)
-        }
-
-        if (node.dataset.woff2) {
-            singleFont.files.push(node.dataset.woff2)
-        }
-
-        if ((singleFont.name || (!singleFont.name && ignoreName)) && singleFont.files.length > 0) {
-            return [singleFont]
-        }
-
-        return false
     }
 
     function loadFont(indexOrKey) {
@@ -913,6 +818,109 @@ function arrayUnique(a) {
 
 
 /**
+ * Check fonts are passed in with correct structure, e.g.
+ * fonts: [ { "Font Name" : [ "fontfile.woff", "fontfile.woff2" ] } ]
+ * 
+ * TODO: Check that at most only one woff and one woff2 is passed in
+ * TODO: Check in passed in axes axes are defined
+ * 
+ * @param {*} fonts
+ */
+function validateFontsFormatting(fonts) {
+    if (typeof(fonts) !== "object" || !Array.isArray(fonts)) {
+        return false
+    }
+
+    for (var i = 0; i < fonts.length; i++) {
+        var font = fonts[i]
+        if (typeof(font) !== "object") {
+            return false
+        }
+
+        if (!font.name || !font.files || !Array.isArray(font.files) || font.files.length <= 0) {
+            return false
+        }
+    }
+
+    return true
+}
+
+function extractFontsFromDOM(root) {
+    var select = root.querySelector("[data-fsjs='fontfamily']"),
+        options = [],
+        fonts = []
+
+    // First try to get data-fonts or data-woff/2 on the root element
+    // If such are found, return them
+    var rootFonts = extractFontsFromNode(root, true)
+    if (rootFonts) {
+        return rootFonts
+    }
+
+    // Otherwise check if there is a dropdown with options that have
+    // data-woff/2 elements
+    if (!select) {
+        return false
+    }
+
+    options = select.querySelectorAll("option")
+    for (i = 0; i < options.length; i++) {
+        var opt = options[i],
+            extractedFonts = extractFontsFromNode(opt, false)
+
+        if (fonts) {
+            fonts = fonts.concat(extractedFonts)
+        }
+    }
+
+    if (fonts) {
+        return fonts
+    }
+
+    return false
+}
+
+function extractFontsFromNode(node, ignoreName) {
+    var fonts = [],
+        singleFont = {
+            "name": "Default",
+            "files": []
+        }
+
+    // prever a data-fonts json_encoded array
+    if (node.dataset.fonts) {
+        try {
+            fonts = JSON.parse(node.dataset.fonts)
+            return fonts
+        } catch (error) {
+            console.error(node.dataset.fonts)
+            throw new Error(errors.dataFontsJsonInvalid)
+        }
+    }
+
+    // else see if a single font can be extracted
+    if (node.dataset.name) {
+        singleFont.name = node.dataset.name
+    }
+
+    if (node.dataset.woff) {
+        singleFont.files.push(node.dataset.woff)
+    }
+
+    if (node.dataset.woff2) {
+        singleFont.files.push(node.dataset.woff2)
+    }
+
+    if ((singleFont.name || (!singleFont.name && ignoreName)) && singleFont.files.length > 0) {
+        return [singleFont]
+    }
+
+    return false
+}
+
+
+
+/**
  * Split an input choice into value and text or return only the value as 
  * both if no separator is used to provide a readable label
  * e.g. "ltr|Left" to right becomes { val: "ltr", text: "Left to right"}
@@ -942,10 +950,14 @@ module.exports = {
     nodeAddClass: nodeAddClass,
     nodeAddClasses: nodeAddClasses,
     nodeRemoveClass: nodeRemoveClass,
-    flattenDeep: flattenDeep,
     isNode: isNode,
+
+    flattenDeep: flattenDeep,
     arrayUnique: arrayUnique,
-    parseParts: parseParts
+    parseParts: parseParts,
+
+    validateFontsFormatting: validateFontsFormatting,
+    extractFontsFromDOM: extractFontsFromDOM,
 }
 },{}],9:[function(_dereq_,module,exports){
 var Fontloader = _dereq_("./fontloader")
