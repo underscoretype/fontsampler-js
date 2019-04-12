@@ -11,12 +11,22 @@
 }
 
 // All UI elements
-.fsjs-block, [data-axis-block] {
+.fsjs-block,
+[data-axis-block] {
     box-sizing: border-box;
     padding: $elementPadding;
     position: relative;
     margin: $elementMargin;
     width: 100%;
+}
+
+[data-axis-block] {
+    margin-top: 0;
+    margin-bottom: 0;
+
+    & + [data-axis-block] {
+        margin-top: $elementMargin;
+    }
 }
 
 .fsjs-label {

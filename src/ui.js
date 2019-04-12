@@ -213,8 +213,19 @@ function UI(root, fonts, options) {
             sanitizeBlock(block, key)
             blocks[key] = block
 
+            console.warn(options.ui[key].render, key)
+
+            if (options.ui[key].render !== true) {
+                console.warn("remove block", block, block.parentNode, block.parentNode.childNodes)
+                blocks[key] = false
+                if (block.parentNode) {
+                    block.parentNode.removeChild(block)
+                }
+                return false
+            }
+
             return false
-        } else if (!block) {
+        } else if (!block && options.ui[key].render === true) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -268,6 +279,7 @@ function UI(root, fonts, options) {
 
         helpers.nodeAddClass(element, options.classes.elementClass)
         element.dataset.fsjs = key
+        element.dataset.fsjsUi = ui[key]
     }
 
     function sanitizeLabel(label, key) {
@@ -310,6 +322,10 @@ function UI(root, fonts, options) {
             element = getElement(key, block),
             type = ui[key],
             opt = options.ui[key]
+
+        if (!block) {
+            return
+        }
 
         if (type === "slider") {
             element.addEventListener("change", onChange)
@@ -358,7 +374,7 @@ function UI(root, fonts, options) {
 
                         if (!isValidAxisAndValue(axis[0], axis[1])) {
                             console.warn(axis)
-                            console.warn(errors.invalidVariation)
+                            console.error(errors.invalidVariation)
                             continue
                         }
 

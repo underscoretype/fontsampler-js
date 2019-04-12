@@ -29,11 +29,13 @@ module.exports = {
     ui: {
         tester: {
             editable: true,
-            label: false
+            label: false,
+            render: true,
         },
         fontfamily: {
             label: "Font",
-            init: ""
+            init: "",
+            render: true,
         },
         fontsize: {
             unit: "px",
@@ -41,7 +43,8 @@ module.exports = {
             min: 8,
             max: 96,
             step: 1,
-            label: "Size"
+            label: "Size",
+            render: true,
         },
         lineheight: {
             unit: "%",
@@ -49,7 +52,8 @@ module.exports = {
             min: 60,
             max: 120,
             step: 5,
-            label: "Leading"
+            label: "Leading",
+            render: true,
         },
         letterspacing: {
             unit: "em",
@@ -57,30 +61,36 @@ module.exports = {
             min: -0.1,
             max: 0.1,
             step: 0.01,
-            label: "Letterspacing"
+            label: "Letterspacing",
+            render: true,
         },
         alignment: {
             choices: ["left|Left", "center|Centered", "right|Right"],
             init: "left",
-            label: "Alignment"
+            label: "Alignment",
+            render: true,
         },
         direction: {
             choices: ["ltr|Left to right", "rtl|Right to left"],
             init: "ltr",
-            label: "Direction"
+            label: "Direction",
+            render: true,
         },
         language: {
             choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
             init: "en-Gb",
-            label: "Language"
+            label: "Language",
+            render: true,
         },
         opentype: {
             choices: ["liga|Ligatures", "frac|Fractions"],
             init: ["liga"],
-            label: "Opentype features"
+            label: "Opentype features",
+            render: true,
         },
         variable: {
-            axes: []
+            axes: [],
+            render: true
         }
     }
 }

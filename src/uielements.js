@@ -66,7 +66,6 @@ function UIElements(root, options) {
         if (key) {
             input.dataset.fsjs = key
         }
-        input.dataset.fsjsSlider = true
 
         return input
     }
@@ -94,6 +93,7 @@ function UIElements(root, options) {
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
+                slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
             }
             slider.dataset.axis = opt.axes[s].code
@@ -165,8 +165,6 @@ function UIElements(root, options) {
     function buttongroup(key, opt) {
         var group = document.createElement("div")
 
-        group.dataset.fsjs = key
-
         for (var o in opt.choices) {
             var button = document.createElement("button"),
                 choice = helpers.parseParts(opt.choices[o])
@@ -179,6 +177,8 @@ function UIElements(root, options) {
             }
             group.appendChild(button)
         }
+
+        group.dataset.fsjs = key
 
         return group
     }

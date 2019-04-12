@@ -32,6 +32,12 @@
         "auto": true
       },
       {
+        "label": "npm run "scss-compressed"",
+        "type": "npm",
+        "script": ""scss-compressed"",
+        "auto": true
+      },
+      {
         "label": "npm run start",
         "type": "npm",
         "script": "start",

@@ -100,7 +100,7 @@ function isNode(node) {
  * @return {Array} flatten array
  */
 function flattenDeep(array) {
-    return array.reduce((acc, current) => {
+    return array.reduce(function (acc, current) {
         return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
     }, []);
 }

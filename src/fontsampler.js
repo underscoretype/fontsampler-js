@@ -57,7 +57,6 @@ function Fontsampler(_root, _fonts, _options) {
     ui = Interface(this.root, fonts, options)
 
     function parseFontInstances(fonts) {
-        console.warn("before", fonts)
         var parsed = []
 
         for (var f = 0; f < fonts.length; f++) {
@@ -357,7 +356,7 @@ function Fontsampler(_root, _fonts, _options) {
         var font
 
         preloader.pause()
-        ui.setStatusClass(options.loadingClass, true)
+        ui.setStatusClass(options.classes.loadingClass, true)
 
         if (typeof(indexOrKey) === "string") {
             font = fonts.filter(function(value, index) {
@@ -366,12 +365,10 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-
-        console.log(font)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
-            ui.setStatusClass(options.loadingClass, false)
+            ui.setStatusClass(options.classes.loadingClass, false)
             
             // update UI to font’s capabilities
             ui.setActiveAxes(font.axes)
@@ -386,7 +383,6 @@ function Fontsampler(_root, _fonts, _options) {
                         input.value = split[1]
                         ui.sendNativeEvent("change", input)
                     }
-                    console.log(split[0], split[1])
                     ui.setLabelValue(split[0], split[1])
                 }
                 ui.setInputVariation(va)
@@ -406,12 +402,12 @@ function Fontsampler(_root, _fonts, _options) {
      */
 
     this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
 
         var initialFont = 0
         if ("init" in options.ui.fontfamily === true && typeof(options.ui.fontfamily) === "string") {
             initialFont = options.ui.fontfamily.init
         }
-        console.debug("Fontsampler.init()", this, this.root, "initial", initialFont)
         ui.init()
         setupUIEvents.call(this)
         loadFont.call(this, initialFont)
@@ -423,10 +419,10 @@ function Fontsampler(_root, _fonts, _options) {
             })
         }
 
-        this.initalized = true
         helpers.nodeAddClass(this.root, options.classes.initClass)
-
+        
         this.root.dispatchEvent(new CustomEvent(events.init))
+        this.initialized = true
 
         // For convenience also have the init method return the instance
         // This way you can create the object and init it, e.g.

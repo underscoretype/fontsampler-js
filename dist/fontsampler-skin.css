@@ -15,7 +15,7 @@
   transition: opacity 0.2s ease-out;
   opacity: 1;
 }
-.fsjs-skin.loading .fsjs-block-tester {
+.fsjs-skin.fsjs-loading .fsjs-block-tester {
   opacity: 0;
 }
 .fsjs-skin > .fsjs-wrapper {
@@ -25,12 +25,20 @@
 .fsjs-skin .fsjs-block-tester {
   display: block;
 }
-.fsjs-skin .fsjs-block, .fsjs-skin [data-axis-block] {
+.fsjs-skin .fsjs-block,
+.fsjs-skin [data-axis-block] {
   box-sizing: border-box;
   padding: 0 5px;
   position: relative;
   margin: 5px;
   width: 100%;
+}
+.fsjs-skin [data-axis-block] {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.fsjs-skin [data-axis-block] + [data-axis-block] {
+  margin-top: 5px;
 }
 .fsjs-skin .fsjs-label {
   line-height: 1.5em;

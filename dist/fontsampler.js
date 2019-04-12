@@ -159,11 +159,13 @@ module.exports = {
     ui: {
         tester: {
             editable: true,
-            label: false
+            label: false,
+            render: true,
         },
         fontfamily: {
             label: "Font",
-            init: ""
+            init: "",
+            render: true,
         },
         fontsize: {
             unit: "px",
@@ -171,7 +173,8 @@ module.exports = {
             min: 8,
             max: 96,
             step: 1,
-            label: "Size"
+            label: "Size",
+            render: true,
         },
         lineheight: {
             unit: "%",
@@ -179,7 +182,8 @@ module.exports = {
             min: 60,
             max: 120,
             step: 5,
-            label: "Leading"
+            label: "Leading",
+            render: true,
         },
         letterspacing: {
             unit: "em",
@@ -187,30 +191,36 @@ module.exports = {
             min: -0.1,
             max: 0.1,
             step: 0.01,
-            label: "Letterspacing"
+            label: "Letterspacing",
+            render: true,
         },
         alignment: {
             choices: ["left|Left", "center|Centered", "right|Right"],
             init: "left",
-            label: "Alignment"
+            label: "Alignment",
+            render: true,
         },
         direction: {
             choices: ["ltr|Left to right", "rtl|Right to left"],
             init: "ltr",
-            label: "Direction"
+            label: "Direction",
+            render: true,
         },
         language: {
             choices: ["en-GB|English", "de-De|Deutsch", "nl-NL|Dutch"],
             init: "en-Gb",
-            label: "Language"
+            label: "Language",
+            render: true,
         },
         opentype: {
             choices: ["liga|Ligatures", "frac|Fractions"],
             init: ["liga"],
-            label: "Opentype features"
+            label: "Opentype features",
+            render: true,
         },
         variable: {
-            axes: []
+            axes: [],
+            render: true
         }
     }
 }
@@ -384,7 +394,6 @@ function Fontsampler(_root, _fonts, _options) {
     ui = Interface(this.root, fonts, options)
 
     function parseFontInstances(fonts) {
-        console.warn("before", fonts)
         var parsed = []
 
         for (var f = 0; f < fonts.length; f++) {
@@ -684,7 +693,7 @@ function Fontsampler(_root, _fonts, _options) {
         var font
 
         preloader.pause()
-        ui.setStatusClass(options.loadingClass, true)
+        ui.setStatusClass(options.classes.loadingClass, true)
 
         if (typeof(indexOrKey) === "string") {
             font = fonts.filter(function(value, index) {
@@ -693,12 +702,10 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-
-        console.log(font)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
-            ui.setStatusClass(options.loadingClass, false)
+            ui.setStatusClass(options.classes.loadingClass, false)
             
             // update UI to font’s capabilities
             ui.setActiveAxes(font.axes)
@@ -713,7 +720,6 @@ function Fontsampler(_root, _fonts, _options) {
                         input.value = split[1]
                         ui.sendNativeEvent("change", input)
                     }
-                    console.log(split[0], split[1])
                     ui.setLabelValue(split[0], split[1])
                 }
                 ui.setInputVariation(va)
@@ -733,12 +739,12 @@ function Fontsampler(_root, _fonts, _options) {
      */
 
     this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
 
         var initialFont = 0
         if ("init" in options.ui.fontfamily === true && typeof(options.ui.fontfamily) === "string") {
             initialFont = options.ui.fontfamily.init
         }
-        console.debug("Fontsampler.init()", this, this.root, "initial", initialFont)
         ui.init()
         setupUIEvents.call(this)
         loadFont.call(this, initialFont)
@@ -750,10 +756,10 @@ function Fontsampler(_root, _fonts, _options) {
             })
         }
 
-        this.initalized = true
         helpers.nodeAddClass(this.root, options.classes.initClass)
-
+        
         this.root.dispatchEvent(new CustomEvent(events.init))
+        this.initialized = true
 
         // For convenience also have the init method return the instance
         // This way you can create the object and init it, e.g.
@@ -890,7 +896,7 @@ function isNode(node) {
  * @return {Array} flatten array
  */
 function flattenDeep(array) {
-    return array.reduce((acc, current) => {
+    return array.reduce(function (acc, current) {
         return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
     }, []);
 }
@@ -1307,8 +1313,19 @@ function UI(root, fonts, options) {
             sanitizeBlock(block, key)
             blocks[key] = block
 
+            console.warn(options.ui[key].render, key)
+
+            if (options.ui[key].render !== true) {
+                console.warn("remove block", block, block.parentNode, block.parentNode.childNodes)
+                blocks[key] = false
+                if (block.parentNode) {
+                    block.parentNode.removeChild(block)
+                }
+                return false
+            }
+
             return false
-        } else if (!block) {
+        } else if (!block && options.ui[key].render === true) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -1362,6 +1379,7 @@ function UI(root, fonts, options) {
 
         helpers.nodeAddClass(element, options.classes.elementClass)
         element.dataset.fsjs = key
+        element.dataset.fsjsUi = ui[key]
     }
 
     function sanitizeLabel(label, key) {
@@ -1404,6 +1422,10 @@ function UI(root, fonts, options) {
             element = getElement(key, block),
             type = ui[key],
             opt = options.ui[key]
+
+        if (!block) {
+            return
+        }
 
         if (type === "slider") {
             element.addEventListener("change", onChange)
@@ -1452,7 +1474,7 @@ function UI(root, fonts, options) {
 
                         if (!isValidAxisAndValue(axis[0], axis[1])) {
                             console.warn(axis)
-                            console.warn(errors.invalidVariation)
+                            console.error(errors.invalidVariation)
                             continue
                         }
 
@@ -1928,7 +1950,6 @@ function UIElements(root, options) {
         if (key) {
             input.dataset.fsjs = key
         }
-        input.dataset.fsjsSlider = true
 
         return input
     }
@@ -1956,6 +1977,7 @@ function UIElements(root, options) {
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
+                slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
             }
             slider.dataset.axis = opt.axes[s].code
@@ -2027,8 +2049,6 @@ function UIElements(root, options) {
     function buttongroup(key, opt) {
         var group = document.createElement("div")
 
-        group.dataset.fsjs = key
-
         for (var o in opt.choices) {
             var button = document.createElement("button"),
                 choice = helpers.parseParts(opt.choices[o])
@@ -2041,6 +2061,8 @@ function UIElements(root, options) {
             }
             group.appendChild(button)
         }
+
+        group.dataset.fsjs = key
 
         return group
     }

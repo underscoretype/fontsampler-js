@@ -8,7 +8,7 @@ function Skin(FS) {
     FS.registerEventhandler(events.init, init)
 
     function init() {
-        console.debug("Skin.init()", FS, FS.initialized)
+        console.debug("Skin.init()", FS)
 
         if (FS.initialized === true) {
             console.error(FS.root)
@@ -17,7 +17,7 @@ function Skin(FS) {
 
         helpers.nodeAddClass(FS.root, "fsjs-skin")
 
-        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-slider]")
+        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-ui='slider']")
         if (rangeInputs.length) {
             rangeSlider.create(rangeInputs, {
                 polyfill: true,
@@ -28,7 +28,7 @@ function Skin(FS) {
             })
         }
 
-        var selectInputs = FS.root.querySelectorAll("select[data-fsjs]")
+        var selectInputs = FS.root.querySelectorAll("select[data-fsjs-ui='dropdown']")
         var dropdowns = []
         if (selectInputs.length) {
             for (var i in selectInputs) {
@@ -62,8 +62,6 @@ function Skin(FS) {
             key = this.element.dataset.axis
             eventKey = "variation"
         }
-
-        console.log("update slider")
 
         label = FS.root.querySelector("[data-fsjs-for='" + key + "'] .fsjs-label-value")
 
