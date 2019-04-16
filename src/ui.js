@@ -429,8 +429,6 @@ function UI(root, fonts, options) {
      * and passing them on to trigger the appropriate changes
      */
     function onChange(e) {
-        console.log("onChange")
-        // sendEvent(e.target.dataset.fsjs)
         setValue(e.target.dataset.fsjs, e.target.value)
     }
 
@@ -605,7 +603,6 @@ function UI(root, fonts, options) {
 
 
     function setValue(key, value) {
-        console.warn("setValue", key, value)
         var element = getElement(key)
 
         switch (key) {

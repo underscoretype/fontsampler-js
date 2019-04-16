@@ -38,7 +38,8 @@
     <p>Fontsampler supports any number of (manually defined) axes and arbitrary min, max, init and step values for those.
         The above example shows only a few of <a href="https://github.com/TypeNetwork/Amstelvar">Amstelvar</a>’s axes.</p>
 
-    <div id="three" class="demo">test</div>
+    <div id="demo-variable-fallback" class="demo">Variable Font instances and axes will be ignored if only a woff file 
+        (no woff2) are supplied or the browser does not support woff2.</div>
 
     <footer>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
@@ -162,6 +163,71 @@
             var fs2 = new Fontsampler(document.getElementById("demo-variable-axes"), fonts2, options2)
             FontsamplerSkin(fs2)
             fs2.init()
+            
+            
+            
+            var fonts3 = [
+                {
+                    name: "Work Sans Woff only test",
+                    files: [
+                        "./fonts/work-sans/WorkSans-Regular.woff"
+                    ],
+                    "instances": [
+                        "wght 250|Work Sans Thin",
+                        "wght 275|Work Sans ExtraLight",
+                        "wght 300|Work Sans Light",
+                        "wght 400|Work Sans Regular",
+                        "wght 500|Work Sans Medium",
+                        "wght 600|Work Sans SemiBold",
+                        "wght 700|Work Sans Bold",
+                        "wght 800|Work Sans ExtraBold",
+                        "wght 900|Work Sans Black"
+                    ],
+                    "language": "ar-afb",
+                    "features": ["rlig", "calt"]
+                },
+                {
+                    "name": "Alegreya Regular", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff"],
+                    "features": ["liga", "dlig"],
+                    "language": "en-gb"
+                }, 
+                { 
+                    "name": "Alegreya Italic", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff"],
+                    "features": ["liga", "dlig"],
+                    "language": "en-gb"
+                }
+            ],
+            options3 = {
+                order: ["tester", ["fontfamily", "language"], ["fontsize", "variation"], "opentype"],
+                ui: {
+                    fontfamily: {
+                        "init": "Work Sans SemiBold"
+                    },
+                    language: {
+                        "choices": ["en-gb|English", "ar-afb|Arabic"],
+                        "init": "en-gb"
+                    },
+                    opentype: {
+                        "choices": ["liga", "dlig", "rlig", "calt"]
+                    },
+                    fontsize: true,
+                    variation: {
+                        axes: [{
+                            tag: "wght",
+                            init: 400,
+                            min: 0,
+                            max: 900,
+                            step: 1,
+                            label: "Weight"
+                        }]
+                    }
+                }
+            }
+            var fs3 = new Fontsampler(document.getElementById("demo-variable-fallback"), fonts3, options3)
+            FontsamplerSkin(fs3)
+            fs3.init()
         }
     </script>
 

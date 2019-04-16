@@ -340,7 +340,8 @@ function fromFiles(files, callback) {
 module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles,
-    "supportsWoff2": supportsWoff2
+    "supportsWoff2": supportsWoff2,
+    "bestWoff": bestWoff
 }
 },{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4}],7:[function(_dereq_,module,exports){
 /**
@@ -409,6 +410,16 @@ function Fontsampler(_root, _fonts, _options) {
             var font = fonts[f]
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
+
+                if (Fontloader.bestWoff(font.files).substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
+                    // no point in registering instances as fonts with no variable font support
+                    font.axes = []
+                    font.instances = []
+                    parsed.push(font)
+
+                    continue
+                }
+
                 for (var v = 0; v < font.instances.length; v++) {
                     var parts = helpers.parseParts(font.instances[v])
                     axes = parts.val.split(",").map(function (value/*, index*/) {
@@ -588,11 +599,13 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop()
+            // If no font or instance of that name is found in fonts default to first
+            if (!font) {
+                font = fonts[0]
+            }
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-
-        console.warn("fonts", fonts)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
@@ -1575,8 +1588,6 @@ function UI(root, fonts, options) {
      * and passing them on to trigger the appropriate changes
      */
     function onChange(e) {
-        console.log("onChange")
-        // sendEvent(e.target.dataset.fsjs)
         setValue(e.target.dataset.fsjs, e.target.value)
     }
 
@@ -1751,7 +1762,6 @@ function UI(root, fonts, options) {
 
 
     function setValue(key, value) {
-        console.warn("setValue", key, value)
         var element = getElement(key)
 
         switch (key) {
@@ -2061,8 +2071,6 @@ function UIElements(root, options) {
 
     function slidergroup(key, opt, node) {
         var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
-        
-        console.warn("slidergroup", key, opt)
 
         for (var s = 0; s < opt.axes.length; s++) {
             var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")

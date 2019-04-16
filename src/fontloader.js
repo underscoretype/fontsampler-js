@@ -86,5 +86,6 @@ function fromFiles(files, callback) {
 module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles,
-    "supportsWoff2": supportsWoff2
+    "supportsWoff2": supportsWoff2,
+    "bestWoff": bestWoff
 }

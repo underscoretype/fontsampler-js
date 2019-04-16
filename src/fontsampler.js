@@ -64,6 +64,16 @@ function Fontsampler(_root, _fonts, _options) {
             var font = fonts[f]
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
+
+                if (Fontloader.bestWoff(font.files).substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
+                    // no point in registering instances as fonts with no variable font support
+                    font.axes = []
+                    font.instances = []
+                    parsed.push(font)
+
+                    continue
+                }
+
                 for (var v = 0; v < font.instances.length; v++) {
                     var parts = helpers.parseParts(font.instances[v])
                     axes = parts.val.split(",").map(function (value/*, index*/) {
@@ -243,11 +253,13 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop()
+            // If no font or instance of that name is found in fonts default to first
+            if (!font) {
+                font = fonts[0]
+            }
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-
-        console.warn("fonts", fonts)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
