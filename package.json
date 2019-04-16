@@ -27,7 +27,6 @@
         "scss-compressed": "sass --watch --style compressed --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css"
     },
     "dependencies": {
-        "derequire": "^2.0.6",
         "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
@@ -37,6 +36,7 @@
     "devDependencies": {
         "browserify": "^16.2.3",
         "http-server": "^0.11.1",
-        "uglifyjs": "^2.4.11"
+        "uglifyjs": "^2.4.11",
+        "derequire": "^2.0.6"
     }
 }
