@@ -305,6 +305,7 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         helpers.nodeAddClass(this.root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
         
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true

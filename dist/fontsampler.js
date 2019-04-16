@@ -257,7 +257,7 @@ var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserve
 var errors = _dereq_("./errors")
 
 // supportsWoff2 manually copied from npm woff2-feature-test
-var supportsWoff2 = (function() {
+var supportsWoff2 = function() {
     if (!("FontFace" in window)) {
         return false;
     }
@@ -266,7 +266,7 @@ var supportsWoff2 = (function() {
     f.load()['catch'](function() {});
 
     return f.status === 'loading' || f.status === 'loaded';
-})();
+}
 
 function getExtension(path) {
     return path.substring(path.lastIndexOf(".") + 1)
@@ -288,7 +288,7 @@ function bestWoff(files) {
         throw new Error(errors.tooManyFiles + files)
     }
 
-    if (woff2s.length > 0 && supportsWoff2) {
+    if (woff2s.length > 0 && supportsWoff2()) {
         return woff2s.shift()
     }
 
@@ -339,7 +339,8 @@ function fromFiles(files, callback) {
 
 module.exports = {
     "loadFont": loadFont,
-    "fromFiles": fromFiles
+    "fromFiles": fromFiles,
+    "supportsWoff2": supportsWoff2
 }
 },{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4}],7:[function(_dereq_,module,exports){
 /**
@@ -649,6 +650,7 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         helpers.nodeAddClass(this.root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
         
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true

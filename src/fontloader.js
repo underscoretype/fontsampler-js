@@ -3,7 +3,7 @@ var FontFaceObserver = require("../node_modules/fontfaceobserver/fontfaceobserve
 var errors = require("./errors")
 
 // supportsWoff2 manually copied from npm woff2-feature-test
-var supportsWoff2 = (function() {
+var supportsWoff2 = function() {
     if (!("FontFace" in window)) {
         return false;
     }
@@ -12,7 +12,7 @@ var supportsWoff2 = (function() {
     f.load()['catch'](function() {});
 
     return f.status === 'loading' || f.status === 'loaded';
-})();
+}
 
 function getExtension(path) {
     return path.substring(path.lastIndexOf(".") + 1)
@@ -34,7 +34,7 @@ function bestWoff(files) {
         throw new Error(errors.tooManyFiles + files)
     }
 
-    if (woff2s.length > 0 && supportsWoff2) {
+    if (woff2s.length > 0 && supportsWoff2()) {
         return woff2s.shift()
     }
 
@@ -85,5 +85,6 @@ function fromFiles(files, callback) {
 
 module.exports = {
     "loadFont": loadFont,
-    "fromFiles": fromFiles
+    "fromFiles": fromFiles,
+    "supportsWoff2": supportsWoff2
 }
