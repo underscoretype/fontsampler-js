@@ -67,7 +67,7 @@ function Fontsampler(_root, _fonts, _options) {
                 for (var v = 0; v < font.instances.length; v++) {
                     var parts = helpers.parseParts(font.instances[v])
                     axes = parts.val.split(",").map(function (value/*, index*/) {
-                        var parts = value.split(" ")
+                        var parts = value.trim().split(" ")
                         return parts[0]
                     })
                     parsed.push({
@@ -244,7 +244,7 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
-        console.warn("font", fonts)
+        console.warn("fonts", fonts)
         
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
