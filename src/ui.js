@@ -26,6 +26,7 @@
 var selection = require("./selection")
 
 var UIElements = require("./uielements")
+var Fontloader = require("./fontloader")
 
 var helpers = require("./helpers")
 var errors = require("./errors")
@@ -734,7 +735,9 @@ function UI(root, fonts, options) {
             sliders = block.querySelectorAll("[data-axis]")
             if (sliders) {
                 for (var s = 0; s < sliders.length; s++) {
-                    if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1) {
+                    if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1 ||
+                        Fontloader.supportsWoff2() === false
+                    ) {
                         helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
                     } else {
                         helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
