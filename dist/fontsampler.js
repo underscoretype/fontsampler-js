@@ -415,6 +415,9 @@ function Fontsampler(_root, _fonts, _options) {
                         var parts = value.trim().split(" ")
                         return parts[0]
                     })
+                    if ("axes" in font === true) {
+                        axes = helpers.arrayUnique(axes.concat(font.axes))
+                    }
                     parsed.push({
                         name: parts.text,
                         files: font.files,
