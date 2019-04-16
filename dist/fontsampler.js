@@ -1532,7 +1532,7 @@ function UI(root, fonts, options) {
 
         for (var a = 0; a < options.ui.variation.axes.length; a++) {
             var axisoptions = options.ui.variation.axes[a]
-            if (axisoptions.code !== axis) {
+            if (axisoptions.tag !== axis) {
                 continue
             }
             if (value < axisoptions.min || value > axisoptions.max) {
@@ -1813,12 +1813,16 @@ function UI(root, fonts, options) {
         if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
-            opt = options.ui.variation.axes[axis]
+            opt = options.ui.variation.axes.filter(function (optVal) {
+                return optVal.tag === axis
+            })
             if (!opt) {
                 opt = {
                     min: 100,
                     max: 900
                 }
+            } else {
+                opt = opt[0]
             }
             if (typeof(opt.min) === "undefined") {
                 opt.min = 100
@@ -2061,29 +2065,29 @@ function UIElements(root, options) {
         console.warn("slidergroup", key, opt)
 
         for (var s = 0; s < opt.axes.length; s++) {
-            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].code + "']")
+            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")
 
             if (!helpers.isNode(wrapper)) {
                 wrapper = document.createElement("div")
-                wrapper.dataset.axisBlock = opt.axes[s].code
+                wrapper.dataset.axisBlock = opt.axes[s].tag
                 slidergroup.appendChild(wrapper)
             }
 
             if (opt.axes[s].label) {
-                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].code + "']")
+                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].tag + "']")
                 if (!helpers.isNode(label)) {
-                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].code)
+                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].tag)
                     wrapper.appendChild(label)
                 }
             }
 
-            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
+            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].tag + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
                 slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
             }
-            slider.dataset.axis = opt.axes[s].code
+            slider.dataset.axis = opt.axes[s].tag
         }
 
         return slidergroup

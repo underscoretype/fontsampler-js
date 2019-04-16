@@ -386,7 +386,7 @@ function UI(root, fonts, options) {
 
         for (var a = 0; a < options.ui.variation.axes.length; a++) {
             var axisoptions = options.ui.variation.axes[a]
-            if (axisoptions.code !== axis) {
+            if (axisoptions.tag !== axis) {
                 continue
             }
             if (value < axisoptions.min || value > axisoptions.max) {
@@ -667,12 +667,16 @@ function UI(root, fonts, options) {
         if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
-            opt = options.ui.variation.axes[axis]
+            opt = options.ui.variation.axes.filter(function (optVal) {
+                return optVal.tag === axis
+            })
             if (!opt) {
                 opt = {
                     min: 100,
                     max: 900
                 }
+            } else {
+                opt = opt[0]
             }
             if (typeof(opt.min) === "undefined") {
                 opt.min = 100

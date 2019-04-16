@@ -76,29 +76,29 @@ function UIElements(root, options) {
         console.warn("slidergroup", key, opt)
 
         for (var s = 0; s < opt.axes.length; s++) {
-            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].code + "']")
+            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")
 
             if (!helpers.isNode(wrapper)) {
                 wrapper = document.createElement("div")
-                wrapper.dataset.axisBlock = opt.axes[s].code
+                wrapper.dataset.axisBlock = opt.axes[s].tag
                 slidergroup.appendChild(wrapper)
             }
 
             if (opt.axes[s].label) {
-                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].code + "']")
+                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].tag + "']")
                 if (!helpers.isNode(label)) {
-                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].code)
+                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].tag)
                     wrapper.appendChild(label)
                 }
             }
 
-            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].code + "']")
+            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].tag + "']")
             if (!helpers.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
                 slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
             }
-            slider.dataset.axis = opt.axes[s].code
+            slider.dataset.axis = opt.axes[s].tag
         }
 
         return slidergroup
