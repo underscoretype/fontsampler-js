@@ -408,11 +408,12 @@ function Fontsampler(_root, _fonts, _options) {
         var parsed = []
 
         for (var f = 0; f < fonts.length; f++) {
-            var font = fonts[f]
+            var font = fonts[f],
+                bestWoff = Fontloader.bestWoff(font.files)
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
 
-                if (Fontloader.bestWoff(font.files).substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
+                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
                     // no point in registering instances as fonts with no variable font support
                     font.axes = []
                     font.instances = []

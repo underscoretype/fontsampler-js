@@ -351,3 +351,11 @@
 .fsjs-skin .fsjs-disabled .dk-select .dk-selected {
   color: #DDD;
 }
+.fsjs-skin [data-fsjs-block=variation] {
+  display: none;
+}
+@supports (font-variation-settings: "tnum" 1) {
+  .fsjs-skin [data-fsjs-block=variation] {
+    display: block;
+  }
+}

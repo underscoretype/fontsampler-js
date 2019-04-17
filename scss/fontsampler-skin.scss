@@ -73,4 +73,15 @@ $elementMargin: 5px !default;
         }
     }
 
+    // Go ahead and hide variable font sliders when the browser does not support them
+    [data-fsjs-block=variation] {
+        display: none;
+    }
+
+    @supports (font-variation-settings: "tnum" 1) {
+        [data-fsjs-block=variation] {
+            display: block;
+        }
+    }
+
 }
