@@ -9,6 +9,7 @@ $borderWidth: 1px !default;
 $borderColor: #CCC !default;
 
 $sliderBarWidth: 1px !default;
+$sliderBarRadius: 2px !default;
 $sliderHandleSize: 10px !default;
 
 $buttonPadding: 0.1em 0.5em 0 !default;
@@ -21,7 +22,6 @@ $elementMargin: 5px !default;
 
 // Scope all styles for fontsamplers with skin only
 .fsjs-skin {
-
     // Handle basic loading states to avoid flash of unstyle text
     transition: opacity 0.2s ease-out;
     opacity: 0;
