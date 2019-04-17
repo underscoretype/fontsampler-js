@@ -247,11 +247,11 @@ function UI(root, fonts, options) {
 
         if (opt.label) {
             label = uifactory.label(opt.label, opt.unit, opt.init, key)
-            block.append(label)
+            block.appendChild(label)
             sanitizeLabel(label, key)
         }
 
-        block.append(element)
+        block.appendChild(element)
         sanitizeElement(element, key)
 
         sanitizeBlock(block, key)

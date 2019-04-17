@@ -152,9 +152,9 @@ function UIElements(root, options) {
         // TODO move this to interface and on tester node init
         if (!tester.dataset.replaceText) {
             if (options.initialText) {
-                tester.append(document.createTextNode(options.initialText))
+                tester.appendChild(document.createTextNode(options.initialText))
             } else if (!options.initialText && options.originalText) {
-                tester.append(document.createTextNode(options.originalText))
+                tester.appendChild(document.createTextNode(options.originalText))
             }
             tester.dataset.replaceText = true
         }

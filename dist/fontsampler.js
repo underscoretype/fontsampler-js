@@ -319,7 +319,7 @@ function loadFont(file, callback) {
     })
     
     if (FontFace) {
-        var ff = new FontFace(family, "url(" + file + ")")
+        var ff = new FontFace(family, "url(" + file + ")", {})
         ff.load().then(function() {
             document.fonts.add(ff)
         }).catch(function(e) {
@@ -1400,11 +1400,11 @@ function UI(root, fonts, options) {
 
         if (opt.label) {
             label = uifactory.label(opt.label, opt.unit, opt.init, key)
-            block.append(label)
+            block.appendChild(label)
             sanitizeLabel(label, key)
         }
 
-        block.append(element)
+        block.appendChild(element)
         sanitizeElement(element, key)
 
         sanitizeBlock(block, key)
@@ -2214,9 +2214,9 @@ function UIElements(root, options) {
         // TODO move this to interface and on tester node init
         if (!tester.dataset.replaceText) {
             if (options.initialText) {
-                tester.append(document.createTextNode(options.initialText))
+                tester.appendChild(document.createTextNode(options.initialText))
             } else if (!options.initialText && options.originalText) {
-                tester.append(document.createTextNode(options.originalText))
+                tester.appendChild(document.createTextNode(options.originalText))
             }
             tester.dataset.replaceText = true
         }

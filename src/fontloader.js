@@ -64,7 +64,7 @@ function loadFont(file, callback) {
     })
     
     if (FontFace) {
-        var ff = new FontFace(family, "url(" + file + ")")
+        var ff = new FontFace(family, "url(" + file + ")", {})
         ff.load().then(function() {
             document.fonts.add(ff)
         }).catch(function(e) {
