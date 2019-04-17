@@ -46,13 +46,13 @@ function Fontsampler(_root, _fonts, _options) {
     }
     this.root = _root
     this.initialized = false
+    this.currentFont = false
 
     // Parse fonts and options from the passed in objects or possibly
     // from the root node data attributes
     options = parseOptions.call(this, _options)
     fonts = parseFonts.call(this, _fonts)
     fonts = parseFontInstances.call(this, fonts)
-
 
     // options.generate = true
     ui = Interface(this.root, fonts, options)
@@ -76,7 +76,7 @@ function Fontsampler(_root, _fonts, _options) {
 
                 for (var v = 0; v < font.instances.length; v++) {
                     var parts = helpers.parseParts(font.instances[v])
-                    axes = parts.val.split(",").map(function (value/*, index*/) {
+                    axes = parts.val.split(",").map(function(value /*, index*/ ) {
                         var parts = value.trim().split(" ")
                         return parts[0]
                     })
@@ -226,9 +226,10 @@ function Fontsampler(_root, _fonts, _options) {
         })
 
         // dropdowns
-        this.root.addEventListener(events.fontChanged, function () {
+        var that = this
+        this.root.addEventListener(events.fontChanged, function() {
             var val = ui.getValue("fontfamily")
-            loadFont(val)
+            that.loadFont(val)
         })
 
         // buttongroups
@@ -242,7 +243,44 @@ function Fontsampler(_root, _fonts, _options) {
         })
     }
 
-    function loadFont(indexOrKey) {
+    /**
+     * PUBLIC API
+     */
+
+    this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
+
+        var initialFont = 0
+        if ("init" in options.ui.fontfamily === true &&
+            typeof(options.ui.fontfamily.init) === "string" &&
+            options.ui.fontfamily.init !== "") {
+            initialFont = options.ui.fontfamily.init
+        }
+        ui.init()
+        setupUIEvents.call(this)
+        this.loadFont.call(this, initialFont)
+
+        if (options.lazyload) {
+            ui.setStatusClass(options.preloadingClass, true)
+            preloader.load(fonts, function() {
+                ui.setStatusClass(options.preloadingClass, false)
+                _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
+            })
+        }
+
+        helpers.nodeAddClass(this.root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
+
+        this.root.dispatchEvent(new CustomEvent(events.init))
+        this.initialized = true
+
+        // For convenience also have the init method return the instance
+        // This way you can create the object and init it, e.g.
+        // var fs = new Fontsampler().init()
+        return this
+    }
+
+    this.loadFont = function(indexOrKey) {
         console.debug("Fontsampler.loadFont", indexOrKey, this)
         var font
 
@@ -260,11 +298,13 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-        
+
+        this.currentFont = font
+
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
             ui.setStatusClass(options.classes.loadingClass, false)
-            
+
             // update UI to font’s capabilities
             ui.setActiveAxes(font.axes)
             if (font.instance) {
@@ -285,50 +325,15 @@ function Fontsampler(_root, _fonts, _options) {
 
             ui.setActiveOpentype(font.features)
             if (typeof(font.language) === "string") {
-                ui.setActivateLanguage(font.language)
+                ui.setActiveLanguage(font.language)
             }
+            ui.setActiveFont(font.name)
+
 
             _root.dispatchEvent(new CustomEvent(events.fontLoaded))
 
             preloader.resume()
         })
-    }
-
-    /**
-     * PUBLIC API
-     */
-
-    this.init = function() {
-        console.debug("Fontsampler.init()", this, this.root)
-
-        var initialFont = 0
-        if ("init" in options.ui.fontfamily === true && 
-            typeof(options.ui.fontfamily.init) === "string" &&
-            options.ui.fontfamily.init !== "") {
-            initialFont = options.ui.fontfamily.init
-        }
-        ui.init()
-        setupUIEvents.call(this)
-        loadFont.call(this, initialFont)
-
-        if (options.lazyload) {
-            ui.setStatusClass(options.preloadingClass, true)
-            preloader.load(fonts, function() {
-                ui.setStatusClass(options.preloadingClass, false)
-                _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
-            })
-        }
-
-        helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
-        
-        this.root.dispatchEvent(new CustomEvent(events.init))
-        this.initialized = true
-
-        // For convenience also have the init method return the instance
-        // This way you can create the object and init it, e.g.
-        // var fs = new Fontsampler().init()
-        return this
     }
 
     this.lazyload = function() {
@@ -337,31 +342,19 @@ function Fontsampler(_root, _fonts, _options) {
         }
     }
 
-    // this.registerEventhandler = function(event, callback) {
-    //     // Validate that only fontsampler.events.… are passed in
-    //     if (Object.values(events).indexOf(event) === -1) {
-    //         throw new Error(errors.invalidEvent)
-    //     }
-
-    //     // Only act if there is a valid callback
-    //     if (typeof(callback) === "function") {
-    //         this.root.addEventListener(event, callback)
-    //     }
-    // }
-
     this.setText = function(text) {
         ui.setInputText(text)
     }
 
-    this.getValue = function (key) {
+    this.getValue = function(key) {
         return ui.getValue(key)
     }
 
-    this.setValue = function (key, value) {
+    this.setValue = function(key, value) {
         return ui.setValue(key, value)
     }
 
-    this.setVariation = function (key, value) {
+    this.setVariation = function(key, value) {
         return ui.setVariation(key, value)
     }
 

@@ -19,6 +19,7 @@ module.exports = {
         labelUnitClass: "fsjs-label-unit",
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
+        disabledClass: "fsjs-disabled",
     },
     order: [
         // ["fontsize", "lineheight", "letterspacing"],

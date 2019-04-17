@@ -149,6 +149,7 @@ module.exports = {
         labelUnitClass: "fsjs-label-unit",
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
+        disabledClass: "fsjs-disabled",
     },
     order: [
         // ["fontsize", "lineheight", "letterspacing"],
@@ -392,13 +393,13 @@ function Fontsampler(_root, _fonts, _options) {
     }
     this.root = _root
     this.initialized = false
+    this.currentFont = false
 
     // Parse fonts and options from the passed in objects or possibly
     // from the root node data attributes
     options = parseOptions.call(this, _options)
     fonts = parseFonts.call(this, _fonts)
     fonts = parseFontInstances.call(this, fonts)
-
 
     // options.generate = true
     ui = Interface(this.root, fonts, options)
@@ -422,7 +423,7 @@ function Fontsampler(_root, _fonts, _options) {
 
                 for (var v = 0; v < font.instances.length; v++) {
                     var parts = helpers.parseParts(font.instances[v])
-                    axes = parts.val.split(",").map(function (value/*, index*/) {
+                    axes = parts.val.split(",").map(function(value /*, index*/ ) {
                         var parts = value.trim().split(" ")
                         return parts[0]
                     })
@@ -572,9 +573,10 @@ function Fontsampler(_root, _fonts, _options) {
         })
 
         // dropdowns
-        this.root.addEventListener(events.fontChanged, function () {
+        var that = this
+        this.root.addEventListener(events.fontChanged, function() {
             var val = ui.getValue("fontfamily")
-            loadFont(val)
+            that.loadFont(val)
         })
 
         // buttongroups
@@ -588,7 +590,44 @@ function Fontsampler(_root, _fonts, _options) {
         })
     }
 
-    function loadFont(indexOrKey) {
+    /**
+     * PUBLIC API
+     */
+
+    this.init = function() {
+        console.debug("Fontsampler.init()", this, this.root)
+
+        var initialFont = 0
+        if ("init" in options.ui.fontfamily === true &&
+            typeof(options.ui.fontfamily.init) === "string" &&
+            options.ui.fontfamily.init !== "") {
+            initialFont = options.ui.fontfamily.init
+        }
+        ui.init()
+        setupUIEvents.call(this)
+        this.loadFont.call(this, initialFont)
+
+        if (options.lazyload) {
+            ui.setStatusClass(options.preloadingClass, true)
+            preloader.load(fonts, function() {
+                ui.setStatusClass(options.preloadingClass, false)
+                _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
+            })
+        }
+
+        helpers.nodeAddClass(this.root, options.classes.initClass)
+        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
+
+        this.root.dispatchEvent(new CustomEvent(events.init))
+        this.initialized = true
+
+        // For convenience also have the init method return the instance
+        // This way you can create the object and init it, e.g.
+        // var fs = new Fontsampler().init()
+        return this
+    }
+
+    this.loadFont = function(indexOrKey) {
         console.debug("Fontsampler.loadFont", indexOrKey, this)
         var font
 
@@ -606,11 +645,13 @@ function Fontsampler(_root, _fonts, _options) {
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
             font = fonts[indexOrKey]
         }
-        
+
+        this.currentFont = font
+
         Fontloader.fromFiles(font.files, function(f) {
             ui.setInputCss("fontFamily", f.family)
             ui.setStatusClass(options.classes.loadingClass, false)
-            
+
             // update UI to font’s capabilities
             ui.setActiveAxes(font.axes)
             if (font.instance) {
@@ -631,50 +672,15 @@ function Fontsampler(_root, _fonts, _options) {
 
             ui.setActiveOpentype(font.features)
             if (typeof(font.language) === "string") {
-                ui.setActivateLanguage(font.language)
+                ui.setActiveLanguage(font.language)
             }
+            ui.setActiveFont(font.name)
+
 
             _root.dispatchEvent(new CustomEvent(events.fontLoaded))
 
             preloader.resume()
         })
-    }
-
-    /**
-     * PUBLIC API
-     */
-
-    this.init = function() {
-        console.debug("Fontsampler.init()", this, this.root)
-
-        var initialFont = 0
-        if ("init" in options.ui.fontfamily === true && 
-            typeof(options.ui.fontfamily.init) === "string" &&
-            options.ui.fontfamily.init !== "") {
-            initialFont = options.ui.fontfamily.init
-        }
-        ui.init()
-        setupUIEvents.call(this)
-        loadFont.call(this, initialFont)
-
-        if (options.lazyload) {
-            ui.setStatusClass(options.preloadingClass, true)
-            preloader.load(fonts, function() {
-                ui.setStatusClass(options.preloadingClass, false)
-                _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
-            })
-        }
-
-        helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
-        
-        this.root.dispatchEvent(new CustomEvent(events.init))
-        this.initialized = true
-
-        // For convenience also have the init method return the instance
-        // This way you can create the object and init it, e.g.
-        // var fs = new Fontsampler().init()
-        return this
     }
 
     this.lazyload = function() {
@@ -683,31 +689,19 @@ function Fontsampler(_root, _fonts, _options) {
         }
     }
 
-    // this.registerEventhandler = function(event, callback) {
-    //     // Validate that only fontsampler.events.… are passed in
-    //     if (Object.values(events).indexOf(event) === -1) {
-    //         throw new Error(errors.invalidEvent)
-    //     }
-
-    //     // Only act if there is a valid callback
-    //     if (typeof(callback) === "function") {
-    //         this.root.addEventListener(event, callback)
-    //     }
-    // }
-
     this.setText = function(text) {
         ui.setInputText(text)
     }
 
-    this.getValue = function (key) {
+    this.getValue = function(key) {
         return ui.getValue(key)
     }
 
-    this.setValue = function (key, value) {
+    this.setValue = function(key, value) {
         return ui.setValue(key, value)
     }
 
-    this.setVariation = function (key, value) {
+    this.setVariation = function(key, value) {
         return ui.setVariation(key, value)
     }
 
@@ -1846,7 +1840,44 @@ function UI(root, fonts, options) {
             setLabelValue(axis, val)            
             setInputVariation(v)
         }
+    }
 
+    function fontIsInstance(variation) {
+        for (var i = 0; i < fonts.length; i++) {
+            var f = fonts[i]
+
+            if ("instance" in f === false) {
+                continue
+            }
+
+            var parts = f.instance.split(","),
+                vars = {}
+            for (var k = 0; k < parts.length; k++) {
+                var p = parts[k].trim().split(" ")
+                vars[ p[0] ] = p[1]
+            }
+            if (Object.keys(variation).length !== Object.keys(vars).length) {
+                continue
+            }
+
+            for (var v in variation) {
+                if (variation.hasOwnProperty(v)) {
+                    if (v in vars) {
+                        if (vars[v].toString() !== variation[v].toString()) {
+                            continue
+                        }
+                    } else {
+                        continue
+                    }
+                } else {
+                    continue
+                } 
+
+                return f
+            }
+        }
+
+        return false
     }
 
     /**
@@ -1885,6 +1916,39 @@ function UI(root, fonts, options) {
         val = parsed.join(",")
 
         input.style["font-variation-settings"] = val
+
+        // Update fontfamily select if it exists
+        // When a variable font is updated check if the selected values
+        // match a defined instance, and if set it active in the font family
+        var fontfamily = getBlock("fontfamily")
+        if (helpers.isNode(fontfamily)) {
+            var instanceFont = fontIsInstance(variations)
+            if (instanceFont === false) {
+                helpers.nodeAddClass(fontfamily, options.classes.disabledClass)
+            } else {
+                helpers.nodeRemoveClass(fontfamily, options.classes.disabledClass)
+                var element = getElement("fontfamily")
+                if (element.value !== instanceFont.name) {
+                    element.value = instanceFont.name
+                    sendNativeEvent("change", element)
+                }
+            }
+        }
+    }
+
+    function setActiveFont(name) {
+        var fontfamily = getBlock("fontfamily")
+        if (helpers.isNode(fontfamily)) {
+            var element = getElement("fontfamily")
+            if (helpers.isNode(element)) {
+                // Only update if it is not the selected fontfamily value
+                if (element.value !== name) {
+                    element.querySelectorAll("option[value='" + name + "']").selected = true
+                    element.value = name
+                    sendNativeEvent("change", element)
+                }
+            }
+        }
     }
 
     function setActiveAxes(axes) {
@@ -1898,27 +1962,30 @@ function UI(root, fonts, options) {
                     if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1 ||
                         Fontloader.supportsWoff2() === false
                     ) {
-                        helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                        helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
-                        helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                        helpers.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
                     }
                 }
             }
         }
     }
 
-    function setActivateLanguage(lang) {
+    function setActiveLanguage(lang) {
         var dropdown = getElement("language")
 
-        if (dropdown && typeof(lang) === "string") {
+        if (helpers.isNode(dropdown) && typeof(lang) === "string") {
             var languageChoices = options.ui.language.choices.map(function (value) {
                 return value.split("|")[0]
             })
             if (languageChoices.lang !== -1) {
-                dropdown.value = lang
-                dropdown.querySelector("option[value='" + lang + "']").selected = true
-                sendNativeEvent("change", dropdown)
-                root.dispatchEvent(new CustomEvent(events.languageChanged))
+                var option = dropdown.querySelector("option[value='" + lang + "']")
+                if (helpers.isNode(option)) {
+                    dropdown.value = lang
+                    option.selected = true
+                    sendNativeEvent("change", dropdown)
+                    root.dispatchEvent(new CustomEvent(events.languageChanged))
+                }
             }
         }
     }
@@ -1986,8 +2053,10 @@ function UI(root, fonts, options) {
         setInputVariation: setInputVariation,
         setInputText: setInputText,
         setStatusClass: setStatusClass,
+        
+        setActiveFont: setActiveFont,
         setActiveAxes: setActiveAxes,
-        setActivateLanguage: setActivateLanguage,
+        setActiveLanguage: setActiveLanguage,
         setActiveOpentype: setActiveOpentype,
         setLabelValue: setLabelValue,
 

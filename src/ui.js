@@ -687,7 +687,44 @@ function UI(root, fonts, options) {
             setLabelValue(axis, val)            
             setInputVariation(v)
         }
+    }
 
+    function fontIsInstance(variation) {
+        for (var i = 0; i < fonts.length; i++) {
+            var f = fonts[i]
+
+            if ("instance" in f === false) {
+                continue
+            }
+
+            var parts = f.instance.split(","),
+                vars = {}
+            for (var k = 0; k < parts.length; k++) {
+                var p = parts[k].trim().split(" ")
+                vars[ p[0] ] = p[1]
+            }
+            if (Object.keys(variation).length !== Object.keys(vars).length) {
+                continue
+            }
+
+            for (var v in variation) {
+                if (variation.hasOwnProperty(v)) {
+                    if (v in vars) {
+                        if (vars[v].toString() !== variation[v].toString()) {
+                            continue
+                        }
+                    } else {
+                        continue
+                    }
+                } else {
+                    continue
+                } 
+
+                return f
+            }
+        }
+
+        return false
     }
 
     /**
@@ -726,6 +763,39 @@ function UI(root, fonts, options) {
         val = parsed.join(",")
 
         input.style["font-variation-settings"] = val
+
+        // Update fontfamily select if it exists
+        // When a variable font is updated check if the selected values
+        // match a defined instance, and if set it active in the font family
+        var fontfamily = getBlock("fontfamily")
+        if (helpers.isNode(fontfamily)) {
+            var instanceFont = fontIsInstance(variations)
+            if (instanceFont === false) {
+                helpers.nodeAddClass(fontfamily, options.classes.disabledClass)
+            } else {
+                helpers.nodeRemoveClass(fontfamily, options.classes.disabledClass)
+                var element = getElement("fontfamily")
+                if (element.value !== instanceFont.name) {
+                    element.value = instanceFont.name
+                    sendNativeEvent("change", element)
+                }
+            }
+        }
+    }
+
+    function setActiveFont(name) {
+        var fontfamily = getBlock("fontfamily")
+        if (helpers.isNode(fontfamily)) {
+            var element = getElement("fontfamily")
+            if (helpers.isNode(element)) {
+                // Only update if it is not the selected fontfamily value
+                if (element.value !== name) {
+                    element.querySelectorAll("option[value='" + name + "']").selected = true
+                    element.value = name
+                    sendNativeEvent("change", element)
+                }
+            }
+        }
     }
 
     function setActiveAxes(axes) {
@@ -739,27 +809,30 @@ function UI(root, fonts, options) {
                     if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1 ||
                         Fontloader.supportsWoff2() === false
                     ) {
-                        helpers.nodeAddClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                        helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
-                        helpers.nodeRemoveClass(sliders[s].parentNode, "fsjs-slider-inactive")
+                        helpers.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
                     }
                 }
             }
         }
     }
 
-    function setActivateLanguage(lang) {
+    function setActiveLanguage(lang) {
         var dropdown = getElement("language")
 
-        if (dropdown && typeof(lang) === "string") {
+        if (helpers.isNode(dropdown) && typeof(lang) === "string") {
             var languageChoices = options.ui.language.choices.map(function (value) {
                 return value.split("|")[0]
             })
             if (languageChoices.lang !== -1) {
-                dropdown.value = lang
-                dropdown.querySelector("option[value='" + lang + "']").selected = true
-                sendNativeEvent("change", dropdown)
-                root.dispatchEvent(new CustomEvent(events.languageChanged))
+                var option = dropdown.querySelector("option[value='" + lang + "']")
+                if (helpers.isNode(option)) {
+                    dropdown.value = lang
+                    option.selected = true
+                    sendNativeEvent("change", dropdown)
+                    root.dispatchEvent(new CustomEvent(events.languageChanged))
+                }
             }
         }
     }
@@ -827,8 +900,10 @@ function UI(root, fonts, options) {
         setInputVariation: setInputVariation,
         setInputText: setInputText,
         setStatusClass: setStatusClass,
+        
+        setActiveFont: setActiveFont,
         setActiveAxes: setActiveAxes,
-        setActivateLanguage: setActivateLanguage,
+        setActiveLanguage: setActiveLanguage,
         setActiveOpentype: setActiveOpentype,
         setLabelValue: setLabelValue,
 

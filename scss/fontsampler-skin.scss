@@ -53,7 +53,7 @@ $elementMargin: 5px !default;
     @import "_dropkick";
     @import "_rangeslider";
 
-    .fsjs-slider-inactive {
+    .fsjs-disabled {
         .fsjs-label {
             color: $disabledColor;
         }
@@ -66,6 +66,10 @@ $elementMargin: 5px !default;
             .rangeSlider__fill {
                 background-color: $disabledColor;
             }
+        }
+
+        .dk-select .dk-selected {
+            color: $disabledColor;
         }
     }
 
