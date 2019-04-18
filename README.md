@@ -1,22 +1,71 @@
-# Fontsampler.js
+# Fontsampler.js (v0.0.0)
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
+
+## Installation
+
+_TODO_ npm package submission
+
+## Use
+
+See [underscoretype.github.io/fontsampler-js/](https://underscoretype.github.io/fontsampler-js/) for 
+detailed examples.
+
+A minimal example:
+
+    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    …
+    <div id="demo"></div>
+    …
+    <script>
+    var fonts = [
+        "name": "My Font",
+        "files": ["path/to/file.woff", "path/to/file.woff2"]
+    ]
+    var options = {
+        order: [["fontsize", "lineheight", "letterspacing"], "tester"]
+    }
+    var demo = new Fontsampler(document.getElementById("demo"), fonts, options)
+    FontsamplerSkin(demo)
+    demo.init()
+    </script>
 
 
 ## Status
 
-Currently work in progress and pre-release. API not stable and likely to change.
+Currently work in progress and pre-release. **API not stable and likely to change.**
 
 
-## TODO
-* Implement public event interface (change, click, init, loading, loaded)
-* Implement API on main object (set/get, set/get option, destroy, reset)
-* Implement per-font options (e.g. one font ltr other rtl etc)
+### Development
+
+PRs, issue reports and feature requests welcome.
+
+Development requirements:
+
+    $ npm install
+
+If you use VSCode src compiling tasks should automatically be started, else see the package.json scripts.
+
+For testing:
+
+    $ npm install -g protractor jasmine
+    $ webdriver-manager start
+    $ npm run test
 
 
-## Licence
+### TODO / Roadmap
+* Implement public event interface (change, click, init, loading, loaded) _partially done_
+* Implement API on main object (set/get, set/get option, destroy, reset) _mostly done_
+* Implement per-font options (e.g. one font ltr other rtl etc) _partially done_
+* Add Unit and End-to-End tests _started_
+
+
+## License
 
 Licensed under [Apache License 2.0](LICENSE.txt)
+
 
 ### Licenses for fonts included in the demo
 * [Alegreya](https://github.com/huertatipografica/Alegreya/) by [Huerta Tipografica](https://www.huertatipografica.com/) ([License](https://github.com/huertatipografica/Alegreya/blob/master/LICENSE.md))
