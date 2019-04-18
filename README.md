@@ -2,6 +2,28 @@
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
+Fontsampler library ~13kb minified & gzipped
+Fontsampler skin js & css ~15kb minified & gzipped
+
+Support for:
+* woff / woff2 / woff2 variable fonts
+* available and configurable UI for:
+    * tester input
+    * font picker
+    * font size
+    * line height
+    * letter spacing
+    * alignment
+    * direction (ltr/rtl)
+    * language (html lang attr, triggering OT locl features)
+    * variable axes (configurable, not detected)
+    * opentype (configurable, not detected)
+* API for manipulating the instances
+* optional skin to enhance bare browser input UI
+* configurable UI, options, font settings
+* initialization on empty DOM node
+* initialization on existing DOM structure (to use custom layout and UI)
+
 ## Installation
 
 _TODO_ npm package submission
