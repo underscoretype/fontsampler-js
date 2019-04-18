@@ -1206,6 +1206,7 @@ module.exports = {
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
+    "fontRendered": "fontsampler.events.fontrendered",
     "fontsPreloaded": "fontsampler.events.fontspreloaded"
 }
 
@@ -1237,9 +1238,18 @@ function pruneClass(className, classNames) {
     }
 }
 
+/**
+ * 
+ * @param str className 
+ * @param str classNames - space separated
+ */
 function addClass(className, classNames) {
     if (!classNames) {
         classNames = ""
+    }
+
+    if (className === classNames) {
+        return classNames
     }
 
     classNames = classNames.trim()

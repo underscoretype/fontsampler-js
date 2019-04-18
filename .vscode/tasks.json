@@ -42,12 +42,6 @@
         "type": "npm",
         "script": "start",
         "auto": true
-      },
-      {
-        "label": "npm run demo",
-        "type": "npm",
-        "script": "demo",
-        "auto": true
       }
     ]
   }

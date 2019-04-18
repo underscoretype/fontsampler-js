@@ -249,6 +249,7 @@ module.exports = {
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
+    "fontRendered": "fontsampler.events.fontrendered",
     "fontsPreloaded": "fontsampler.events.fontspreloaded"
 }
 
@@ -401,7 +402,6 @@ function Fontsampler(_root, _fonts, _options) {
     fonts = parseFonts.call(this, _fonts)
     fonts = parseFontInstances.call(this, fonts)
 
-    // options.generate = true
     ui = Interface(this.root, fonts, options)
 
     function parseFontInstances(fonts) {
@@ -447,6 +447,28 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         return parsed
+    }
+
+    function parseFontVariations(font) {
+        var va = {}, parts 
+        
+        if ("instance" in font === false) {
+            return va
+        }
+
+        parts = font.instance.split(",")
+        for (var p = 0; p < parts.length; p++) {
+            var split = parts[p].trim().split(" ")
+            va[split[0]] = split[1]
+            var input = _root.querySelector("[data-axis='" + split[0] + "']")
+            if (input) {
+                input.value = split[1]
+                ui.sendNativeEvent("change", input)
+            }
+            ui.setLabelValue(split[0], split[1])
+        }
+
+        return va
     }
 
     function parseFonts(fonts) {
@@ -575,9 +597,10 @@ function Fontsampler(_root, _fonts, _options) {
 
         // dropdowns
         var that = this
-        this.root.addEventListener(events.fontChanged, function() {
-            var val = ui.getValue("fontfamily")
-            that.loadFont(val)
+        this.root.addEventListener(events.fontChanged, function(e) {
+            if (e.detail.font) {
+                that.showFont(e.detail.font)
+            }
         })
 
         // buttongroups
@@ -606,7 +629,7 @@ function Fontsampler(_root, _fonts, _options) {
         }
         ui.init()
         setupUIEvents.call(this)
-        this.loadFont.call(this, initialFont)
+        this.showFont.call(this, initialFont)
 
         if (options.lazyload) {
             ui.setStatusClass(options.preloadingClass, true)
@@ -628,9 +651,9 @@ function Fontsampler(_root, _fonts, _options) {
         return this
     }
 
-    this.loadFont = function(indexOrKey) {
-        console.debug("Fontsampler.loadFont", indexOrKey, this)
-        var font
+    this.showFont = function(indexOrKey) {
+        console.debug("Fontsampler.showFont", indexOrKey, this)
+        var font, changed = true
 
         preloader.pause()
         ui.setStatusClass(options.classes.loadingClass, true)
@@ -647,42 +670,43 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
+        changed = this.currentFont !== font
         this.currentFont = font
 
+        // The actual font update
         Fontloader.fromFiles(font.files, function(f) {
-            ui.setInputCss("fontFamily", f.family)
             ui.setStatusClass(options.classes.loadingClass, false)
 
-            // update UI to font’s capabilities
+            // Update the css font family
+            ui.setInputCss("fontFamily", f.family)
+
+            // Update active axes and set variation of this instance
             ui.setActiveAxes(font.axes)
-            if (font.instance) {
-                var va = {}
-                var parts = font.instance.split(",")
-                for (var p = 0; p < parts.length; p++) {
-                    var split = parts[p].trim().split(" ")
-                    va[split[0]] = split[1]
-                    var input = _root.querySelector("[data-axis='" + split[0] + "']")
-                    if (input) {
-                        input.value = split[1]
-                        ui.sendNativeEvent("change", input)
-                    }
-                    ui.setLabelValue(split[0], split[1])
-                }
+            if ("instance" in font === true) {
+                var va = parseFontVariations(font)
                 ui.setInputVariation(va)
             }
 
+            // Update available OT features for this font
             ui.setActiveOpentype(font.features)
+
+            // Update the currently select language if the font defines one
             if (typeof(font.language) === "string") {
                 ui.setActiveLanguage(font.language)
             }
+
             ui.setActiveFont(font.name)
-
-
-            _root.dispatchEvent(new CustomEvent(events.fontLoaded))
-
+            
             preloader.resume()
+
+            if (changed) {
+                _root.dispatchEvent(new CustomEvent(events.fontLoaded))
+            }
+            _root.dispatchEvent(new CustomEvent(events.fontRendered))
+
         })
     }
+
 
     this.lazyload = function() {
         if (this.initialized && fonts) {
@@ -700,10 +724,6 @@ function Fontsampler(_root, _fonts, _options) {
 
     this.setValue = function(key, value) {
         return ui.setValue(key, value)
-    }
-
-    this.setVariation = function(key, value) {
-        return ui.setVariation(key, value)
     }
 
     return this
@@ -738,9 +758,18 @@ function pruneClass(className, classNames) {
     }
 }
 
+/**
+ * 
+ * @param str className 
+ * @param str classNames - space separated
+ */
 function addClass(className, classNames) {
     if (!classNames) {
         classNames = ""
+    }
+
+    if (className === classNames) {
+        return classNames
     }
 
     classNames = classNames.trim()
@@ -1379,10 +1408,9 @@ function UI(root, fonts, options) {
 
             return false
         } else if (!block && (
-                options.ui[key].render === true || 
-                (key === "variation" && options.ui.variations.render === true) 
-            )
-        ) {
+                options.ui[key].render === true ||
+                (key === "variation" && options.ui.variations.render === true)
+            )) {
             // for missing blocks that should get rendered create them
             block = createBlock(key)
             blocks[key] = block
@@ -1450,7 +1478,7 @@ function UI(root, fonts, options) {
         }
 
         if (helpers.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
-            value.textContent = ""   
+            value.textContent = ""
         }
 
         if (helpers.isNode(value) && value && value.textContent === "") {
@@ -1755,7 +1783,6 @@ function UI(root, fonts, options) {
         return false
     }
 
-
     function setValue(key, value) {
         var element = getElement(key)
 
@@ -1769,10 +1796,10 @@ function UI(root, fonts, options) {
                 } else {
                     // if a value was passed in check if it is within bounds,
                     // valid and if the slider needs an update (via native event)
-                    value = helpers.clamp(value, options.ui[key].min, 
+                    value = helpers.clamp(value, options.ui[key].min,
                         options.ui[key].max, options.ui[key].init)
 
-                    if (element.value.toString() !== value.toString()) {
+                    if (element.value.toString() !== value.toString()) {
                         element.value = value
                         sendNativeEvent("change", element)
                     }
@@ -1780,45 +1807,55 @@ function UI(root, fonts, options) {
 
                 setLabelValue(key, value)
                 setInputCss(keyToCss[key], value + options.ui[key].unit)
-            break;
+                break;
 
             case "variation":
-            break;
+                setVariations(value)
+                break;
 
             case "opentype":
                 setInputOpentype(value)
-            break;
+                break;
 
             case "language":
                 setInputAttr("lang", value)
-            break;
+                break;
 
             case "fontfamily":
-                root.dispatchEvent(new CustomEvent(events.fontChanged))
-            break;
+                // Trigger an event that will start the loading process in the
+                // Fontsampler instance
+                root.dispatchEvent(new CustomEvent(events.fontChanged, {
+                    detail: {
+                        font: value
+                    }
+                }))
+                break;
 
             case "alignment":
                 setInputCss(keyToCss[key], value)
-            break;
-            
+                break;
+
             case "direction":
                 setInputAttr("dir", value)
-            break;
+                break;
 
             case "tester":
-            break;
+                break;
         }
     }
 
+    /**
+     * Update a single variation axis and UI
+     */
     function setVariation(axis, val) {
         var v = getVariation(),
             label,
             opt
 
-        if (isValidAxisAndValue(axis, val)) {
+        if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
-            opt = options.ui.variation.axes.filter(function (optVal) {
+            opt = options.ui.variation.axes.filter(function(optVal) {
                 return optVal.tag === axis
             })
             if (!opt) {
@@ -1835,11 +1872,28 @@ function UI(root, fonts, options) {
             if (typeof(opt.max) === "undefined") {
                 opt.max = 900
             }
-            
+
             v[axis] = helpers.clamp(val, opt.min, opt.max)
 
-            setLabelValue(axis, val)            
+            setLabelValue(axis, val)
             setInputVariation(v)
+        }
+    }
+
+    /**
+     * Bulk update several variations from object
+     * 
+     * @param object vals with variation:value pairs 
+     */
+    function setVariations(vals) {
+        if (typeof(vals) !== "object") {
+            return false
+        }
+
+        for (var axis in vals) {
+            if (vals.hasOwnProperty(axis)) {
+                setVariation(axis, vals[axis])
+            }
         }
     }
 
@@ -1858,7 +1912,7 @@ function UI(root, fonts, options) {
                 vars = {}
             for (var k = 0; k < parts.length; k++) {
                 var p = parts[k].trim().split(" ")
-                vars[ p[0] ] = p[1].toString()
+                vars[p[0]] = p[1].toString()
             }
 
             // check if all variation keys and values match
@@ -1915,13 +1969,12 @@ function UI(root, fonts, options) {
         // Update fontfamily select if it exists
         // When a variable font is updated check if the selected values
         // match a defined instance, and if set it active in the font family
-        var fontfamily = getBlock("fontfamily")
-        if (helpers.isNode(fontfamily)) {
+        if (helpers.isNode(blocks.fontfamily)) {
             var instanceFont = fontIsInstance(variations)
             if (instanceFont === false) {
-                helpers.nodeAddClass(fontfamily, options.classes.disabledClass)
+                helpers.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {
-                helpers.nodeRemoveClass(fontfamily, options.classes.disabledClass)
+                helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
                 var element = getElement("fontfamily")
                 if (element.value !== instanceFont.name) {
                     element.value = instanceFont.name
@@ -1932,13 +1985,19 @@ function UI(root, fonts, options) {
     }
 
     function setActiveFont(name) {
-        var fontfamily = getBlock("fontfamily")
-        if (helpers.isNode(fontfamily)) {
-            var element = getElement("fontfamily")
+        if (helpers.isNode(blocks.fontfamily)) {
+            var element = getElement("fontfamily", blocks.fontfamily),
+                option
+
+            helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
+
             if (helpers.isNode(element)) {
                 // Only update if it is not the selected fontfamily value
                 if (element.value !== name) {
-                    element.querySelectorAll("option[value='" + name + "']").selected = true
+                    option = element.querySelectorAll("option[value='" + name + "']")
+                    if (helpers.isNode(option)) {
+                        option.selected = true
+                    }
                     element.value = name
                     sendNativeEvent("change", element)
                 }
@@ -1947,14 +2006,13 @@ function UI(root, fonts, options) {
     }
 
     function setActiveAxes(axes) {
-        var block = getBlock("variation"),
-            sliders
+        if (helpers.isNode(blocks.variation)) {
+            var sliders = blocks.variation.querySelectorAll("[data-axis]")
 
-        if (block) {
-            sliders = block.querySelectorAll("[data-axis]")
             if (sliders) {
                 for (var s = 0; s < sliders.length; s++) {
-                    if (!Array.isArray(axes) || axes.length < 1 || axes.indexOf(sliders[s].dataset.axis) === -1 ||
+                    if (!Array.isArray(axes) || axes.length < 1 ||
+                        axes.indexOf(sliders[s].dataset.axis) === -1 ||
                         Fontloader.supportsWoff2() === false
                     ) {
                         helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
@@ -1967,18 +2025,20 @@ function UI(root, fonts, options) {
     }
 
     function setActiveLanguage(lang) {
-        var dropdown = getElement("language")
-
-        if (helpers.isNode(dropdown) && typeof(lang) === "string") {
-            var languageChoices = options.ui.language.choices.map(function (value) {
+        if (helpers.isNode(blocks.language) && typeof(lang) === "string") {
+            var languageChoices = options.ui.language.choices.map(function(value) {
                 return value.split("|")[0]
             })
-            if (languageChoices.lang !== -1) {
-                var option = dropdown.querySelector("option[value='" + lang + "']")
+
+            if (languageChoices.length !== -1) {
+                var option = blocks.language.querySelector("option[value='" + lang + "']")
+
                 if (helpers.isNode(option)) {
-                    dropdown.value = lang
+                    // Trigger the change on the native input
+                    blocks.language.value = lang
                     option.selected = true
-                    sendNativeEvent("change", dropdown)
+                    sendNativeEvent("change", blocks.language)
+
                     root.dispatchEvent(new CustomEvent(events.languageChanged))
                 }
             }
@@ -1986,11 +2046,10 @@ function UI(root, fonts, options) {
     }
 
     function setActiveOpentype(features) {
-        var block = getBlock("opentype")
-            checkboxes = false
-            
-        if (block) {
-            checkboxes = block.querySelectorAll("[data-feature]")
+        var checkboxes = false
+
+        if (helpers.isNode(blocks.opentype)) {
+            checkboxes = blocks.opentype.querySelectorAll("[data-feature]")
         }
         if (checkboxes) {
             for (var c = 0; c < checkboxes.length; c++) {
@@ -2001,7 +2060,7 @@ function UI(root, fonts, options) {
                         helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                     }
                 } else {
-                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")        
+                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                 }
             }
         }
@@ -2034,7 +2093,7 @@ function UI(root, fonts, options) {
         getValue: getValue,
         setValue: setValue,
 
-        setVariation: setVariation,
+        setVariations: setVariations,
 
         getCssValue: getCssValue,
         getButtongroupValue: getButtongroupValue,
@@ -2048,7 +2107,7 @@ function UI(root, fonts, options) {
         setInputVariation: setInputVariation,
         setInputText: setInputText,
         setStatusClass: setStatusClass,
-        
+
         setActiveFont: setActiveFont,
         setActiveAxes: setActiveAxes,
         setActiveLanguage: setActiveLanguage,

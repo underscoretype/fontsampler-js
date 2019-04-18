@@ -9,7 +9,7 @@
 
 
     <!-- Fontsampler -->
-    <script src="../dist/fontsampler.js"></script>
+    <script src="../dist/fontsampler.min.js"></script>
     <script src="../dist/fontsampler-skin.js"></script>
 
     <link rel="stylesheet" href="../dist/fontsampler-skin.css">
@@ -138,11 +138,11 @@
             function setFont(e) {
                 
                 for (var i = 0; i < skinned.length; i++) {
-                    skinned[i].loadFont(e.currentTarget.textContent)
+                    skinned[i].showFont(e.currentTarget.textContent)
                 }
 
                 for (var k = 0; k < raw.length; k++) {
-                    raw[k].loadFont(e.currentTarget.textContent)
+                    raw[k].showFont(e.currentTarget.textContent)
                 }
             }
 

@@ -1,7 +1,7 @@
 {
     "name": "fontsampler-js",
     "version": "0.0.1",
-    "description": "Render webfont testers",
+    "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
     "author": {
         "name": "Johannes Neumeier",
         "email": "hello@underscoretype.com"
@@ -10,19 +10,18 @@
         "url": "https://github.com/kontur/fontsampler-js/issues"
     },
     "license": "GNU GPLv3",
-    "main": "src/main.js",
+    "main": "src/fontsampler.js",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/kontur/fontsampler-js.git"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "http-server",
-        "demo": "open http://localhost:8080/docs/index.html",
+        "start": "http-server -a 127.0.0.1 -p 8080 -o",
         "js": "watchify src/fontsampler.js -o 'derequire > dist/fontsampler.js' -v -s 'Fontsampler'",
-        "js-compressed": "watchify src/fontsampler.js -o 'derequire | uglifyjs -c > dist/fontsampler.min.js' -v -s 'Fontsampler'",
+        "js-compressed": "watchify src/fontsampler.js -o 'derequire | uglifyjs -c drop_console=true > dist/fontsampler.min.js' -v -s 'Fontsampler'",
         "js-skin": "watchify src/skin.js -o 'derequire > dist/fontsampler-skin.js' -v -s 'FontsamplerSkin'",
-        "js-skin-compressed": "watchify src/skin.js -o 'derequire | uglifyjs -c > dist/fontsampler-skin.min.js' -v -s 'FontsamplerSkin'",
+        "js-skin-compressed": "watchify src/skin.js -o 'derequire | uglifyjs -c drop_console=true > dist/fontsampler-skin.min.js' -v -s 'FontsamplerSkin'",
         "scss": "sass --watch --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.css",
         "scss-compressed": "sass --watch --style compressed --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css"
     },

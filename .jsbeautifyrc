@@ -8,5 +8,7 @@
     "newline_between_rules": true,
     "selector_separator_newline": true,
     "space_around_combinator": true,
-    "space_before_conditional": true
+    "space_before_conditional": true,
+    "operator-position": "before-newline",
+    "space-after-anon-function": false
 }
