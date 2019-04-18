@@ -1206,6 +1206,7 @@ module.exports = {
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
+    "fontRendered": "fontsampler.events.fontrendered",
     "fontsPreloaded": "fontsampler.events.fontspreloaded"
 }
 
@@ -1237,9 +1238,18 @@ function pruneClass(className, classNames) {
     }
 }
 
+/**
+ * 
+ * @param str className 
+ * @param str classNames - space separated
+ */
 function addClass(className, classNames) {
     if (!classNames) {
         classNames = ""
+    }
+
+    if (className === classNames) {
+        return classNames
     }
 
     classNames = classNames.trim()
@@ -1534,25 +1544,19 @@ function Skin(FS) {
         var selectInputs = FS.root.querySelectorAll("select[data-fsjs-ui='dropdown']")
         var dropdowns = []
         if (selectInputs.length) {
-            for (var i in selectInputs) {
-                if (selectInputs.hasOwnProperty(i)) {
-                    dropdowns.push(new Dropkick(selectInputs[i], {
-                        mobile: true
-                    }))
-                }
+            for (var i = 0; i < selectInputs.length; i++) {
+                var dropdown = new Dropkick(selectInputs[i], {
+                    mobile: true
+                })
+                dropdowns.push(dropdown)
+                
+                // listen for and trigger updates on native change event on select
+                selectInputs[i].dataset.i = i
+                selectInputs[i].addEventListener("change", function () {
+                    dropdowns[this.dataset.i].refresh()
+                })
             }
         }
-        // FS.registerEventhandler(events.languageChanged, function (e) {
-        //     var languageDropdown = FS.root.querySelector("select[data-fsjs='language']")
-        //     if (languageDropdown && dropdowns) {
-        //         for (var d = 0; d < dropdowns.length; d++) {
-        //             var dropdown = dropdowns[d]
-        //             if (dropdown.sel, dropdown.sel === languageDropdown) {
-        //                 dropdown.select(languageDropdown.value)
-        //             }
-        //         }
-        //     }
-        // })
     }
 
     function updateSlider(position /*, value*/ ) {

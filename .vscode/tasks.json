@@ -1,0 +1,47 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "npm run js",
+        "type": "npm",
+        "script": "js",
+        "auto": true
+      },
+      {
+        "label": "npm run js-skin",
+        "type": "npm",
+        "script": "js-skin",
+        "auto": true
+      },
+      {
+        "label": "npm run js-compressed",
+        "type": "npm",
+        "script": "js-compressed",
+        "auto": true
+      },
+      {
+        "label": "npm run js-skin-compressed",
+        "type": "npm",
+        "script": "js-skin-compressed",
+        "auto": true
+      },
+      {
+        "label": "npm run scss",
+        "type": "npm",
+        "script": "scss",
+        "auto": true
+      },
+      {
+        "label": "npm run scss-compressed",
+        "type": "npm",
+        "script": "scss-compressed",
+        "auto": true
+      },
+      {
+        "label": "npm run start",
+        "type": "npm",
+        "script": "start",
+        "auto": true
+      }
+    ]
+  }

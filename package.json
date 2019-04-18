@@ -1,0 +1,44 @@
+{
+    "name": "fontsampler-js",
+    "version": "0.0.1",
+    "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
+    "author": {
+        "name": "Johannes Neumeier",
+        "email": "hello@underscoretype.com"
+    },
+    "bugs": {
+        "url": "https://github.com/kontur/fontsampler-js/issues"
+    },
+    "license": "GNU GPLv3",
+    "main": "src/fontsampler.js",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kontur/fontsampler-js.git"
+    },
+    "scripts": {
+        "test": "protractor conf.js",
+        "start": "http-server -a 127.0.0.1 -p 8080 -o",
+        "js": "watchify src/fontsampler.js -o 'derequire > dist/fontsampler.js' -v -s 'Fontsampler'",
+        "js-compressed": "watchify src/fontsampler.js -o 'derequire | uglifyjs -c drop_console=true > dist/fontsampler.min.js' -v -s 'Fontsampler'",
+        "js-skin": "watchify src/skin.js -o 'derequire > dist/fontsampler-skin.js' -v -s 'FontsamplerSkin'",
+        "js-skin-compressed": "watchify src/skin.js -o 'derequire | uglifyjs -c drop_console=true > dist/fontsampler-skin.min.js' -v -s 'FontsamplerSkin'",
+        "scss": "sass --watch --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.css",
+        "scss-compressed": "sass --watch --style compressed --no-source-map scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css"
+    },
+    "dependencies": {
+        "dropkickjs": "^2.2.4",
+        "extend": "^3.0.2",
+        "fontfaceobserver": "^2.1.0",
+        "rangeslider-pure": "^0.4.7",
+        "woff2-feature-test": "^1.0.3"
+    },
+    "devDependencies": {
+        "browserify": "^16.2.3",
+        "derequire": "^2.0.6",
+        "http-server": "^0.11.1",
+        "jasmine": "^3.4.0",
+        "jasmine-ts-console-reporter": "^3.1.1",
+        "protractor": "^5.4.2",
+        "uglifyjs": "^2.4.11"
+    }
+}
