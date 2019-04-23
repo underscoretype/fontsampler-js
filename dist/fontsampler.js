@@ -319,7 +319,7 @@ function loadFont(file, callback) {
         console.error(new Error(errors.fileNotfound))
     })
     
-    if (FontFace) {
+    if ("FontFace" in window) {
         var ff = new FontFace(family, "url(" + file + ")", {})
         ff.load().then(function() {
             document.fonts.add(ff)
