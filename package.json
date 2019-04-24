@@ -9,7 +9,7 @@
     "bugs": {
         "url": "https://github.com/kontur/fontsampler-js/issues"
     },
-    "license": "GNU GPLv3",
+    "license": "MIT",
     "main": "src/fontsampler.js",
     "repository": {
         "type": "git",
