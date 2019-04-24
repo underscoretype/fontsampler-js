@@ -1899,9 +1899,17 @@ function UI(root, fonts, options) {
     }
 
     function fontIsInstance(variation) {
-        for (var v in variation) {
-            variation[v] = variation[v].toString()
+        if (typeof(variation) !== "object") {
+            return false
         }
+
+        for (var v in variation) {
+            // for now just ignore values that are not a number, don't throw an error
+            if (!isNaN(parseInt(variation[v]))) {
+                variation[v] = variation[v].toString()
+            }
+        }
+
         for (var i = 0; i < fonts.length; i++) {
             var f = fonts[i]
 
@@ -1909,21 +1917,25 @@ function UI(root, fonts, options) {
                 continue
             }
 
-            var parts = f.instance.split(","),
-                vars = {}
-            for (var k = 0; k < parts.length; k++) {
-                var p = parts[k].trim().split(" ")
-                vars[p[0]] = p[1].toString()
-            }
+            try {
+                var parts = f.instance.split(","),
+                    vars = {}
+                for (var k = 0; k < parts.length; k++) {
+                    var p = parts[k].trim().split(" ")
+                    vars[p[0]] = p[1].toString()
+                }
 
-            // check if all variation keys and values match
-            if (Object.keys(variation).length !== Object.keys(vars).length) {
+                // check if all variation keys and values match
+                if (Object.keys(variation).length !== Object.keys(vars).length) {
+                    continue
+                }
+
+                // elegant compare equal for objects, if equal return font
+                if (JSON.stringify(vars) === JSON.stringify(variation)) {
+                    return f
+                }
+            } catch (e) {
                 continue
-            }
-
-            // elegant compare equal for objects, if equal return font
-            if (JSON.stringify(vars) === JSON.stringify(variation)) {
-                return f
             }
         }
 
