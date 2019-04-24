@@ -242,7 +242,7 @@ function Fontsampler(_root, _fonts, _options) {
     function setupUIEvents() {
 
         // checkbox
-        this.root.addEventListener("fontsampler.onopentypechanged", function() {
+        this.root.addEventListener(events.opentypeChanged, function() {
             var val = ui.getOpentype()
             ui.setInputOpentype(val)
         })
@@ -253,16 +253,6 @@ function Fontsampler(_root, _fonts, _options) {
             if (e.detail.font) {
                 that.showFont(e.detail.font)
             }
-        })
-
-        // buttongroups
-        this.root.addEventListener("fontsampler.onalignmentchanged", function() {
-            var val = ui.getButtongroupValue("alignment")
-            ui.setInputCss("textAlign", val)
-        })
-        this.root.addEventListener("fontsampler.ondirectionchanged", function() {
-            var val = ui.getButtongroupValue("direction")
-            ui.setInputAttr("dir", val)
         })
     }
 
@@ -376,6 +366,10 @@ function Fontsampler(_root, _fonts, _options) {
 
     this.setValue = function(key, value) {
         return ui.setValue(key, value)
+    }
+
+    this.setLabel = function(key, value) {
+        return ui.setLabelValue(key, value)
     }
 
     return this

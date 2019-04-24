@@ -1207,7 +1207,9 @@ module.exports = {
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
     "fontRendered": "fontsampler.events.fontrendered",
-    "fontsPreloaded": "fontsampler.events.fontspreloaded"
+    "fontsPreloaded": "fontsampler.events.fontspreloaded",
+    "valueChanged": "fontsampler.events.valuechanged",
+    "opentypeChanged": "fontsampler.events.opentypechanged",
 }
 
 },{}],4:[function(_dereq_,module,exports){

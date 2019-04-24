@@ -441,7 +441,7 @@ function UI(root, fonts, options) {
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        sendEvent("opentype")
+        sendEvent(events.opentypeChanged)
     }
 
     /**
@@ -462,8 +462,8 @@ function UI(root, fonts, options) {
         }
     }
 
-    function sendEvent(type) {
-        root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
+    function sendEvent(type, opt) {
+        root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }
 
     function sendNativeEvent(type, node) {
@@ -659,6 +659,10 @@ function UI(root, fonts, options) {
             case "tester":
                 break;
         }
+        console.log("set value", key, value)
+        var obj = {}
+        obj[key] = value
+        sendEvent(events.valueChanged, obj)
     }
 
     /**
@@ -666,7 +670,6 @@ function UI(root, fonts, options) {
      */
     function setVariation(axis, val) {
         var v = getVariation(),
-            label,
             opt
 
         if (isValidAxisAndValue(axis, val)) {

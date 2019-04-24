@@ -250,7 +250,9 @@ module.exports = {
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
     "fontRendered": "fontsampler.events.fontrendered",
-    "fontsPreloaded": "fontsampler.events.fontspreloaded"
+    "fontsPreloaded": "fontsampler.events.fontspreloaded",
+    "valueChanged": "fontsampler.events.valuechanged",
+    "opentypeChanged": "fontsampler.events.opentypechanged",
 }
 
 },{}],6:[function(_dereq_,module,exports){
@@ -590,7 +592,7 @@ function Fontsampler(_root, _fonts, _options) {
     function setupUIEvents() {
 
         // checkbox
-        this.root.addEventListener("fontsampler.onopentypechanged", function() {
+        this.root.addEventListener(events.opentypeChanged, function() {
             var val = ui.getOpentype()
             ui.setInputOpentype(val)
         })
@@ -601,16 +603,6 @@ function Fontsampler(_root, _fonts, _options) {
             if (e.detail.font) {
                 that.showFont(e.detail.font)
             }
-        })
-
-        // buttongroups
-        this.root.addEventListener("fontsampler.onalignmentchanged", function() {
-            var val = ui.getButtongroupValue("alignment")
-            ui.setInputCss("textAlign", val)
-        })
-        this.root.addEventListener("fontsampler.ondirectionchanged", function() {
-            var val = ui.getButtongroupValue("direction")
-            ui.setInputAttr("dir", val)
         })
     }
 
@@ -724,6 +716,10 @@ function Fontsampler(_root, _fonts, _options) {
 
     this.setValue = function(key, value) {
         return ui.setValue(key, value)
+    }
+
+    this.setLabel = function(key, value) {
+        return ui.setLabelValue(key, value)
     }
 
     return this
@@ -1624,7 +1620,7 @@ function UI(root, fonts, options) {
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        sendEvent("opentype")
+        sendEvent(events.opentypeChanged)
     }
 
     /**
@@ -1645,8 +1641,8 @@ function UI(root, fonts, options) {
         }
     }
 
-    function sendEvent(type) {
-        root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
+    function sendEvent(type, opt) {
+        root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }
 
     function sendNativeEvent(type, node) {
@@ -1842,6 +1838,10 @@ function UI(root, fonts, options) {
             case "tester":
                 break;
         }
+        console.log("set value", key, value)
+        var obj = {}
+        obj[key] = value
+        sendEvent(events.valueChanged, obj)
     }
 
     /**
@@ -1849,7 +1849,6 @@ function UI(root, fonts, options) {
      */
     function setVariation(axis, val) {
         var v = getVariation(),
-            label,
             opt
 
         if (isValidAxisAndValue(axis, val)) {
