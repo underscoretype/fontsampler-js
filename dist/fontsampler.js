@@ -1561,18 +1561,21 @@ function UI(root, fonts, options) {
         if (!Array.isArray(options.ui.variation.axes)) {
             return false
         }
-
+        
         for (var a = 0; a < options.ui.variation.axes.length; a++) {
             var axisoptions = options.ui.variation.axes[a]
+
             if (axisoptions.tag !== axis) {
                 continue
             }
-            if (value < axisoptions.min || value > axisoptions.max) {
+            if (parseFloat(value) < parseFloat(axisoptions.min) || parseFloat(value) > parseFloat(axisoptions.max)) {
                 return false
             } else {
                 return true
             }
         }
+
+        return false
     }
 
     function getElement(key, node) {
@@ -1838,7 +1841,6 @@ function UI(root, fonts, options) {
             case "tester":
                 break;
         }
-        console.log("set value", key, value)
         var obj = {}
         obj[key] = value
         sendEvent(events.valueChanged, obj)
@@ -1850,14 +1852,14 @@ function UI(root, fonts, options) {
     function setVariation(axis, val) {
         var v = getVariation(),
             opt
-
+        
         if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
             opt = options.ui.variation.axes.filter(function(optVal) {
                 return optVal.tag === axis
             })
-            if (!opt) {
+            if (!opt || typeof(opt) === "undefined") {
                 opt = {
                     min: 100,
                     max: 900

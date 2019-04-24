@@ -1,4 +1,4 @@
-# Fontsampler.js (v0.0.2)
+# Fontsampler.js
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
