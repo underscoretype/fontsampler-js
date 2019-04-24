@@ -1,0 +1,11 @@
+# no code style and tooling
+.vscode
+.jshintrc
+.jsbeautifyrc
+
+# no docs
+docs
+
+# no tests
+spec
+conf.js
