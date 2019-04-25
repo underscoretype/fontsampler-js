@@ -29,7 +29,7 @@
         "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
-        "rangeslider-pure": "^0.4.7",
+        "rangeslider-pure": "git@github.com:kontur/rangeSlider.git",
         "woff2-feature-test": "^1.0.3"
     },
     "devDependencies": {

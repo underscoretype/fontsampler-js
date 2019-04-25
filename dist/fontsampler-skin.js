@@ -149,6 +149,7 @@ var pluginName = 'rangeSlider';
 var inputrange = dom.supportsRange();
 var defaults = {
   polyfill: true,
+  root: document,
   rangeClass: 'rangeSlider',
   disabledClass: 'rangeSlider--disabled',
   fillClass: 'rangeSlider__fill',
@@ -310,7 +311,7 @@ var RangeSlider = function () {
     // Attach Events
     window.addEventListener('resize', this._handleResize, false);
 
-    dom.addEventListeners(document, this.options.startEvent, this._startEventListener);
+    dom.addEventListeners(this.options.root, this.options.startEvent, this._startEventListener);
 
     // Listen to programmatic value changes
     this.element.addEventListener('change', this._changeEventListener, false);
@@ -364,7 +365,7 @@ var RangeSlider = function () {
   }, {
     key: 'destroy',
     value: function destroy() {
-      dom.removeAllListenersFromEl(this, document);
+      dom.removeAllListenersFromEl(this, this.options.root);
       window.removeEventListener('resize', this._handleResize, false);
       this.element.removeEventListener('change', this._changeEventListener, false);
 
@@ -398,7 +399,7 @@ var RangeSlider = function () {
       if (this.onInit && typeof this.onInit === 'function') {
         this.onInit();
       }
-      this._update();
+      this._update(false);
     }
   }, {
     key: '_updatePercentFromValue',
@@ -446,7 +447,7 @@ var RangeSlider = function () {
     }
   }, {
     key: '_update',
-    value: function _update() {
+    value: function _update(triggerEvent) {
       var sizeProperty = this.vertical ? 'offsetHeight' : 'offsetWidth';
 
       this.handleSize = dom.getDimension(this.handle, sizeProperty);
@@ -467,7 +468,9 @@ var RangeSlider = function () {
         this._setBufferPosition(this.options.buffer);
       }
       this._updatePercentFromValue();
-      dom.triggerEvent(this.element, 'change', { origin: this.identifier });
+      if (triggerEvent !== false) {
+        dom.triggerEvent(this.element, 'change', { origin: this.identifier });
+      }
     }
   }, {
     key: '_handleResize',
@@ -486,8 +489,8 @@ var RangeSlider = function () {
     value: function _handleDown(e) {
       this.isInteractsNow = true;
       e.preventDefault();
-      dom.addEventListeners(document, this.options.moveEvent, this._handleMove);
-      dom.addEventListeners(document, this.options.endEvent, this._handleEnd);
+      dom.addEventListeners(this.options.root, this.options.moveEvent, this._handleMove);
+      dom.addEventListeners(this.options.root, this.options.endEvent, this._handleEnd);
 
       // If we click on the handle don't set the new position
       if ((' ' + e.target.className + ' ').replace(newLineAndTabRegexp, ' ').indexOf(this.options.handleClass) > -1) {
@@ -521,8 +524,8 @@ var RangeSlider = function () {
     key: '_handleEnd',
     value: function _handleEnd(e) {
       e.preventDefault();
-      dom.removeEventListeners(document, this.options.moveEvent, this._handleMove);
-      dom.removeEventListeners(document, this.options.endEvent, this._handleEnd);
+      dom.removeEventListeners(this.options.root, this.options.moveEvent, this._handleMove);
+      dom.removeEventListeners(this.options.root, this.options.endEvent, this._handleEnd);
 
       // Ok we're done fire the change event
       dom.triggerEvent(this.element, 'change', { origin: this.identifier });
@@ -755,6 +758,11 @@ var RangeSlider = function () {
 }();
 
 exports.default = RangeSlider;
+
+
+RangeSlider.version = "0.4.8";
+RangeSlider.dom = dom;
+RangeSlider.functions = func;
 module.exports = exports['default'];
 
 /***/ }),
@@ -830,7 +838,7 @@ var getHiddenParentNodes = exports.getHiddenParentNodes = function getHiddenPare
   var parents = [];
   var node = element.parentNode;
 
-  while (isHidden(node)) {
+  while (node && isHidden(node)) {
     parents.push(node);
     node = node.parentNode;
   }
@@ -1025,7 +1033,7 @@ var removeEventListeners = exports.removeEventListeners = function removeEventLi
 
 /**
  * Remove ALL event listeners which exists in el[EVENT_LISTENER_LIST]
- * @param instance
+ * @param {RangeSlider} instance
  * @param {HTMLElement} el DOM element
  */
 var removeAllListenersFromEl = exports.removeAllListenersFromEl = function removeAllListenersFromEl(instance, el) {

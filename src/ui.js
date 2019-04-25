@@ -330,8 +330,8 @@ function UI(root, fonts, options) {
         }
 
         if (type === "slider") {
-            element.addEventListener("change", onSlide)
             setValue(key, opt.init)
+            element.addEventListener("change", onSlide)
         } else if (type === "dropdown") {
             element.addEventListener("change", onChange)
             setValue(key, opt.init)
@@ -809,8 +809,14 @@ function UI(root, fonts, options) {
                 helpers.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {
                 helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
-                var element = getElement("fontfamily")
+                var element = getElement("fontfamily"),
+                    option
+                
                 if (element.value !== instanceFont.name) {
+                    option = element.querySelector("option[value='" + instanceFont.name + "']")
+                    if (helpers.isNode(option)) {
+                        option.selected = true
+                    }
                     element.value = instanceFont.name
                     sendNativeEvent("change", element)
                 }
