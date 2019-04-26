@@ -6,11 +6,12 @@ $bgColorHover: darken($bgColor, 5%) !default;
 
 $borderRadius: 2px !default;
 $borderWidth: 1px !default;
-$borderColor: #CCC !default;
+$borderColor: lighten($baseColor, 50%) !default;
 
 $sliderBarWidth: 1px !default;
 $sliderBarRadius: 2px !default;
 $sliderHandleSize: 10px !default;
+$sliderHandleColor: $baseColor !default;
 
 $buttonPadding: 0.1em 0.5em 0 !default;
 $buttonHeight: 2em !default;

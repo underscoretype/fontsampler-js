@@ -66,7 +66,7 @@
 }
 .fsjs-skin .fsjs-button, .fsjs-skin .fsjs-block-type-buttongroup button {
   background: #FDFDFD;
-  border: 1px solid #CCC;
+  border: 1px solid #b3b3b3;
   border-radius: 2px;
   color: inherit;
   cursor: pointer;
@@ -173,7 +173,7 @@
   overflow: hidden;
   position: relative;
   background-color: #FDFDFD;
-  border: 1px solid #CCC;
+  border: 1px solid #b3b3b3;
   border-radius: 2px;
   padding: 0.1em 0.5em 0;
   padding-right: 1.5em;
@@ -197,7 +197,7 @@
 .fsjs-skin .dk-selected:after {
   top: 0;
   height: 100%;
-  border-left: 1px solid #CCC;
+  border-left: 1px solid #b3b3b3;
   margin: 0 1.5em 0 0;
 }
 .fsjs-skin .dk-selected-disabled {
@@ -224,7 +224,7 @@
 }
 .fsjs-skin .dk-select-options {
   background-color: white;
-  border: 1px solid #CCC;
+  border: 1px solid #b3b3b3;
   border-radius: 2px;
   list-style: none;
   margin: 0;
@@ -290,7 +290,7 @@
 }
 .fsjs-skin .rangeSlider {
   position: relative;
-  background: #CCC;
+  background: #b3b3b3;
 }
 .fsjs-skin .rangeSlider__horizontal {
   height: 1px;
@@ -301,7 +301,7 @@
   opacity: 0.4;
 }
 .fsjs-skin .rangeSlider__fill {
-  background: #CCC;
+  background: #b3b3b3;
   position: absolute;
 }
 .fsjs-skin .rangeSlider__fill__horizontal {
