@@ -373,7 +373,7 @@ function Fontsampler(_root, _fonts, _options) {
         if (this.currentFont === font) {
             // Same font file (Variation might be different)
             // Skip straight to "fontLoaded" procedure
-            initFont(this.currentFont)
+            initFont(this.currentFont.f)
         } else {
             // Load a new font file
             this.currentFont = font
