@@ -408,6 +408,14 @@ function Fontsampler(_root, _fonts, _options) {
     ui = Interface(this.root, fonts, options)
 
     function parseFontInstances(fonts) {
+
+        // CSS.supports support superseds variable font support, so it is a 
+        // handy way to eliminate pre-variable font browsers
+        // Bail early if not support for variations
+        if (!CSS.supports("(font-variation-settings: normal)")) {
+            return fonts
+        }
+
         var parsed = []
 
         for (var f = 0; f < fonts.length; f++) {
@@ -1222,6 +1230,9 @@ module.exports = Selection
  *      The actual ui control (input, select, buttongroup)
  *      [data-fsjs=_property_].fsjs-element-_property_
  * 
+ * The terminology used in this class uses `block` for a wrapper of an UI element
+ * and `element` for the actual UI element that has a value, e.g. the HTML input
+ * or select etc.
  */
 var selection = _dereq_("./selection")
 
@@ -1253,9 +1264,9 @@ function UI(root, fonts, options) {
             "alignment": "text-align"
         },
         blocks = {},
-        uifactory = null,
-        input = null,
-        originalText = ""
+        uifactory = null, // instance of uielements
+        input = null, // the tester text field
+        originalText = "" // used to store textContent that was in the root node on init
 
     function init() {
         console.debug("Fontsampler.Interface.init()", root, fonts, options)
@@ -1263,10 +1274,10 @@ function UI(root, fonts, options) {
         helpers.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
 
-        // The fontfamily is just being defined without the options, which
-        // are the fonts passed in. let’s make this transformation behind
+        // The `fontfamily` UI option is just being defined without the options, which
+        // are the fonts passed in. Let’s make this transformation behind
         // the scenes so we can use the re-usable "dropdown" ui by defining
-        // the needed choices
+        // the needed `choices` attribute
         if (options.ui.fontfamily && typeof(options.ui.fontfamily) === "boolean") {
             options.ui.fontfamily = {}
         }
@@ -1276,6 +1287,8 @@ function UI(root, fonts, options) {
 
         // Before modifying the root node, detect if it is containing only
         // text, and if so, store it to the options for later use
+        // NOTE: This currently only extracts single nodes or text, not an
+        // entire node tree possible nested in the root node
         if (root.childNodes.length === 1 && root.childNodes[0].nodeType === Node.TEXT_NODE) {
             originalText = root.childNodes[0].textContent
             root.removeChild(root.childNodes[0])
@@ -1438,10 +1451,16 @@ function UI(root, fonts, options) {
         return false
     }
 
+    /**
+     * Create a block wrapper and the UI element it contains
+     * 
+     * @param {string} key 
+     */
     function createBlock(key) {
         var block = document.createElement("div"),
             element = createElement(key),
             label = false
+
         opt = options.ui[key]
 
         if (opt.label) {
@@ -1452,12 +1471,16 @@ function UI(root, fonts, options) {
 
         block.appendChild(element)
         sanitizeElement(element, key)
-
         sanitizeBlock(block, key)
 
         return block
     }
 
+    /**
+     * Create the actual UI element for a key
+     * 
+     * @param {string} key 
+     */
     function createElement(key) {
         var element = uifactory[ui[key]](key, options.ui[key])
         sanitizeElement(element, key)
@@ -1465,6 +1488,13 @@ function UI(root, fonts, options) {
         return element
     }
 
+    /**
+     * Make sure a UI wrapper block has the classes and attributes
+     * expected
+     * 
+     * @param {node} block 
+     * @param {string} key 
+     */
     function sanitizeBlock(block, key) {
         var classes = [
             options.classes.blockClass,
@@ -1476,6 +1506,12 @@ function UI(root, fonts, options) {
         block.dataset.fsjsBlock = key
     }
 
+    /**
+     * Make sure a UI element has the classes and attributes expected
+     * 
+     * @param {node} element 
+     * @param {string} key 
+     */
     function sanitizeElement(element, key) {
         element = uifactory[ui[key]](key, options.ui[key], element)
 
@@ -1484,6 +1520,13 @@ function UI(root, fonts, options) {
         element.dataset.fsjsUi = ui[key]
     }
 
+    /**
+     * If a UI element has a label, make sure it conforms to the DOM structure
+     * and attributes expected of it
+     * 
+     * @param {node} label 
+     * @param {string} key 
+     */
     function sanitizeLabel(label, key) {
         var text = label.querySelector("." + options.classes.labelTextClass),
             value = label.querySelector("." + options.classes.labelValueClass),
@@ -1514,8 +1557,9 @@ function UI(root, fonts, options) {
 
     /**
      * Init a UI element with values (update DOM to options)
-     * @param node node 
-     * @param object opt 
+     * 
+     * @param {node} node 
+     * @param {object} opt 
      * @return boolean
      */
     function initBlock(key) {
@@ -1535,7 +1579,6 @@ function UI(root, fonts, options) {
         } else if (type === "dropdown") {
             element.addEventListener("change", onChange)
             setValue(key, opt.init)
-            // TODO init values to tester
         } else if (type === "buttongroup") {
             var buttons = element.querySelectorAll("[data-choice]")
 
@@ -1578,11 +1621,18 @@ function UI(root, fonts, options) {
         return true
     }
 
+    /**
+     * Checks if a variable font axis value is on any of the defined
+     * axes
+     * 
+     * @param {string} axis 
+     * @param {mixed} value 
+     */
     function isValidAxisAndValue(axis, value) {
         if (!Array.isArray(options.ui.variation.axes)) {
             return false
         }
-        
+
         for (var a = 0; a < options.ui.variation.axes.length; a++) {
             var axisoptions = options.ui.variation.axes[a]
 
@@ -1873,7 +1923,7 @@ function UI(root, fonts, options) {
     function setVariation(axis, val) {
         var v = getVariation(),
             opt
-        
+
         if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
@@ -2011,7 +2061,7 @@ function UI(root, fonts, options) {
                 helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
                 var element = getElement("fontfamily"),
                     option
-                
+
                 if (element.value !== instanceFont.name) {
                     option = element.querySelector("option[value='" + instanceFont.name + "']")
                     if (helpers.isNode(option)) {

@@ -58,6 +58,14 @@ function Fontsampler(_root, _fonts, _options) {
     ui = Interface(this.root, fonts, options)
 
     function parseFontInstances(fonts) {
+
+        // CSS.supports support superseds variable font support, so it is a 
+        // handy way to eliminate pre-variable font browsers
+        // Bail early if not support for variations
+        if (!CSS.supports("(font-variation-settings: normal)")) {
+            return fonts
+        }
+
         var parsed = []
 
         for (var f = 0; f < fonts.length; f++) {

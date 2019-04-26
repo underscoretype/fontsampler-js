@@ -354,7 +354,7 @@
 .fsjs-skin [data-fsjs-block=variation] {
   display: none;
 }
-@supports (font-variation-settings: "tnum" 1) {
+@supports (font-variation-settings: normal) {
   .fsjs-skin [data-fsjs-block=variation] {
     display: block;
   }

@@ -73,12 +73,13 @@ $elementMargin: 5px !default;
         }
     }
 
-    // Go ahead and hide variable font sliders when the browser does not support them
+    // Hide or style variable font sliders and fontfamily dropdown options
+    // when the browser does not support them
     [data-fsjs-block=variation] {
         display: none;
     }
 
-    @supports (font-variation-settings: "tnum" 1) {
+    @supports (font-variation-settings: normal) {
         [data-fsjs-block=variation] {
             display: block;
         }
