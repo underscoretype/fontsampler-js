@@ -257,20 +257,8 @@ module.exports = {
 
 },{}],6:[function(_dereq_,module,exports){
 var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
-
 var errors = _dereq_("./errors")
-
-// supportsWoff2 manually copied from npm woff2-feature-test
-var supportsWoff2 = function() {
-    if (!("FontFace" in window)) {
-        return false;
-    }
-
-    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
-    f.load()['catch'](function() {});
-
-    return f.status === 'loading' || f.status === 'loaded';
-}
+var supports = _dereq_("./supports")
 
 function getExtension(path) {
     return path.substring(path.lastIndexOf(".") + 1)
@@ -292,7 +280,7 @@ function bestWoff(files) {
         throw new Error(errors.tooManyFiles + files)
     }
 
-    if (woff2s.length > 0 && supportsWoff2()) {
+    if (woff2s.length > 0 && supports.woff2) {
         return woff2s.shift()
     }
 
@@ -344,10 +332,9 @@ function fromFiles(files, callback) {
 module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles,
-    "supportsWoff2": supportsWoff2,
     "bestWoff": bestWoff
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4}],7:[function(_dereq_,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4,"./supports":11}],7:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -363,6 +350,7 @@ var Fontloader = _dereq_("./fontloader")
 var Interface = _dereq_("./ui")
 var Preloader = _dereq_("./preloader")
 var helpers = _dereq_("./helpers")
+var supports = _dereq_("./supports")
 
 var errors = _dereq_("./errors")
 var events = _dereq_("./events")
@@ -412,7 +400,7 @@ function Fontsampler(_root, _fonts, _options) {
         // CSS.supports support superseds variable font support, so it is a 
         // handy way to eliminate pre-variable font browsers
         // Bail early if not support for variations
-        if (!CSS.supports("(font-variation-settings: normal)")) {
+        if (!supports.variableFonts) {
             return fonts
         }
 
@@ -424,7 +412,7 @@ function Fontsampler(_root, _fonts, _options) {
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
 
-                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
+                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !supports.woff2) {
                     // no point in registering instances as fonts with no variable font support
                     font.axes = []
                     font.instances = []
@@ -681,7 +669,8 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
+        helpers.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
+        helpers.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
 
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true
@@ -755,7 +744,7 @@ function Fontsampler(_root, _fonts, _options) {
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./defaults":3,"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./preloader":9,"./ui":11}],8:[function(_dereq_,module,exports){
+},{"../node_modules/extend":1,"./defaults":3,"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./preloader":9,"./supports":11,"./ui":12}],8:[function(_dereq_,module,exports){
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -1206,6 +1195,43 @@ function Selection () {
 
 module.exports = Selection
 },{}],11:[function(_dereq_,module,exports){
+
+/**
+ * Just a centralized wrapper around the native CSS.supports, which
+ * superseds variable font support, so it is a handy way to eliminate 
+ * pre-variable font browsers
+ */
+function variableFonts() {
+    if (!CSS || "supports" in CSS === false) {
+        return false
+    }
+    
+    return CSS.supports("(font-variation-settings: normal)")
+}
+
+/**
+ * Simple woff2 support detection with a shim font, copied from:
+ * npm woff2-feature-test
+ */
+function woff2() {
+    if (!("FontFace" in window)) {
+        return false;
+    }
+
+    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
+    f.load()['catch'](function() {});
+
+    return f.status === 'loading' || f.status === 'loaded';
+}
+
+/**
+ * Return the executed method returns as attributes of this module
+ */
+module.exports = {
+    variableFonts: (variableFonts)(),
+    woff2: (woff2)()
+}
+},{}],12:[function(_dereq_,module,exports){
 /**
  * A wrapper around the Fontsampler interface
  * 
@@ -1240,6 +1266,7 @@ var UIElements = _dereq_("./uielements")
 var Fontloader = _dereq_("./fontloader")
 
 var helpers = _dereq_("./helpers")
+var supports = _dereq_("./supports")
 var errors = _dereq_("./errors")
 var events = _dereq_("./events")
 
@@ -2103,7 +2130,7 @@ function UI(root, fonts, options) {
                 for (var s = 0; s < sliders.length; s++) {
                     if (!Array.isArray(axes) || axes.length < 1 ||
                         axes.indexOf(sliders[s].dataset.axis) === -1 ||
-                        Fontloader.supportsWoff2() === false
+                        supports.woff2 === false
                     ) {
                         helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
@@ -2209,7 +2236,7 @@ function UI(root, fonts, options) {
     }
 }
 module.exports = UI
-},{"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./selection":10,"./uielements":12}],12:[function(_dereq_,module,exports){
+},{"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./selection":10,"./supports":11,"./uielements":13}],13:[function(_dereq_,module,exports){
 
 var helpers = _dereq_("./helpers")
 

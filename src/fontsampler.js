@@ -13,6 +13,7 @@ var Fontloader = require("./fontloader")
 var Interface = require("./ui")
 var Preloader = require("./preloader")
 var helpers = require("./helpers")
+var supports = require("./supports")
 
 var errors = require("./errors")
 var events = require("./events")
@@ -62,7 +63,7 @@ function Fontsampler(_root, _fonts, _options) {
         // CSS.supports support superseds variable font support, so it is a 
         // handy way to eliminate pre-variable font browsers
         // Bail early if not support for variations
-        if (!CSS.supports("(font-variation-settings: normal)")) {
+        if (!supports.variableFonts) {
             return fonts
         }
 
@@ -74,7 +75,7 @@ function Fontsampler(_root, _fonts, _options) {
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
 
-                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !Fontloader.supportsWoff2()) {
+                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !supports.woff2) {
                     // no point in registering instances as fonts with no variable font support
                     font.axes = []
                     font.instances = []
@@ -331,7 +332,8 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, Fontloader.supportsWoff2() ? "fsjs-woff2" : "fsjs-woff")
+        helpers.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
+        helpers.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
 
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true

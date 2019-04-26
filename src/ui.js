@@ -32,6 +32,7 @@ var UIElements = require("./uielements")
 var Fontloader = require("./fontloader")
 
 var helpers = require("./helpers")
+var supports = require("./supports")
 var errors = require("./errors")
 var events = require("./events")
 
@@ -895,7 +896,7 @@ function UI(root, fonts, options) {
                 for (var s = 0; s < sliders.length; s++) {
                     if (!Array.isArray(axes) || axes.length < 1 ||
                         axes.indexOf(sliders[s].dataset.axis) === -1 ||
-                        Fontloader.supportsWoff2() === false
+                        supports.woff2 === false
                     ) {
                         helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
