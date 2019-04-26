@@ -12,12 +12,16 @@ var extend = require("../node_modules/extend")
 var Fontloader = require("./fontloader")
 var Interface = require("./ui")
 var Preloader = require("./preloader")
-var helpers = require("./helpers")
-var supports = require("./supports")
 
-var errors = require("./errors")
-var events = require("./events")
-var _defaults = require("./defaults")
+var errors = require("./constants/errors")
+var events = require("./constants/events")
+var _defaults = require("./constants/defaults")
+
+var helpers = require("./helpers/helpers")
+var utils = require("./helpers/utils")
+var dom = require("./helpers/dom")
+var supports = require("./helpers/supports")
+
 
 /**
  * The main constructor for setting up a new Fontsampler instance
@@ -91,7 +95,7 @@ function Fontsampler(_root, _fonts, _options) {
                         return parts[0]
                     })
                     if ("axes" in font === true) {
-                        axes = helpers.arrayUnique(axes.concat(font.axes))
+                        axes = utils.arrayUnique(axes.concat(font.axes))
                     }
                     parsed.push({
                         name: parts.text,
@@ -218,10 +222,10 @@ function Fontsampler(_root, _fonts, _options) {
                 blocksInDom[b] = nodesInDom[b].dataset.fsjs
             }
         }
-        blocksInOrder = typeof(opt) === "object" && "order" in opt ? helpers.flattenDeep(opt.order) : []
+        blocksInOrder = typeof(opt) === "object" && "order" in opt ? utils.flattenDeep(opt.order) : []
         blocksInUI = typeof(opt) === "object" && "ui" in opt ? Object.keys(opt.ui) : []
         blocks = blocksInDom.concat(blocksInOrder, blocksInUI)
-        blocks = helpers.arrayUnique(blocks)
+        blocks = utils.arrayUnique(blocks)
 
         // Always make sure we are rendering at least a tester, no matter the configuration
         if (blocks.indexOf("tester") === -1) {
@@ -239,7 +243,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Then: check DOM and UI for any other present blocks and append them
         // in case they are missing
-        var blocksInOrderNow = helpers.flattenDeep(options.order)
+        var blocksInOrderNow = utils.flattenDeep(options.order)
         for (var i = 0; i < blocks.length; i++) {
             if (blocksInOrderNow.indexOf(blocks[i]) === -1) {
                 options.order.push(blocks[i])
@@ -331,9 +335,9 @@ function Fontsampler(_root, _fonts, _options) {
             })
         }
 
-        helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
-        helpers.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
+        dom.nodeAddClass(this.root, options.classes.initClass)
+        dom.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
+        dom.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
 
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true

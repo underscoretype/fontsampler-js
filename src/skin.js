@@ -1,7 +1,8 @@
 var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
 var Dropkick = require("../node_modules/dropkickjs/dist/dropkick").default
 var events = require("./events")
-var helpers = require("./helpers")
+var helpers = require("./helpers/helpers")
+var dom = require("./helpers/dom")
 
 function Skin(FS) {
 
@@ -15,7 +16,7 @@ function Skin(FS) {
             throw new Error("FontsamplerSkin: Cannot apply skin to a Fontsampler that is already initialized.")
         }
 
-        helpers.nodeAddClass(FS.root, "fsjs-skin")
+        dom.nodeAddClass(FS.root, "fsjs-skin")
 
         var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-ui='slider']")
         if (rangeInputs.length) {

@@ -31,10 +31,12 @@ var selection = require("./selection")
 var UIElements = require("./uielements")
 var Fontloader = require("./fontloader")
 
-var helpers = require("./helpers")
-var supports = require("./supports")
 var errors = require("./errors")
 var events = require("./events")
+
+var dom = require("./helpers/dom")
+var utils = require("./helpers/utils")
+var supports = require("./helpers/supports")
 
 function UI(root, fonts, options) {
 
@@ -64,7 +66,7 @@ function UI(root, fonts, options) {
     function init() {
         console.debug("Fontsampler.Interface.init()", root, fonts, options)
 
-        helpers.nodeAddClass(root, options.classes.rootClass)
+        dom.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
 
         // The `fontfamily` UI option is just being defined without the options, which
@@ -96,7 +98,7 @@ function UI(root, fonts, options) {
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
-            if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
+            if (dom.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
                 root.appendChild(elementA)
             }
         }
@@ -295,7 +297,7 @@ function UI(root, fonts, options) {
             options.classes.blockClass + "-type-" + ui[key]
         ]
 
-        helpers.nodeAddClasses(block, classes)
+        dom.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
     }
 
@@ -308,7 +310,7 @@ function UI(root, fonts, options) {
     function sanitizeElement(element, key) {
         element = uifactory[ui[key]](key, options.ui[key], element)
 
-        helpers.nodeAddClass(element, options.classes.elementClass)
+        dom.nodeAddClass(element, options.classes.elementClass)
         element.dataset.fsjs = key
         element.dataset.fsjsUi = ui[key]
     }
@@ -326,25 +328,25 @@ function UI(root, fonts, options) {
             unit = label.querySelector("." + options.classes.labelUnitClass),
             element = getElement(key)
 
-        if (helpers.isNode(text) && text.textContent === "") {
+        if (dom.isNode(text) && text.textContent === "") {
             text.textContent = options.ui[key].label
         }
 
-        if (helpers.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
+        if (dom.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
             value.textContent = ""
         }
 
-        if (helpers.isNode(value) && value && value.textContent === "") {
+        if (dom.isNode(value) && value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             value.textContent = element.value
         }
 
-        if (helpers.isNode(unit) && unit && unit.textContent === "") {
+        if (dom.isNode(unit) && unit && unit.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             unit.textContent = element.dataset.unit
         }
 
-        helpers.nodeAddClass(label, options.classes.labelClass)
+        dom.nodeAddClass(label, options.classes.labelClass)
         label.dataset.fsjsFor = key
     }
 
@@ -379,9 +381,9 @@ function UI(root, fonts, options) {
                 for (var b = 0; b < buttons.length; b++) {
                     buttons[b].addEventListener("click", onClick)
                     if (buttons[b].dataset.choice === options.ui[key].init) {
-                        helpers.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
+                        dom.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
                     } else {
-                        helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
+                        dom.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
                     }
                 }
             }
@@ -448,7 +450,7 @@ function UI(root, fonts, options) {
         }
         var element = root.querySelector("[data-fsjs='" + key + "']")
 
-        return helpers.isNode(element) ? element : false
+        return dom.isNode(element) ? element : false
     }
 
     function getBlock(key, node) {
@@ -457,7 +459,7 @@ function UI(root, fonts, options) {
         }
         var block = root.querySelector("[data-fsjs-block='" + key + "']")
 
-        return helpers.isNode(block) ? block : false
+        return dom.isNode(block) ? block : false
     }
 
     function getLabel(key, node) {
@@ -466,7 +468,7 @@ function UI(root, fonts, options) {
         }
         var block = root.querySelector("[data-fsjs-for='" + key + "']")
 
-        return helpers.isNode(block) ? block : false
+        return dom.isNode(block) ? block : false
     }
 
     /**
@@ -501,9 +503,9 @@ function UI(root, fonts, options) {
 
         if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
-                helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
+                dom.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
             }
-            helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
+            dom.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
             setValue(property, e.currentTarget.dataset.choice)
         }
     }
@@ -659,7 +661,7 @@ function UI(root, fonts, options) {
                 } else {
                     // if a value was passed in check if it is within bounds,
                     // valid and if the slider needs an update (via native event)
-                    value = helpers.clamp(value, options.ui[key].min,
+                    value = utils.clamp(value, options.ui[key].min,
                         options.ui[key].max, options.ui[key].init)
 
                     if (element.value.toString() !== value.toString()) {
@@ -738,7 +740,7 @@ function UI(root, fonts, options) {
                 opt.max = 900
             }
 
-            v[axis] = helpers.clamp(val, opt.min, opt.max)
+            v[axis] = utils.clamp(val, opt.min, opt.max)
 
             setLabelValue(axis, val)
             setInputVariation(v)
@@ -846,18 +848,18 @@ function UI(root, fonts, options) {
         // Update fontfamily select if it exists
         // When a variable font is updated check if the selected values
         // match a defined instance, and if set it active in the font family
-        if (helpers.isNode(blocks.fontfamily)) {
+        if (dom.isNode(blocks.fontfamily)) {
             var instanceFont = fontIsInstance(variations)
             if (instanceFont === false) {
-                helpers.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
+                dom.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {
-                helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
+                dom.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
                 var element = getElement("fontfamily"),
                     option
 
                 if (element.value !== instanceFont.name) {
                     option = element.querySelector("option[value='" + instanceFont.name + "']")
-                    if (helpers.isNode(option)) {
+                    if (dom.isNode(option)) {
                         option.selected = true
                     }
                     element.value = instanceFont.name
@@ -868,17 +870,17 @@ function UI(root, fonts, options) {
     }
 
     function setActiveFont(name) {
-        if (helpers.isNode(blocks.fontfamily)) {
+        if (dom.isNode(blocks.fontfamily)) {
             var element = getElement("fontfamily", blocks.fontfamily),
                 option
 
-            helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
+            dom.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
 
-            if (helpers.isNode(element)) {
+            if (dom.isNode(element)) {
                 // Only update if it is not the selected fontfamily value
                 if (element.value !== name) {
                     option = element.querySelectorAll("option[value='" + name + "']")
-                    if (helpers.isNode(option)) {
+                    if (dom.isNode(option)) {
                         option.selected = true
                     }
                     element.value = name
@@ -889,7 +891,7 @@ function UI(root, fonts, options) {
     }
 
     function setActiveAxes(axes) {
-        if (helpers.isNode(blocks.variation)) {
+        if (dom.isNode(blocks.variation)) {
             var sliders = blocks.variation.querySelectorAll("[data-axis]")
 
             if (sliders) {
@@ -898,9 +900,9 @@ function UI(root, fonts, options) {
                         axes.indexOf(sliders[s].dataset.axis) === -1 ||
                         supports.woff2 === false
                     ) {
-                        helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
+                        dom.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
-                        helpers.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
+                        dom.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
                     }
                 }
             }
@@ -908,7 +910,7 @@ function UI(root, fonts, options) {
     }
 
     function setActiveLanguage(lang) {
-        if (helpers.isNode(blocks.language) && typeof(lang) === "string") {
+        if (dom.isNode(blocks.language) && typeof(lang) === "string") {
             var languageChoices = options.ui.language.choices.map(function(value) {
                 return value.split("|")[0]
             })
@@ -916,7 +918,7 @@ function UI(root, fonts, options) {
             if (languageChoices.length !== -1) {
                 var option = blocks.language.querySelector("option[value='" + lang + "']")
 
-                if (helpers.isNode(option)) {
+                if (dom.isNode(option)) {
                     // Trigger the change on the native input
                     blocks.language.value = lang
                     option.selected = true
@@ -931,19 +933,19 @@ function UI(root, fonts, options) {
     function setActiveOpentype(features) {
         var checkboxes = false
 
-        if (helpers.isNode(blocks.opentype)) {
+        if (dom.isNode(blocks.opentype)) {
             checkboxes = blocks.opentype.querySelectorAll("[data-feature]")
         }
         if (checkboxes) {
             for (var c = 0; c < checkboxes.length; c++) {
                 if (Array.isArray(features)) {
                     if (features.indexOf(checkboxes[c].dataset.feature) === -1) {
-                        helpers.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                        dom.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                     } else {
-                        helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                        dom.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                     }
                 } else {
-                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    dom.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                 }
             }
         }
@@ -965,9 +967,9 @@ function UI(root, fonts, options) {
 
     function setStatusClass(classString, status) {
         if (status === true) {
-            helpers.nodeAddClass(root, classString)
+            dom.nodeAddClass(root, classString)
         } else if (status === false) {
-            helpers.nodeRemoveClass(root, classString)
+            dom.nodeRemoveClass(root, classString)
         }
     }
 

@@ -1221,6 +1221,10 @@ module.exports = {
 }
 
 },{}],4:[function(_dereq_,module,exports){
+/**
+ * DOM related helpers
+ */
+
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -1325,27 +1329,16 @@ function isNode(node) {
     return typeof(node) === "object" && node !== null && "nodeType" in node
 }
 
+module.exports = {
+    nodeAddClass: nodeAddClass,
+    nodeAddClasses: nodeAddClasses,
+    nodeRemoveClass: nodeRemoveClass,
+    isNode: isNode
+}
+},{}],5:[function(_dereq_,module,exports){
 /**
- * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
- * @method flattenDeep
- * @param array {Array}
- * @return {Array} flatten array
+ * App specific helpers
  */
-function flattenDeep(array) {
-    return array.reduce(function (acc, current) {
-        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
-    }, []);
-}
-
-function arrayUnique(a) {
-    if (!Array.isArray(a)) {
-        return false
-    }
-    return a.filter(function(value, index, self) {
-        return self.indexOf(value) === index
-    }, a)
-}
-
 
 
 /**
@@ -1449,8 +1442,6 @@ function extractFontsFromNode(node, ignoreName) {
     return false
 }
 
-
-
 /**
  * Split an input choice into value and text or return only the value as 
  * both if no separator is used to provide a readable label
@@ -1477,54 +1468,19 @@ function parseParts(choice) {
     }
 }
 
-/**
- * Number clamp to min—max with fallback for when any input value is not a number
- * @param {*} value 
- * @param {*} min 
- * @param {*} max 
- * @param {*} fallback 
- */
-function clamp(value, min, max, fallback) {    
-    value = parseFloat(value)
-    min = parseFloat(min)
-    max = parseFloat(max)
-    
-    if (isNaN(value) || isNaN(min) || isNaN(max)) {
-        if (typeof(fallback) !== "undefined") {
-            value = fallback
-        } else {
-            return value
-        }
-    } 
-    
-    if (value < min) {
-        value = min
-    } else if (value > max) {
-        value = max
-    }
-
-    return value
-}
-
 module.exports = {
-    nodeAddClass: nodeAddClass,
-    nodeAddClasses: nodeAddClasses,
-    nodeRemoveClass: nodeRemoveClass,
-    isNode: isNode,
-
-    flattenDeep: flattenDeep,
-    arrayUnique: arrayUnique,
+    
     parseParts: parseParts,
-    clamp: clamp,
 
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
 }
-},{}],5:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 var rangeSlider = _dereq_("../node_modules/rangeslider-pure/dist/range-slider")
 var Dropkick = _dereq_("../node_modules/dropkickjs/dist/dropkick").default
 var events = _dereq_("./events")
-var helpers = _dereq_("./helpers")
+var helpers = _dereq_("./helpers/helpers")
+var dom = _dereq_("./helpers/dom")
 
 function Skin(FS) {
 
@@ -1538,7 +1494,7 @@ function Skin(FS) {
             throw new Error("FontsamplerSkin: Cannot apply skin to a Fontsampler that is already initialized.")
         }
 
-        helpers.nodeAddClass(FS.root, "fsjs-skin")
+        dom.nodeAddClass(FS.root, "fsjs-skin")
 
         var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-ui='slider']")
         if (rangeInputs.length) {
@@ -1586,5 +1542,5 @@ function Skin(FS) {
 }
 
 module.exports = Skin
-},{"../node_modules/dropkickjs/dist/dropkick":1,"../node_modules/rangeslider-pure/dist/range-slider":2,"./events":3,"./helpers":4}]},{},[5])(5)
+},{"../node_modules/dropkickjs/dist/dropkick":1,"../node_modules/rangeslider-pure/dist/range-slider":2,"./events":3,"./helpers/dom":4,"./helpers/helpers":5}]},{},[6])(6)
 });

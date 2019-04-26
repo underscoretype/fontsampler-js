@@ -256,6 +256,10 @@ module.exports = {
 }
 
 },{}],6:[function(_dereq_,module,exports){
+arguments[4][4][0].apply(exports,arguments)
+},{"dup":4}],7:[function(_dereq_,module,exports){
+arguments[4][5][0].apply(exports,arguments)
+},{"dup":5}],8:[function(_dereq_,module,exports){
 var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
 var errors = _dereq_("./errors")
 var supports = _dereq_("./supports")
@@ -334,7 +338,7 @@ module.exports = {
     "fromFiles": fromFiles,
     "bestWoff": bestWoff
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":4,"./supports":11}],7:[function(_dereq_,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":6,"./supports":16}],9:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -349,12 +353,16 @@ var extend = _dereq_("../node_modules/extend")
 var Fontloader = _dereq_("./fontloader")
 var Interface = _dereq_("./ui")
 var Preloader = _dereq_("./preloader")
-var helpers = _dereq_("./helpers")
-var supports = _dereq_("./supports")
 
-var errors = _dereq_("./errors")
-var events = _dereq_("./events")
-var _defaults = _dereq_("./defaults")
+var errors = _dereq_("./constants/errors")
+var events = _dereq_("./constants/events")
+var _defaults = _dereq_("./constants/defaults")
+
+var helpers = _dereq_("./helpers/helpers")
+var utils = _dereq_("./helpers/utils")
+var dom = _dereq_("./helpers/dom")
+var supports = _dereq_("./helpers/supports")
+
 
 /**
  * The main constructor for setting up a new Fontsampler instance
@@ -428,7 +436,7 @@ function Fontsampler(_root, _fonts, _options) {
                         return parts[0]
                     })
                     if ("axes" in font === true) {
-                        axes = helpers.arrayUnique(axes.concat(font.axes))
+                        axes = utils.arrayUnique(axes.concat(font.axes))
                     }
                     parsed.push({
                         name: parts.text,
@@ -555,10 +563,10 @@ function Fontsampler(_root, _fonts, _options) {
                 blocksInDom[b] = nodesInDom[b].dataset.fsjs
             }
         }
-        blocksInOrder = typeof(opt) === "object" && "order" in opt ? helpers.flattenDeep(opt.order) : []
+        blocksInOrder = typeof(opt) === "object" && "order" in opt ? utils.flattenDeep(opt.order) : []
         blocksInUI = typeof(opt) === "object" && "ui" in opt ? Object.keys(opt.ui) : []
         blocks = blocksInDom.concat(blocksInOrder, blocksInUI)
-        blocks = helpers.arrayUnique(blocks)
+        blocks = utils.arrayUnique(blocks)
 
         // Always make sure we are rendering at least a tester, no matter the configuration
         if (blocks.indexOf("tester") === -1) {
@@ -576,7 +584,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Then: check DOM and UI for any other present blocks and append them
         // in case they are missing
-        var blocksInOrderNow = helpers.flattenDeep(options.order)
+        var blocksInOrderNow = utils.flattenDeep(options.order)
         for (var i = 0; i < blocks.length; i++) {
             if (blocksInOrderNow.indexOf(blocks[i]) === -1) {
                 options.order.push(blocks[i])
@@ -668,9 +676,9 @@ function Fontsampler(_root, _fonts, _options) {
             })
         }
 
-        helpers.nodeAddClass(this.root, options.classes.initClass)
-        helpers.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
-        helpers.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
+        dom.nodeAddClass(this.root, options.classes.initClass)
+        dom.nodeAddClass(this.root, supports.woff2 ? "fsjs-woff2" : "fsjs-woff")
+        dom.nodeAddClass(this.root, supports.variableFonts ? "fsjs-variable-fonts" : "fsjs-no-variable-fonts")
 
         this.root.dispatchEvent(new CustomEvent(events.init))
         this.initialized = true
@@ -744,7 +752,11 @@ function Fontsampler(_root, _fonts, _options) {
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./defaults":3,"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./preloader":9,"./supports":11,"./ui":12}],8:[function(_dereq_,module,exports){
+},{"../node_modules/extend":1,"./constants/defaults":3,"./constants/errors":4,"./constants/events":5,"./fontloader":8,"./helpers/dom":10,"./helpers/helpers":11,"./helpers/supports":12,"./helpers/utils":13,"./preloader":14,"./ui":17}],10:[function(_dereq_,module,exports){
+/**
+ * DOM related helpers
+ */
+
 function pruneClass(className, classNames) {
     if (!classNames) {
         return ""
@@ -849,27 +861,16 @@ function isNode(node) {
     return typeof(node) === "object" && node !== null && "nodeType" in node
 }
 
+module.exports = {
+    nodeAddClass: nodeAddClass,
+    nodeAddClasses: nodeAddClasses,
+    nodeRemoveClass: nodeRemoveClass,
+    isNode: isNode
+}
+},{}],11:[function(_dereq_,module,exports){
 /**
- * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
- * @method flattenDeep
- * @param array {Array}
- * @return {Array} flatten array
+ * App specific helpers
  */
-function flattenDeep(array) {
-    return array.reduce(function (acc, current) {
-        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
-    }, []);
-}
-
-function arrayUnique(a) {
-    if (!Array.isArray(a)) {
-        return false
-    }
-    return a.filter(function(value, index, self) {
-        return self.indexOf(value) === index
-    }, a)
-}
-
 
 
 /**
@@ -973,8 +974,6 @@ function extractFontsFromNode(node, ignoreName) {
     return false
 }
 
-
-
 /**
  * Split an input choice into value and text or return only the value as 
  * both if no separator is used to provide a readable label
@@ -1001,6 +1000,55 @@ function parseParts(choice) {
     }
 }
 
+module.exports = {
+    
+    parseParts: parseParts,
+
+    validateFontsFormatting: validateFontsFormatting,
+    extractFontsFromDOM: extractFontsFromDOM,
+}
+},{}],12:[function(_dereq_,module,exports){
+
+/**
+ * Just a centralized wrapper around the native CSS.supports, which
+ * superseds variable font support, so it is a handy way to eliminate 
+ * pre-variable font browsers
+ */
+function variableFonts() {
+    if (!CSS || "supports" in CSS === false) {
+        return false
+    }
+    
+    return CSS.supports("(font-variation-settings: normal)")
+}
+
+/**
+ * Simple woff2 support detection with a shim font, copied from:
+ * npm woff2-feature-test
+ */
+function woff2() {
+    if (!("FontFace" in window)) {
+        return false;
+    }
+
+    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
+    f.load()['catch'](function() {});
+
+    return f.status === 'loading' || f.status === 'loaded';
+}
+
+/**
+ * Return the executed method returns as attributes of this module
+ */
+module.exports = {
+    variableFonts: (variableFonts)(),
+    woff2: (woff2)()
+}
+},{}],13:[function(_dereq_,module,exports){
+/**
+ * Non-app specific JS helpers
+ */
+
 /**
  * Number clamp to min—max with fallback for when any input value is not a number
  * @param {*} value 
@@ -1008,19 +1056,19 @@ function parseParts(choice) {
  * @param {*} max 
  * @param {*} fallback 
  */
-function clamp(value, min, max, fallback) {    
+function clamp(value, min, max, fallback) {
     value = parseFloat(value)
     min = parseFloat(min)
     max = parseFloat(max)
-    
+
     if (isNaN(value) || isNaN(min) || isNaN(max)) {
         if (typeof(fallback) !== "undefined") {
             value = fallback
         } else {
             return value
         }
-    } 
-    
+    }
+
     if (value < min) {
         value = min
     } else if (value > max) {
@@ -1030,21 +1078,33 @@ function clamp(value, min, max, fallback) {
     return value
 }
 
-module.exports = {
-    nodeAddClass: nodeAddClass,
-    nodeAddClasses: nodeAddClasses,
-    nodeRemoveClass: nodeRemoveClass,
-    isNode: isNode,
+/**
+ * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
+ * @method flattenDeep
+ * @param array {Array}
+ * @return {Array} flatten array
+ */
+function flattenDeep(array) {
+    return array.reduce(function(acc, current) {
+        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+    }, []);
+}
 
+function arrayUnique(a) {
+    if (!Array.isArray(a)) {
+        return false
+    }
+    return a.filter(function(value, index, self) {
+        return self.indexOf(value) === index
+    }, a)
+}
+
+module.exports = {
     flattenDeep: flattenDeep,
     arrayUnique: arrayUnique,
-    parseParts: parseParts,
-    clamp: clamp,
-
-    validateFontsFormatting: validateFontsFormatting,
-    extractFontsFromDOM: extractFontsFromDOM,
+    clamp: clamp
 }
-},{}],9:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 var Fontloader = _dereq_("./fontloader")
 
 function Preloader() {
@@ -1106,7 +1166,7 @@ function Preloader() {
 
 
 module.exports = Preloader
-},{"./fontloader":6}],10:[function(_dereq_,module,exports){
+},{"./fontloader":8}],15:[function(_dereq_,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1194,44 +1254,9 @@ function Selection () {
 }
 
 module.exports = Selection
-},{}],11:[function(_dereq_,module,exports){
-
-/**
- * Just a centralized wrapper around the native CSS.supports, which
- * superseds variable font support, so it is a handy way to eliminate 
- * pre-variable font browsers
- */
-function variableFonts() {
-    if (!CSS || "supports" in CSS === false) {
-        return false
-    }
-    
-    return CSS.supports("(font-variation-settings: normal)")
-}
-
-/**
- * Simple woff2 support detection with a shim font, copied from:
- * npm woff2-feature-test
- */
-function woff2() {
-    if (!("FontFace" in window)) {
-        return false;
-    }
-
-    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
-    f.load()['catch'](function() {});
-
-    return f.status === 'loading' || f.status === 'loaded';
-}
-
-/**
- * Return the executed method returns as attributes of this module
- */
-module.exports = {
-    variableFonts: (variableFonts)(),
-    woff2: (woff2)()
-}
-},{}],12:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"dup":12}],17:[function(_dereq_,module,exports){
 /**
  * A wrapper around the Fontsampler interface
  * 
@@ -1265,10 +1290,12 @@ var selection = _dereq_("./selection")
 var UIElements = _dereq_("./uielements")
 var Fontloader = _dereq_("./fontloader")
 
-var helpers = _dereq_("./helpers")
-var supports = _dereq_("./supports")
 var errors = _dereq_("./errors")
 var events = _dereq_("./events")
+
+var dom = _dereq_("./helpers/dom")
+var utils = _dereq_("./helpers/utils")
+var supports = _dereq_("./helpers/supports")
 
 function UI(root, fonts, options) {
 
@@ -1298,7 +1325,7 @@ function UI(root, fonts, options) {
     function init() {
         console.debug("Fontsampler.Interface.init()", root, fonts, options)
 
-        helpers.nodeAddClass(root, options.classes.rootClass)
+        dom.nodeAddClass(root, options.classes.rootClass)
         uifactory = UIElements(root, options)
 
         // The `fontfamily` UI option is just being defined without the options, which
@@ -1330,7 +1357,7 @@ function UI(root, fonts, options) {
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
-            if (helpers.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
+            if (dom.isNode(elementA) && elementA.childNodes.length > 0 && !elementA.isConnected) {
                 root.appendChild(elementA)
             }
         }
@@ -1529,7 +1556,7 @@ function UI(root, fonts, options) {
             options.classes.blockClass + "-type-" + ui[key]
         ]
 
-        helpers.nodeAddClasses(block, classes)
+        dom.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
     }
 
@@ -1542,7 +1569,7 @@ function UI(root, fonts, options) {
     function sanitizeElement(element, key) {
         element = uifactory[ui[key]](key, options.ui[key], element)
 
-        helpers.nodeAddClass(element, options.classes.elementClass)
+        dom.nodeAddClass(element, options.classes.elementClass)
         element.dataset.fsjs = key
         element.dataset.fsjsUi = ui[key]
     }
@@ -1560,25 +1587,25 @@ function UI(root, fonts, options) {
             unit = label.querySelector("." + options.classes.labelUnitClass),
             element = getElement(key)
 
-        if (helpers.isNode(text) && text.textContent === "") {
+        if (dom.isNode(text) && text.textContent === "") {
             text.textContent = options.ui[key].label
         }
 
-        if (helpers.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
+        if (dom.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
             value.textContent = ""
         }
 
-        if (helpers.isNode(value) && value && value.textContent === "") {
+        if (dom.isNode(value) && value && value.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             value.textContent = element.value
         }
 
-        if (helpers.isNode(unit) && unit && unit.textContent === "") {
+        if (dom.isNode(unit) && unit && unit.textContent === "") {
             // If set in already set in DOM the above validate will have set it
             unit.textContent = element.dataset.unit
         }
 
-        helpers.nodeAddClass(label, options.classes.labelClass)
+        dom.nodeAddClass(label, options.classes.labelClass)
         label.dataset.fsjsFor = key
     }
 
@@ -1613,9 +1640,9 @@ function UI(root, fonts, options) {
                 for (var b = 0; b < buttons.length; b++) {
                     buttons[b].addEventListener("click", onClick)
                     if (buttons[b].dataset.choice === options.ui[key].init) {
-                        helpers.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
+                        dom.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
                     } else {
-                        helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
+                        dom.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
                     }
                 }
             }
@@ -1682,7 +1709,7 @@ function UI(root, fonts, options) {
         }
         var element = root.querySelector("[data-fsjs='" + key + "']")
 
-        return helpers.isNode(element) ? element : false
+        return dom.isNode(element) ? element : false
     }
 
     function getBlock(key, node) {
@@ -1691,7 +1718,7 @@ function UI(root, fonts, options) {
         }
         var block = root.querySelector("[data-fsjs-block='" + key + "']")
 
-        return helpers.isNode(block) ? block : false
+        return dom.isNode(block) ? block : false
     }
 
     function getLabel(key, node) {
@@ -1700,7 +1727,7 @@ function UI(root, fonts, options) {
         }
         var block = root.querySelector("[data-fsjs-for='" + key + "']")
 
-        return helpers.isNode(block) ? block : false
+        return dom.isNode(block) ? block : false
     }
 
     /**
@@ -1735,9 +1762,9 @@ function UI(root, fonts, options) {
 
         if (property in ui && ui[property] === "buttongroup") {
             for (var b = 0; b < buttons.length; b++) {
-                helpers.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
+                dom.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
             }
-            helpers.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
+            dom.nodeAddClass(e.currentTarget, options.classes.buttonSelectedClass)
             setValue(property, e.currentTarget.dataset.choice)
         }
     }
@@ -1893,7 +1920,7 @@ function UI(root, fonts, options) {
                 } else {
                     // if a value was passed in check if it is within bounds,
                     // valid and if the slider needs an update (via native event)
-                    value = helpers.clamp(value, options.ui[key].min,
+                    value = utils.clamp(value, options.ui[key].min,
                         options.ui[key].max, options.ui[key].init)
 
                     if (element.value.toString() !== value.toString()) {
@@ -1972,7 +1999,7 @@ function UI(root, fonts, options) {
                 opt.max = 900
             }
 
-            v[axis] = helpers.clamp(val, opt.min, opt.max)
+            v[axis] = utils.clamp(val, opt.min, opt.max)
 
             setLabelValue(axis, val)
             setInputVariation(v)
@@ -2080,18 +2107,18 @@ function UI(root, fonts, options) {
         // Update fontfamily select if it exists
         // When a variable font is updated check if the selected values
         // match a defined instance, and if set it active in the font family
-        if (helpers.isNode(blocks.fontfamily)) {
+        if (dom.isNode(blocks.fontfamily)) {
             var instanceFont = fontIsInstance(variations)
             if (instanceFont === false) {
-                helpers.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
+                dom.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {
-                helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
+                dom.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
                 var element = getElement("fontfamily"),
                     option
 
                 if (element.value !== instanceFont.name) {
                     option = element.querySelector("option[value='" + instanceFont.name + "']")
-                    if (helpers.isNode(option)) {
+                    if (dom.isNode(option)) {
                         option.selected = true
                     }
                     element.value = instanceFont.name
@@ -2102,17 +2129,17 @@ function UI(root, fonts, options) {
     }
 
     function setActiveFont(name) {
-        if (helpers.isNode(blocks.fontfamily)) {
+        if (dom.isNode(blocks.fontfamily)) {
             var element = getElement("fontfamily", blocks.fontfamily),
                 option
 
-            helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
+            dom.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
 
-            if (helpers.isNode(element)) {
+            if (dom.isNode(element)) {
                 // Only update if it is not the selected fontfamily value
                 if (element.value !== name) {
                     option = element.querySelectorAll("option[value='" + name + "']")
-                    if (helpers.isNode(option)) {
+                    if (dom.isNode(option)) {
                         option.selected = true
                     }
                     element.value = name
@@ -2123,7 +2150,7 @@ function UI(root, fonts, options) {
     }
 
     function setActiveAxes(axes) {
-        if (helpers.isNode(blocks.variation)) {
+        if (dom.isNode(blocks.variation)) {
             var sliders = blocks.variation.querySelectorAll("[data-axis]")
 
             if (sliders) {
@@ -2132,9 +2159,9 @@ function UI(root, fonts, options) {
                         axes.indexOf(sliders[s].dataset.axis) === -1 ||
                         supports.woff2 === false
                     ) {
-                        helpers.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
+                        dom.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
-                        helpers.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
+                        dom.nodeRemoveClass(sliders[s].parentNode, options.classes.disabledClass)
                     }
                 }
             }
@@ -2142,7 +2169,7 @@ function UI(root, fonts, options) {
     }
 
     function setActiveLanguage(lang) {
-        if (helpers.isNode(blocks.language) && typeof(lang) === "string") {
+        if (dom.isNode(blocks.language) && typeof(lang) === "string") {
             var languageChoices = options.ui.language.choices.map(function(value) {
                 return value.split("|")[0]
             })
@@ -2150,7 +2177,7 @@ function UI(root, fonts, options) {
             if (languageChoices.length !== -1) {
                 var option = blocks.language.querySelector("option[value='" + lang + "']")
 
-                if (helpers.isNode(option)) {
+                if (dom.isNode(option)) {
                     // Trigger the change on the native input
                     blocks.language.value = lang
                     option.selected = true
@@ -2165,19 +2192,19 @@ function UI(root, fonts, options) {
     function setActiveOpentype(features) {
         var checkboxes = false
 
-        if (helpers.isNode(blocks.opentype)) {
+        if (dom.isNode(blocks.opentype)) {
             checkboxes = blocks.opentype.querySelectorAll("[data-feature]")
         }
         if (checkboxes) {
             for (var c = 0; c < checkboxes.length; c++) {
                 if (Array.isArray(features)) {
                     if (features.indexOf(checkboxes[c].dataset.feature) === -1) {
-                        helpers.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                        dom.nodeAddClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                     } else {
-                        helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                        dom.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                     }
                 } else {
-                    helpers.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
+                    dom.nodeRemoveClass(checkboxes[c].parentNode, "fsjs-checkbox-inactive")
                 }
             }
         }
@@ -2199,9 +2226,9 @@ function UI(root, fonts, options) {
 
     function setStatusClass(classString, status) {
         if (status === true) {
-            helpers.nodeAddClass(root, classString)
+            dom.nodeAddClass(root, classString)
         } else if (status === false) {
-            helpers.nodeRemoveClass(root, classString)
+            dom.nodeRemoveClass(root, classString)
         }
     }
 
@@ -2236,9 +2263,10 @@ function UI(root, fonts, options) {
     }
 }
 module.exports = UI
-},{"./errors":4,"./events":5,"./fontloader":6,"./helpers":8,"./selection":10,"./supports":11,"./uielements":13}],13:[function(_dereq_,module,exports){
+},{"./errors":6,"./events":7,"./fontloader":8,"./helpers/dom":10,"./helpers/supports":12,"./helpers/utils":13,"./selection":15,"./uielements":18}],18:[function(_dereq_,module,exports){
 
-var helpers = _dereq_("./helpers")
+var helpers = _dereq_("./helpers/helpers")
+var dom = _dereq_("./helpers/dom")
 
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
@@ -2255,7 +2283,7 @@ function UIElements(root, options) {
             val, unit
 
         label.dataset.fsjsFor = relatedInput
-        helpers.nodeAddClass(label, options.classes.labelClass)
+        dom.nodeAddClass(label, options.classes.labelClass)
 
         text.className = options.classes.labelTextClass
         text.appendChild(document.createTextNode(labelText))
@@ -2279,7 +2307,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = helpers.isNode(node) ? node : document.createElement("input")
+        var input = dom.isNode(node) ? node : document.createElement("input")
 
         var attributes = {
             type: "range",
@@ -2313,12 +2341,12 @@ function UIElements(root, options) {
     }
 
     function slidergroup(key, opt, node) {
-        var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+        var slidergroup = dom.isNode(node) ? node : document.createElement("div")
 
         for (var s = 0; s < opt.axes.length; s++) {
             var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")
 
-            if (!helpers.isNode(wrapper)) {
+            if (!dom.isNode(wrapper)) {
                 wrapper = document.createElement("div")
                 wrapper.dataset.axisBlock = opt.axes[s].tag
                 slidergroup.appendChild(wrapper)
@@ -2326,14 +2354,14 @@ function UIElements(root, options) {
 
             if (opt.axes[s].label) {
                 var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].tag + "']")
-                if (!helpers.isNode(label)) {
+                if (!dom.isNode(label)) {
                     label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].tag)
                     wrapper.appendChild(label)
                 }
             }
 
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].tag + "']")
-            if (!helpers.isNode(slider)) {
+            if (!dom.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
                 slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
@@ -2346,7 +2374,7 @@ function UIElements(root, options) {
     }
 
     function dropdown(key, opt, node) {
-        var dropdown = helpers.isNode(node) ? node : document.createElement("select")
+        var dropdown = dom.isNode(node) ? node : document.createElement("select")
         if ("choices" in opt === false || opt.choices.length < 1) {
             return false
         }
@@ -2355,7 +2383,7 @@ function UIElements(root, options) {
             var choice = helpers.parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
-            if (!helpers.isNode(option)) {
+            if (!dom.isNode(option)) {
                 option = document.createElement("option")
                 option.appendChild(document.createTextNode(choice.text))
                 dropdown.appendChild(option)
@@ -2416,7 +2444,7 @@ function UIElements(root, options) {
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
-            helpers.nodeAddClass(options.classes.buttonClass)
+            dom.nodeAddClass(options.classes.buttonClass)
             if (opt.init === choice.val) {
                 button.className = options.classes.buttonSelectedClass
             }
@@ -2485,5 +2513,5 @@ function UIElements(root, options) {
 }
 
 module.exports = UIElements
-},{"./helpers":8}]},{},[7])(7)
+},{"./helpers/dom":10,"./helpers/helpers":11}]},{},[9])(9)
 });

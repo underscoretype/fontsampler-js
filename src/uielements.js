@@ -1,5 +1,6 @@
 
-var helpers = require("./helpers")
+var helpers = require("./helpers/helpers")
+var dom = require("./helpers/dom")
 
 /**
  * Wrapper to provide global root, options and fonts to all methods (UI Elements)
@@ -16,7 +17,7 @@ function UIElements(root, options) {
             val, unit
 
         label.dataset.fsjsFor = relatedInput
-        helpers.nodeAddClass(label, options.classes.labelClass)
+        dom.nodeAddClass(label, options.classes.labelClass)
 
         text.className = options.classes.labelTextClass
         text.appendChild(document.createTextNode(labelText))
@@ -40,7 +41,7 @@ function UIElements(root, options) {
     }
 
     function slider(key, opt, node) {
-        var input = helpers.isNode(node) ? node : document.createElement("input")
+        var input = dom.isNode(node) ? node : document.createElement("input")
 
         var attributes = {
             type: "range",
@@ -74,12 +75,12 @@ function UIElements(root, options) {
     }
 
     function slidergroup(key, opt, node) {
-        var slidergroup = helpers.isNode(node) ? node : document.createElement("div")
+        var slidergroup = dom.isNode(node) ? node : document.createElement("div")
 
         for (var s = 0; s < opt.axes.length; s++) {
             var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")
 
-            if (!helpers.isNode(wrapper)) {
+            if (!dom.isNode(wrapper)) {
                 wrapper = document.createElement("div")
                 wrapper.dataset.axisBlock = opt.axes[s].tag
                 slidergroup.appendChild(wrapper)
@@ -87,14 +88,14 @@ function UIElements(root, options) {
 
             if (opt.axes[s].label) {
                 var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].tag + "']")
-                if (!helpers.isNode(label)) {
+                if (!dom.isNode(label)) {
                     label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].tag)
                     wrapper.appendChild(label)
                 }
             }
 
             var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].tag + "']")
-            if (!helpers.isNode(slider)) {
+            if (!dom.isNode(slider)) {
                 slider = this.slider(false, opt.axes[s])
                 slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
@@ -107,7 +108,7 @@ function UIElements(root, options) {
     }
 
     function dropdown(key, opt, node) {
-        var dropdown = helpers.isNode(node) ? node : document.createElement("select")
+        var dropdown = dom.isNode(node) ? node : document.createElement("select")
         if ("choices" in opt === false || opt.choices.length < 1) {
             return false
         }
@@ -116,7 +117,7 @@ function UIElements(root, options) {
             var choice = helpers.parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
                 
-            if (!helpers.isNode(option)) {
+            if (!dom.isNode(option)) {
                 option = document.createElement("option")
                 option.appendChild(document.createTextNode(choice.text))
                 dropdown.appendChild(option)
@@ -177,7 +178,7 @@ function UIElements(root, options) {
 
             button.dataset.choice = choice.val
             button.appendChild(document.createTextNode(choice.text))
-            helpers.nodeAddClass(options.classes.buttonClass)
+            dom.nodeAddClass(options.classes.buttonClass)
             if (opt.init === choice.val) {
                 button.className = options.classes.buttonSelectedClass
             }
