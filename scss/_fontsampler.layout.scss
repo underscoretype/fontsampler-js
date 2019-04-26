@@ -23,10 +23,6 @@
 [data-axis-block] {
     margin-top: 0;
     margin-bottom: 0;
-
-    & + [data-axis-block] {
-        margin-top: $elementMargin;
-    }
 }
 
 .fsjs-label {

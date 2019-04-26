@@ -37,9 +37,6 @@
   margin-top: 0;
   margin-bottom: 0;
 }
-.fsjs-skin [data-axis-block] + [data-axis-block] {
-  margin-top: 5px;
-}
 .fsjs-skin .fsjs-label {
   line-height: 1.5em;
 }
