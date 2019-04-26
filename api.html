@@ -39,11 +39,15 @@
         <strong>Change font:</strong><button class="button-font">Alegreya Regular</button><button class="button-font">Work Sans Regular</button>
     </div>
 
+    <strong>Events:</strong>
+    <div id="eventlog">
+    </div>
+
     <footer>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
         <em>fontsampler-js is brought to you by Underscore</em><br>
         <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
-        <p><a href="../LICENCE.txt">Licensed under Apache License 2.0</a></p>
+        <p><a href="../LICENCE.txt">Licensed under MIT License</a></p>
     </footer>
 
     <script>
@@ -88,7 +92,7 @@
                     language: true,
                     variation: {
                         axes: [{
-                            code: "wght",
+                            tag: "wght",
                             init: 400,
                             min: 0,
                             max: 900,
@@ -106,10 +110,25 @@
                 new Fontsampler(document.getElementById("demo-api-no-skin"), fonts, options),
             ]
 
+            var events = [
+                "fontsampler.events.init",
+                "fontsampler.events.languagechanged",
+                "fontsampler.events.fontchanged",
+                "fontsampler.events.fontloaded",
+                "fontsampler.events.fontrendered",
+                "fontsampler.events.fontspreloaded",
+                "fontsampler.events.valuechanged",
+                "fontsampler.events.opentypechanged",
+            ]
+
             for (var i = 0; i < skinned.length; i++) {
                 console.log("")
                 console.log("Init skinned Fontsampler:", i, skinned[i])
+                var s = skinned[i]
                 FontsamplerSkin(skinned[i])
+                for (var e = 0; e < events.length; e++) {
+                    skinned[i].root.addEventListener(events[e], logEvent)
+                }
                 skinned[i].init()
                 console.log("")
             }
@@ -117,8 +136,23 @@
             for (var k = 0; k < raw.length; k++) {
                 console.log("")
                 console.log("Init unskinned Fontsampler:", k, raw[k])
+                for (var e = 0; e < events.length; e++) {
+                    raw[k].root.addEventListener(events[e], logEvent)
+                }
                 raw[k].init()
                 console.log("")
+            }
+
+            function logEvent(e) {
+                var log = document.getElementById("eventlog")
+
+                var p = document.createElement("p")
+                p.textContent = e.type + ": "
+                if (e.detail) {
+                    p.textContent += JSON.stringify(e.detail)
+                }
+
+                log.insertBefore(p, log.firstChild)
             }
 
             function setValue(e) {

@@ -31,7 +31,8 @@ function Fontsampler(_root, _fonts, _options) {
         preloader = new Preloader(),
         passedInOptions = false,
         // deep clone the _defaults
-        defaults = (JSON.parse(JSON.stringify(_defaults)))
+        defaults = (JSON.parse(JSON.stringify(_defaults))),
+        that = this
 
     // Make sure new instances are create with new Fontsampler
     // this will === window if Fontsampler() is used without
@@ -102,8 +103,9 @@ function Fontsampler(_root, _fonts, _options) {
     }
 
     function parseFontVariations(font) {
-        var va = {}, parts 
-        
+        var va = {},
+            parts
+
         if ("instance" in font === false) {
             return va
         }
@@ -242,7 +244,7 @@ function Fontsampler(_root, _fonts, _options) {
     function setupUIEvents() {
 
         // checkbox
-        this.root.addEventListener("fontsampler.onopentypechanged", function() {
+        this.root.addEventListener(events.opentypeChanged, function() {
             var val = ui.getOpentype()
             ui.setInputOpentype(val)
         })
@@ -251,19 +253,48 @@ function Fontsampler(_root, _fonts, _options) {
         var that = this
         this.root.addEventListener(events.fontChanged, function(e) {
             if (e.detail.font) {
-                that.showFont(e.detail.font)
+                if (typeof(this.currentFont) === "undefined") {
+                    that.showFont(e.detail.font)
+                }
             }
         })
+    }
 
-        // buttongroups
-        this.root.addEventListener("fontsampler.onalignmentchanged", function() {
-            var val = ui.getButtongroupValue("alignment")
-            ui.setInputCss("textAlign", val)
-        })
-        this.root.addEventListener("fontsampler.ondirectionchanged", function() {
-            var val = ui.getButtongroupValue("direction")
-            ui.setInputAttr("dir", val)
-        })
+    /**
+     * Encapuslation for what should happen on a font switch, either
+     * after the font has loaded or after the already current font
+     * has received this update (e.g. dropdown select of a variable
+     * font instance)
+     */
+    function initFont(f) {
+        that.currentFont.f = f
+
+        ui.setStatusClass(options.classes.loadingClass, false)
+
+        // Update the css font family
+        ui.setInputCss("fontFamily", f.family)
+
+        // Update active axes and set variation of this instance
+        ui.setActiveAxes(that.currentFont.axes)
+        if ("instance" in that.currentFont === true) {
+            var va = parseFontVariations(that.currentFont)
+            ui.setInputVariation(va)
+        }
+
+        // Update available OT features for this font
+        ui.setActiveOpentype(that.currentFont.features)
+
+        // Update the currently select language if the font defines one
+        if (typeof(that.currentFont.language) === "string") {
+            ui.setActiveLanguage(that.currentFont.language)
+        }
+
+        ui.setActiveFont(that.currentFont.name)
+
+        preloader.resume()
+
+        _root.dispatchEvent(new CustomEvent(events.fontRendered))
+
     }
 
     /**
@@ -303,9 +334,12 @@ function Fontsampler(_root, _fonts, _options) {
         return this
     }
 
+    /**
+     * The public interface for showing (and possibly loading) a font
+     */
     this.showFont = function(indexOrKey) {
-        console.debug("Fontsampler.showFont", indexOrKey, this)
-        var font, changed = true
+        console.debug("Fontsampler.showFont", indexOrKey, this.currentFont)
+        var font
 
         preloader.pause()
         ui.setStatusClass(options.classes.loadingClass, true)
@@ -322,43 +356,20 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
-        changed = this.currentFont !== font
-        this.currentFont = font
+        if (this.currentFont === font) {
+            // Same font file (Variation might be different)
+            // Skip straight to "fontLoaded" procedure
+            initFont(this.currentFont)
+        } else {
+            // Load a new font file
+            this.currentFont = font
 
-        // The actual font update
-        Fontloader.fromFiles(font.files, function(f) {
-            ui.setStatusClass(options.classes.loadingClass, false)
+            // The actual font load
+            Fontloader.fromFiles(font.files, initFont)
 
-            // Update the css font family
-            ui.setInputCss("fontFamily", f.family)
-
-            // Update active axes and set variation of this instance
-            ui.setActiveAxes(font.axes)
-            if ("instance" in font === true) {
-                var va = parseFontVariations(font)
-                ui.setInputVariation(va)
-            }
-
-            // Update available OT features for this font
-            ui.setActiveOpentype(font.features)
-
-            // Update the currently select language if the font defines one
-            if (typeof(font.language) === "string") {
-                ui.setActiveLanguage(font.language)
-            }
-
-            ui.setActiveFont(font.name)
-            
-            preloader.resume()
-
-            if (changed) {
-                _root.dispatchEvent(new CustomEvent(events.fontLoaded))
-            }
-            _root.dispatchEvent(new CustomEvent(events.fontRendered))
-
-        })
+            _root.dispatchEvent(new CustomEvent(events.fontLoaded))
+        }
     }
-
 
     this.lazyload = function() {
         if (this.initialized && fonts) {
@@ -376,6 +387,10 @@ function Fontsampler(_root, _fonts, _options) {
 
     this.setValue = function(key, value) {
         return ui.setValue(key, value)
+    }
+
+    this.setLabel = function(key, value) {
+        return ui.setLabelValue(key, value)
     }
 
     return this

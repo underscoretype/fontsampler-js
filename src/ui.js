@@ -330,8 +330,8 @@ function UI(root, fonts, options) {
         }
 
         if (type === "slider") {
-            element.addEventListener("change", onSlide)
             setValue(key, opt.init)
+            element.addEventListener("change", onSlide)
         } else if (type === "dropdown") {
             element.addEventListener("change", onChange)
             setValue(key, opt.init)
@@ -382,18 +382,21 @@ function UI(root, fonts, options) {
         if (!Array.isArray(options.ui.variation.axes)) {
             return false
         }
-
+        
         for (var a = 0; a < options.ui.variation.axes.length; a++) {
             var axisoptions = options.ui.variation.axes[a]
+
             if (axisoptions.tag !== axis) {
                 continue
             }
-            if (value < axisoptions.min || value > axisoptions.max) {
+            if (parseFloat(value) < parseFloat(axisoptions.min) || parseFloat(value) > parseFloat(axisoptions.max)) {
                 return false
             } else {
                 return true
             }
         }
+
+        return false
     }
 
     function getElement(key, node) {
@@ -441,7 +444,7 @@ function UI(root, fonts, options) {
 
     function onCheck() {
         // Currently this is only used for opentype checkboxes
-        sendEvent("opentype")
+        sendEvent(events.opentypeChanged)
     }
 
     /**
@@ -462,8 +465,8 @@ function UI(root, fonts, options) {
         }
     }
 
-    function sendEvent(type) {
-        root.dispatchEvent(new CustomEvent("fontsampler.on" + type + "changed"))
+    function sendEvent(type, opt) {
+        root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }
 
     function sendNativeEvent(type, node) {
@@ -659,6 +662,9 @@ function UI(root, fonts, options) {
             case "tester":
                 break;
         }
+        var obj = {}
+        obj[key] = value
+        sendEvent(events.valueChanged, obj)
     }
 
     /**
@@ -666,16 +672,15 @@ function UI(root, fonts, options) {
      */
     function setVariation(axis, val) {
         var v = getVariation(),
-            label,
             opt
-
+        
         if (isValidAxisAndValue(axis, val)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
             opt = options.ui.variation.axes.filter(function(optVal) {
                 return optVal.tag === axis
             })
-            if (!opt) {
+            if (!opt || typeof(opt) === "undefined") {
                 opt = {
                     min: 100,
                     max: 900
@@ -715,9 +720,17 @@ function UI(root, fonts, options) {
     }
 
     function fontIsInstance(variation) {
-        for (var v in variation) {
-            variation[v] = variation[v].toString()
+        if (typeof(variation) !== "object") {
+            return false
         }
+
+        for (var v in variation) {
+            // for now just ignore values that are not a number, don't throw an error
+            if (!isNaN(parseInt(variation[v]))) {
+                variation[v] = variation[v].toString()
+            }
+        }
+
         for (var i = 0; i < fonts.length; i++) {
             var f = fonts[i]
 
@@ -725,21 +738,25 @@ function UI(root, fonts, options) {
                 continue
             }
 
-            var parts = f.instance.split(","),
-                vars = {}
-            for (var k = 0; k < parts.length; k++) {
-                var p = parts[k].trim().split(" ")
-                vars[p[0]] = p[1].toString()
-            }
+            try {
+                var parts = f.instance.split(","),
+                    vars = {}
+                for (var k = 0; k < parts.length; k++) {
+                    var p = parts[k].trim().split(" ")
+                    vars[p[0]] = p[1].toString()
+                }
 
-            // check if all variation keys and values match
-            if (Object.keys(variation).length !== Object.keys(vars).length) {
+                // check if all variation keys and values match
+                if (Object.keys(variation).length !== Object.keys(vars).length) {
+                    continue
+                }
+
+                // elegant compare equal for objects, if equal return font
+                if (JSON.stringify(vars) === JSON.stringify(variation)) {
+                    return f
+                }
+            } catch (e) {
                 continue
-            }
-
-            // elegant compare equal for objects, if equal return font
-            if (JSON.stringify(vars) === JSON.stringify(variation)) {
-                return f
             }
         }
 
@@ -792,8 +809,14 @@ function UI(root, fonts, options) {
                 helpers.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {
                 helpers.nodeRemoveClass(blocks.fontfamily, options.classes.disabledClass)
-                var element = getElement("fontfamily")
+                var element = getElement("fontfamily"),
+                    option
+                
                 if (element.value !== instanceFont.name) {
+                    option = element.querySelector("option[value='" + instanceFont.name + "']")
+                    if (helpers.isNode(option)) {
+                        option.selected = true
+                    }
                     element.value = instanceFont.name
                     sendNativeEvent("change", element)
                 }

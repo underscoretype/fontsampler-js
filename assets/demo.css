@@ -140,3 +140,8 @@ footer {
     box-sizing: border-box;
     width: 45%;
 }
+
+#eventlog {
+    max-height: 25vh;
+    overflow-y: scroll;
+}

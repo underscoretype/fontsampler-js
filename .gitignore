@@ -3,7 +3,6 @@ node_modules
 *.woff*
 node_modules
 src/*
-dist
 .vscode
 scss/*
 .js*

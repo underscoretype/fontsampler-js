@@ -1,10 +1,34 @@
-# Fontsampler.js (v0.0.0)
+# Fontsampler.js
 
 A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.
 
+Fontsampler library ~13kb minified & gzipped
+Fontsampler skin js & css ~15kb minified & gzipped
+
+Support for:
+* woff / woff2 / woff2 variable fonts
+* available and configurable UI for:
+    * tester input
+    * font picker
+    * font size
+    * line height
+    * letter spacing
+    * alignment
+    * direction (ltr/rtl)
+    * language (html lang attr, triggering OT locl features)
+    * variable axes (configurable, not detected)
+    * opentype (configurable, not detected)
+* API for manipulating the instances
+* optional skin to enhance bare browser input UI
+* configurable UI, options, font settings
+* initialization on empty DOM node
+* initialization on existing DOM structure (to use custom layout and UI)
+
 ## Installation
 
-_TODO_ npm package submission
+Via npm:
+
+    $ npm install fontsampler-js
 
 ## Use
 
@@ -56,7 +80,7 @@ For testing:
 
 
 ### TODO / Roadmap
-* Implement public event interface (change, click, init, loading, loaded) _partially done_
+* Implement public event interface (change, click, init, loading, loaded) _mostly done_
 * Implement API on main object (set/get, set/get option, destroy, reset) _mostly done_
 * Implement per-font options (e.g. one font ltr other rtl etc) _partially done_
 * Add Unit and End-to-End tests _started_
@@ -64,7 +88,7 @@ For testing:
 
 ## License
 
-Licensed under [Apache License 2.0](LICENSE.txt)
+Licensed under [MIT License](LICENSE.txt)
 
 
 ### Licenses for fonts included in the demo

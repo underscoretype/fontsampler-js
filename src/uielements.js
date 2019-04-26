@@ -52,8 +52,9 @@ function UIElements(root, options) {
         input.setAttribute("autocomplete", "off")
         setMissingAttributes(input, attributes)
 
-        if (typeof(input.val) === "undefined") {
+        if (typeof(input.value) === "undefined") {
             input.value = opt.init
+            input.setAttribute("value", opt.init)
         }
 
         if ("unit" in input.dataset === false) {
@@ -63,6 +64,8 @@ function UIElements(root, options) {
             input.dataset.init = opt.init
         }
 
+        // only main element get the data-fsjs; key missing means this is 
+        // a nested slider
         if (key) {
             input.dataset.fsjs = key
         }
@@ -96,6 +99,7 @@ function UIElements(root, options) {
                 slider.dataset.fsjsUi = "slider"
                 wrapper.appendChild(slider)
             }
+            
             slider.dataset.axis = opt.axes[s].tag
         }
 
@@ -119,8 +123,10 @@ function UIElements(root, options) {
             }
 
             option.value = choice.val
+            
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
+                dropdown.value = option.value
             }
 
             if ("instance" in opt) {
