@@ -256,13 +256,9 @@ module.exports = {
 }
 
 },{}],6:[function(_dereq_,module,exports){
-arguments[4][4][0].apply(exports,arguments)
-},{"dup":4}],7:[function(_dereq_,module,exports){
-arguments[4][5][0].apply(exports,arguments)
-},{"dup":5}],8:[function(_dereq_,module,exports){
 var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
-var errors = _dereq_("./errors")
-var supports = _dereq_("./supports")
+var errors = _dereq_("./constants/errors")
+var supports = _dereq_("./helpers/supports")
 
 function getExtension(path) {
     return path.substring(path.lastIndexOf(".") + 1)
@@ -338,7 +334,7 @@ module.exports = {
     "fromFiles": fromFiles,
     "bestWoff": bestWoff
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./errors":6,"./supports":16}],9:[function(_dereq_,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./constants/errors":4,"./helpers/supports":11}],7:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -752,7 +748,7 @@ function Fontsampler(_root, _fonts, _options) {
 }
 
 module.exports = Fontsampler
-},{"../node_modules/extend":1,"./constants/defaults":3,"./constants/errors":4,"./constants/events":5,"./fontloader":8,"./helpers/dom":10,"./helpers/helpers":11,"./helpers/supports":12,"./helpers/utils":13,"./preloader":14,"./ui":17}],10:[function(_dereq_,module,exports){
+},{"../node_modules/extend":1,"./constants/defaults":3,"./constants/errors":4,"./constants/events":5,"./fontloader":6,"./helpers/dom":8,"./helpers/helpers":9,"./helpers/supports":11,"./helpers/utils":12,"./preloader":13,"./ui":14}],8:[function(_dereq_,module,exports){
 /**
  * DOM related helpers
  */
@@ -867,7 +863,7 @@ module.exports = {
     nodeRemoveClass: nodeRemoveClass,
     isNode: isNode
 }
-},{}],11:[function(_dereq_,module,exports){
+},{}],9:[function(_dereq_,module,exports){
 /**
  * App specific helpers
  */
@@ -1007,166 +1003,7 @@ module.exports = {
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
 }
-},{}],12:[function(_dereq_,module,exports){
-
-/**
- * Just a centralized wrapper around the native CSS.supports, which
- * superseds variable font support, so it is a handy way to eliminate 
- * pre-variable font browsers
- */
-function variableFonts() {
-    if (!CSS || "supports" in CSS === false) {
-        return false
-    }
-    
-    return CSS.supports("(font-variation-settings: normal)")
-}
-
-/**
- * Simple woff2 support detection with a shim font, copied from:
- * npm woff2-feature-test
- */
-function woff2() {
-    if (!("FontFace" in window)) {
-        return false;
-    }
-
-    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
-    f.load()['catch'](function() {});
-
-    return f.status === 'loading' || f.status === 'loaded';
-}
-
-/**
- * Return the executed method returns as attributes of this module
- */
-module.exports = {
-    variableFonts: (variableFonts)(),
-    woff2: (woff2)()
-}
-},{}],13:[function(_dereq_,module,exports){
-/**
- * Non-app specific JS helpers
- */
-
-/**
- * Number clamp to min—max with fallback for when any input value is not a number
- * @param {*} value 
- * @param {*} min 
- * @param {*} max 
- * @param {*} fallback 
- */
-function clamp(value, min, max, fallback) {
-    value = parseFloat(value)
-    min = parseFloat(min)
-    max = parseFloat(max)
-
-    if (isNaN(value) || isNaN(min) || isNaN(max)) {
-        if (typeof(fallback) !== "undefined") {
-            value = fallback
-        } else {
-            return value
-        }
-    }
-
-    if (value < min) {
-        value = min
-    } else if (value > max) {
-        value = max
-    }
-
-    return value
-}
-
-/**
- * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
- * @method flattenDeep
- * @param array {Array}
- * @return {Array} flatten array
- */
-function flattenDeep(array) {
-    return array.reduce(function(acc, current) {
-        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
-    }, []);
-}
-
-function arrayUnique(a) {
-    if (!Array.isArray(a)) {
-        return false
-    }
-    return a.filter(function(value, index, self) {
-        return self.indexOf(value) === index
-    }, a)
-}
-
-module.exports = {
-    flattenDeep: flattenDeep,
-    arrayUnique: arrayUnique,
-    clamp: clamp
-}
-},{}],14:[function(_dereq_,module,exports){
-var Fontloader = _dereq_("./fontloader")
-
-function Preloader() {
-
-    var queue = [],
-        autoload = true,
-        finishedCallback = null
-
-    function load(fonts, callback) {
-
-        // clone the fonts array
-        queue = fonts.slice(0)
-        autoload = true
-
-        if (typeof(callback) === "function") {
-            finishedCallback = callback
-        }
-
-        loadNext()
-    }
-
-    function pause() {
-        autoload = false
-    }
-
-    function resume() {
-        autoload = true
-        if (queue.length > 0) {
-            loadNext()
-        } else {
-            if (finishedCallback) {
-                finishedCallback()
-            }
-        }
-    }
-
-    function loadNext() {
-        if (queue.length > 0 && autoload) {
-            Fontloader.fromFiles(queue[0].files, function () {
-                queue.shift()
-
-                if (queue.length === 0 && finishedCallback) {
-                    finishedCallback()
-                }
-                
-                if (queue.length > 0 && autoload) {
-                    loadNext()
-                }
-            })
-        }
-    }
-
-    return {
-        load: load,
-        pause: pause,
-        resume: resume
-    }
-}
-
-
-module.exports = Preloader
-},{"./fontloader":8}],15:[function(_dereq_,module,exports){
+},{}],10:[function(_dereq_,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1254,9 +1091,166 @@ function Selection () {
 }
 
 module.exports = Selection
-},{}],16:[function(_dereq_,module,exports){
-arguments[4][12][0].apply(exports,arguments)
-},{"dup":12}],17:[function(_dereq_,module,exports){
+},{}],11:[function(_dereq_,module,exports){
+
+/**
+ * Just a centralized wrapper around the native CSS.supports, which
+ * superseds variable font support, so it is a handy way to eliminate 
+ * pre-variable font browsers
+ */
+function variableFonts() {
+    if (!CSS || "supports" in CSS === false) {
+        return false
+    }
+    
+    return CSS.supports("(font-variation-settings: normal)")
+}
+
+/**
+ * Simple woff2 support detection with a shim font, copied from:
+ * npm woff2-feature-test
+ */
+function woff2() {
+    if (!("FontFace" in window)) {
+        return false;
+    }
+
+    var f = new FontFace('t', 'url( "data:application/font-woff2;base64,d09GMgABAAAAAADwAAoAAAAAAiQAAACoAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAABmAALAogOAE2AiQDBgsGAAQgBSAHIBuDAciO1EZ3I/mL5/+5/rfPnTt9/9Qa8H4cUUZxaRbh36LiKJoVh61XGzw6ufkpoeZBW4KphwFYIJGHB4LAY4hby++gW+6N1EN94I49v86yCpUdYgqeZrOWN34CMQg2tAmthdli0eePIwAKNIIRS4AGZFzdX9lbBUAQlm//f262/61o8PlYO/D1/X4FrWFFgdCQD9DpGJSxmFyjOAGUU4P0qigcNb82GAAA" ) format( "woff2" )', {});
+    f.load()['catch'](function() {});
+
+    return f.status === 'loading' || f.status === 'loaded';
+}
+
+/**
+ * Return the executed method returns as attributes of this module
+ */
+module.exports = {
+    variableFonts: (variableFonts)(),
+    woff2: (woff2)()
+}
+},{}],12:[function(_dereq_,module,exports){
+/**
+ * Non-app specific JS helpers
+ */
+
+/**
+ * Number clamp to min—max with fallback for when any input value is not a number
+ * @param {*} value 
+ * @param {*} min 
+ * @param {*} max 
+ * @param {*} fallback 
+ */
+function clamp(value, min, max, fallback) {
+    value = parseFloat(value)
+    min = parseFloat(min)
+    max = parseFloat(max)
+
+    if (isNaN(value) || isNaN(min) || isNaN(max)) {
+        if (typeof(fallback) !== "undefined") {
+            value = fallback
+        } else {
+            return value
+        }
+    }
+
+    if (value < min) {
+        value = min
+    } else if (value > max) {
+        value = max
+    }
+
+    return value
+}
+
+/**
+ * flatten an array recursively from https://stackoverflow.com/a/42916843/999162
+ * @method flattenDeep
+ * @param array {Array}
+ * @return {Array} flatten array
+ */
+function flattenDeep(array) {
+    return array.reduce(function(acc, current) {
+        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+    }, []);
+}
+
+function arrayUnique(a) {
+    if (!Array.isArray(a)) {
+        return false
+    }
+    return a.filter(function(value, index, self) {
+        return self.indexOf(value) === index
+    }, a)
+}
+
+module.exports = {
+    flattenDeep: flattenDeep,
+    arrayUnique: arrayUnique,
+    clamp: clamp
+}
+},{}],13:[function(_dereq_,module,exports){
+var Fontloader = _dereq_("./fontloader")
+
+function Preloader() {
+
+    var queue = [],
+        autoload = true,
+        finishedCallback = null
+
+    function load(fonts, callback) {
+
+        // clone the fonts array
+        queue = fonts.slice(0)
+        autoload = true
+
+        if (typeof(callback) === "function") {
+            finishedCallback = callback
+        }
+
+        loadNext()
+    }
+
+    function pause() {
+        autoload = false
+    }
+
+    function resume() {
+        autoload = true
+        if (queue.length > 0) {
+            loadNext()
+        } else {
+            if (finishedCallback) {
+                finishedCallback()
+            }
+        }
+    }
+
+    function loadNext() {
+        if (queue.length > 0 && autoload) {
+            Fontloader.fromFiles(queue[0].files, function () {
+                queue.shift()
+
+                if (queue.length === 0 && finishedCallback) {
+                    finishedCallback()
+                }
+                
+                if (queue.length > 0 && autoload) {
+                    loadNext()
+                }
+            })
+        }
+    }
+
+    return {
+        load: load,
+        pause: pause,
+        resume: resume
+    }
+}
+
+
+module.exports = Preloader
+},{"./fontloader":6}],14:[function(_dereq_,module,exports){
 /**
  * A wrapper around the Fontsampler interface
  * 
@@ -1285,13 +1279,13 @@ arguments[4][12][0].apply(exports,arguments)
  * and `element` for the actual UI element that has a value, e.g. the HTML input
  * or select etc.
  */
-var selection = _dereq_("./selection")
+var selection = _dereq_("./helpers/selection")
 
 var UIElements = _dereq_("./uielements")
 var Fontloader = _dereq_("./fontloader")
 
-var errors = _dereq_("./errors")
-var events = _dereq_("./events")
+var errors = _dereq_("./constants/errors")
+var events = _dereq_("./constants/events")
 
 var dom = _dereq_("./helpers/dom")
 var utils = _dereq_("./helpers/utils")
@@ -2263,7 +2257,7 @@ function UI(root, fonts, options) {
     }
 }
 module.exports = UI
-},{"./errors":6,"./events":7,"./fontloader":8,"./helpers/dom":10,"./helpers/supports":12,"./helpers/utils":13,"./selection":15,"./uielements":18}],18:[function(_dereq_,module,exports){
+},{"./constants/errors":4,"./constants/events":5,"./fontloader":6,"./helpers/dom":8,"./helpers/selection":10,"./helpers/supports":11,"./helpers/utils":12,"./uielements":15}],15:[function(_dereq_,module,exports){
 
 var helpers = _dereq_("./helpers/helpers")
 var dom = _dereq_("./helpers/dom")
@@ -2513,5 +2507,5 @@ function UIElements(root, options) {
 }
 
 module.exports = UIElements
-},{"./helpers/dom":10,"./helpers/helpers":11}]},{},[9])(9)
+},{"./helpers/dom":8,"./helpers/helpers":9}]},{},[7])(7)
 });

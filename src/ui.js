@@ -26,13 +26,13 @@
  * and `element` for the actual UI element that has a value, e.g. the HTML input
  * or select etc.
  */
-var selection = require("./selection")
+var selection = require("./helpers/selection")
 
 var UIElements = require("./uielements")
 var Fontloader = require("./fontloader")
 
-var errors = require("./errors")
-var events = require("./events")
+var errors = require("./constants/errors")
+var events = require("./constants/events")
 
 var dom = require("./helpers/dom")
 var utils = require("./helpers/utils")

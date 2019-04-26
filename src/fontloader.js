@@ -1,6 +1,6 @@
 var FontFaceObserver = require("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
-var errors = require("./errors")
-var supports = require("./supports")
+var errors = require("./constants/errors")
+var supports = require("./helpers/supports")
 
 function getExtension(path) {
     return path.substring(path.lastIndexOf(".") + 1)

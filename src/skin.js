@@ -1,7 +1,6 @@
 var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
 var Dropkick = require("../node_modules/dropkickjs/dist/dropkick").default
-var events = require("./events")
-var helpers = require("./helpers/helpers")
+var events = require("./constants/events")
 var dom = require("./helpers/dom")
 
 function Skin(FS) {
