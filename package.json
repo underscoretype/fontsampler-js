@@ -2,6 +2,7 @@
     "name": "fontsampler-js",
     "version": "0.0.10",
     "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
+    "keywords": ["webfont", "font", "variable font", "tester", "browser", "interface"],
     "author": {
         "name": "Johannes Neumeier",
         "email": "hello@underscoretype.com"
