@@ -1099,7 +1099,7 @@ module.exports = Selection
  * pre-variable font browsers
  */
 function variableFonts() {
-    if (!CSS || "supports" in CSS === false) {
+    if ("CSS" in window === false || "supports" in CSS === false) {
         return false
     }
     
@@ -1111,7 +1111,7 @@ function variableFonts() {
  * npm woff2-feature-test
  */
 function woff2() {
-    if (!("FontFace" in window)) {
+    if ("FontFace" in window === false) {
         return false;
     }
 
