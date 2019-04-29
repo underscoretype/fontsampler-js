@@ -898,7 +898,8 @@ function UI(root, fonts, options) {
                 for (var s = 0; s < sliders.length; s++) {
                     if (!Array.isArray(axes) || axes.length < 1 ||
                         axes.indexOf(sliders[s].dataset.axis) === -1 ||
-                        supports.woff2 === false
+                        supports.woff2 === false ||
+                        supports.variableFonts === false
                     ) {
                         dom.nodeAddClass(sliders[s].parentNode, options.classes.disabledClass)
                     } else {
