@@ -76,7 +76,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         for (var f = 0; f < fonts.length; f++) {
             var font = fonts[f],
-                bestWoff = Fontloader.bestWoff(font.files)
+                bestWoff = helpers.bestWoff(font.files)
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
 
@@ -329,9 +329,9 @@ function Fontsampler(_root, _fonts, _options) {
         this.showFont.call(this, initialFont)
 
         if (options.lazyload) {
-            ui.setStatusClass(options.preloadingClass, true)
+            ui.setStatusClass(options.classes.preloadingClass, true)
             preloader.load(fonts, function() {
-                ui.setStatusClass(options.preloadingClass, false)
+                ui.setStatusClass(options.classes.preloadingClass, false)
                 _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
             })
         }
@@ -399,12 +399,6 @@ function Fontsampler(_root, _fonts, _options) {
                 ui.setStatusClass(options.classes.timeoutClass, true)
                 that.currentFont = false
             }, options.timeout)
-        }
-    }
-
-    this.lazyload = function() {
-        if (this.initialized && fonts) {
-            preloader.load(fonts)
         }
     }
 

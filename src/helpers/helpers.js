@@ -1,3 +1,6 @@
+
+var supports = require("./supports")
+
 /**
  * App specific helpers
  */
@@ -130,10 +133,42 @@ function parseParts(choice) {
     }
 }
 
-module.exports = {
-    
-    parseParts: parseParts,
+function getExtension(path) {
+    return path.substring(path.lastIndexOf(".") + 1)
+}
 
+
+function bestWoff(files) {
+    if (typeof(files) !== "object" || !Array.isArray(files)) {
+        return false
+    }
+
+    var woffs = files.filter(function(value) {
+            return getExtension(value) === "woff"
+        }),
+        woff2s = files.filter(function(value) {
+            return getExtension(value) === "woff2"
+        })
+
+    if (woffs.length > 1 || woff2s.length > 1) {
+        throw new Error(errors.tooManyFiles + files)
+    }
+
+    if (woff2s.length > 0 && supports.woff2) {
+        return woff2s.shift()
+    }
+
+    if (woffs.length > 0) {
+        return woffs.shift()
+    }
+
+    return false
+}
+
+module.exports = {
+    getExtension: getExtension,   
+    parseParts: parseParts,
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
+    bestWoff: bestWoff,
 }

@@ -46,7 +46,8 @@ function Preloader() {
                 if (queue.length > 0 && autoload) {
                     loadNext()
                 }
-            })
+            }, function () {
+            }, 5000)
         }
     }
 

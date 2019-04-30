@@ -261,98 +261,157 @@ module.exports = {
 var FontFaceObserver = _dereq_("../node_modules/fontfaceobserver/fontfaceobserver.standalone")
 var errors = _dereq_("./constants/errors")
 var supports = _dereq_("./helpers/supports")
+var helpers = _dereq_("./helpers/helpers")
 
-function getExtension(path) {
-    return path.substring(path.lastIndexOf(".") + 1)
-}
 
-function bestWoff(files) {
-    if (typeof(files) !== "object" || !Array.isArray(files)) {
-        return false
+/**
+ * To avoid initiating simultanouse file load requests for the same font file
+ * orchestrate font loading through this global load queuer
+ */
+function GlobalLoader() {
+
+    var queue = [], // array of loading fonts
+        done = {}, // object with fontface objects
+        callbacks = {} // object with family name index and lists of success/error
+        // callbacks to do when loaded
+
+    function onFontDone(family, file, success, error, timeout) {
+
+        // If Is font loaded? -> to cb responses, return true
+        // El Is font loading? -> add responses to queue, return true
+        // El Add font to loading, add responses to queue, return false (init loading)
+
+        if (family in done === true) {
+            // font is loaded
+            if (done[family].isLoaded === true) {
+                success(done[family])
+            } else {
+                error(done[family])
+            }
+
+        } else if (queue.indexOf(family) !== -1) {
+            // font in load queue but not loaded
+            callbacks[family].success.push(success)
+            callbacks[family].error.push(error)
+
+        } else {
+            queue.push(family)
+            callbacks[family] = {
+                success: [success],
+                error: [error]
+            }
+
+            load(family, file, timeout)
+        }
     }
 
-    var woffs = files.filter(function(value) {
-            return getExtension(value) === "woff"
-        }),
-        woff2s = files.filter(function(value) {
-            return getExtension(value) === "woff2"
-        })
+    /**
+     * When a font is loaded remove it from the queue, call all listeners’
+     * callbacks and save it’s FontFace in `done` for later-coming requests
+     * 
+     * @param {obj} fontface 
+     */
+    function onSuccess(fontface) {
 
-    if (woffs.length > 1 || woff2s.length > 1) {
-        throw new Error(errors.tooManyFiles + files)
+        queue.splice(queue.indexOf(fontface.family), 1)
+
+        // Order matters here; the callbacks might rely on this family
+        // as being marked loaded (e.g. lazyloading)
+        fontface.isLoaded = true
+        done[fontface.family] = fontface
+
+        if (fontface.family in callbacks && "success" in callbacks[fontface.family]) {
+            for (var i = 0; i < callbacks[fontface.family].success.length; i++) {
+                callbacks[fontface.family].success[i](fontface)
+            }
+            callbacks[fontface.family] = {}
+        }
     }
 
-    if (woff2s.length > 0 && supports.woff2) {
-        return woff2s.shift()
+    function onError(family, file, e) {
+        console.error(family, file, e)
+        console.error(new Error(errors.fileNotfound))
+        if (typeof(error) === "function") {
+            error(e)
+        }
     }
 
-    if (woffs.length > 0) {
-        return woffs.shift()
+    /**
+     * The actual load logic with FontFace API or @font-face fallback
+     * 
+     * @param {str} family 
+     * @param {str} file 
+     * @param {int} timeout 
+     */
+    function load(family, file, timeout) {
+        if (typeof(timeout) === "undefined") {
+            timeout = 3000
+        }
+
+        if ("FontFace" in window) {
+            var ff = new FontFace(family, "url(" + file + ")", {})
+            ff.load().then(function() {
+                document.fonts.add(ff)
+                onSuccess(ff)
+            }, function(e) {
+                onError(family, file, e)
+            })
+        } else {
+            // Fallback to loading via @font-face and manually inserted style tag
+            // Utlize the FontFaceObserver to detect when the font is available
+            var font = new FontFaceObserver(family)
+            font.load(null, timeout).then(function(ff) {
+                onSuccess(ff)
+            }, function(e) {
+                onError(family, file, e)
+            })
+
+            var newStyle = document.createElement("style");
+            newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
+            document.head.appendChild(newStyle);
+        }
     }
 
-    return false
+    return {
+        onFontDone: onFontDone
+    }
 }
 
 function loadFont(file, callback, error, timeout) {
     if (!file) {
         return false
     }
-    if (typeof(timeout) === "undefined") {
-        timeout = 3000
-    }
+
     var family = file.substring(file.lastIndexOf("/") + 1)
     family = family.substring(0, family.lastIndexOf("."))
     family = family.replace(/\W/gm, "")
 
-    if ("FontFace" in window) {
-        var ff = new FontFace(family, "url(" + file + ")", {})
-        ff.load().then(function() {
-            document.fonts.add(ff)
-            if (typeof(callback) === "function") {
-                callback(ff)
-            }
-        }, function(e) {
-            console.error(family, file, e)
-            console.error(new Error(errors.fileNotfound))
-            if (typeof(error) === "function") {
-                error(e)
-            }
-        })
-    } else {
-        // Fallback to loading via @font-face and manually inserted style tag
-        // Utlize the FontFaceObserver to detect when the font is available
-        var font = new FontFaceObserver(family)
-        font.load(null, timeout).then(function(f) {
-            font.load().then(function(f) {
-                if (typeof(callback) === "function") {
-                    callback(f)
-                }
-            }, function (e) {
-                console.error(family, file, e)
-                console.error(new Error(errors.fileNotfound))
-                if (typeof(error) === "function") {
-                    error(e)
-                } 
-            })
-        })
-        
-        var newStyle = document.createElement("style");
-        newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
-        document.head.appendChild(newStyle);
+    // Create or get global Loader queuer, append request
+    if ("FontsamplerFontloader" in window === false) {
+        window.FontsamplerFontloader = GlobalLoader()
     }
+    window.FontsamplerFontloader.onFontDone(family, file, callback, error, timeout)
 }
 
+/**
+ * A convenience wrapper around loadFont picking the best font format
+ * in @param files
+ * 
+ * @param {Array} files 
+ * @param {function} callback 
+ * @param {object} error 
+ * @param {int} timeout 
+ */
 function fromFiles(files, callback, error, timeout) {
-    font = bestWoff(files)
+    font = helpers.bestWoff(files)
     loadFont(font, callback, error, timeout)
 }
 
 module.exports = {
     "loadFont": loadFont,
     "fromFiles": fromFiles,
-    "bestWoff": bestWoff
 }
-},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./constants/errors":4,"./helpers/supports":11}],7:[function(_dereq_,module,exports){
+},{"../node_modules/fontfaceobserver/fontfaceobserver.standalone":2,"./constants/errors":4,"./helpers/helpers":9,"./helpers/supports":11}],7:[function(_dereq_,module,exports){
 /**
  * Fontsampler.js
  * 
@@ -431,7 +490,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         for (var f = 0; f < fonts.length; f++) {
             var font = fonts[f],
-                bestWoff = Fontloader.bestWoff(font.files)
+                bestWoff = helpers.bestWoff(font.files)
 
             if ("instances" in font === true && Array.isArray(font.instances)) {
 
@@ -684,9 +743,9 @@ function Fontsampler(_root, _fonts, _options) {
         this.showFont.call(this, initialFont)
 
         if (options.lazyload) {
-            ui.setStatusClass(options.preloadingClass, true)
+            ui.setStatusClass(options.classes.preloadingClass, true)
             preloader.load(fonts, function() {
-                ui.setStatusClass(options.preloadingClass, false)
+                ui.setStatusClass(options.classes.preloadingClass, false)
                 _root.dispatchEvent(new CustomEvent(events.fontsPreloaded))
             })
         }
@@ -754,12 +813,6 @@ function Fontsampler(_root, _fonts, _options) {
                 ui.setStatusClass(options.classes.timeoutClass, true)
                 that.currentFont = false
             }, options.timeout)
-        }
-    }
-
-    this.lazyload = function() {
-        if (this.initialized && fonts) {
-            preloader.load(fonts)
         }
     }
 
@@ -899,6 +952,9 @@ module.exports = {
     isNode: isNode
 }
 },{}],9:[function(_dereq_,module,exports){
+
+var supports = _dereq_("./supports")
+
 /**
  * App specific helpers
  */
@@ -1031,14 +1087,46 @@ function parseParts(choice) {
     }
 }
 
-module.exports = {
-    
-    parseParts: parseParts,
+function getExtension(path) {
+    return path.substring(path.lastIndexOf(".") + 1)
+}
 
+
+function bestWoff(files) {
+    if (typeof(files) !== "object" || !Array.isArray(files)) {
+        return false
+    }
+
+    var woffs = files.filter(function(value) {
+            return getExtension(value) === "woff"
+        }),
+        woff2s = files.filter(function(value) {
+            return getExtension(value) === "woff2"
+        })
+
+    if (woffs.length > 1 || woff2s.length > 1) {
+        throw new Error(errors.tooManyFiles + files)
+    }
+
+    if (woff2s.length > 0 && supports.woff2) {
+        return woff2s.shift()
+    }
+
+    if (woffs.length > 0) {
+        return woffs.shift()
+    }
+
+    return false
+}
+
+module.exports = {
+    getExtension: getExtension,   
+    parseParts: parseParts,
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
+    bestWoff: bestWoff,
 }
-},{}],10:[function(_dereq_,module,exports){
+},{"./supports":11}],10:[function(_dereq_,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1272,7 +1360,8 @@ function Preloader() {
                 if (queue.length > 0 && autoload) {
                     loadNext()
                 }
-            })
+            }, function () {
+            }, 5000)
         }
     }
 
