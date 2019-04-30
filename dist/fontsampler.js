@@ -390,6 +390,7 @@ function Fontsampler(_root, _fonts, _options) {
     this.root = _root
     this.initialized = false
     this.currentFont = false
+    this.loadedFonts = []
 
     // Parse fonts and options from the passed in objects or possibly
     // from the root node data attributes
@@ -707,7 +708,7 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
-        if (this.currentFont === font) {
+        if (this.currentFont.files && JSON.stringify(this.currentFont.files) === JSON.stringify(font.files)) {
             // Same font file (Variation might be different)
             // Skip straight to "fontLoaded" procedure
             initFont(this.currentFont.f)
@@ -716,9 +717,16 @@ function Fontsampler(_root, _fonts, _options) {
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, initFont)
+            Fontloader.fromFiles(font.files, function (f) {
+                var fjson = JSON.stringify(f)
 
-            _root.dispatchEvent(new CustomEvent(events.fontLoaded))
+                if (that.loadedFonts.indexOf(fjson) === -1) {
+                    that.loadedFonts.push(fjson)
+                    _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: f }))
+                }                
+                
+                initFont(f)
+            })
         }
     }
 
