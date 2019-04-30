@@ -33,22 +33,28 @@ function bestWoff(files) {
     return false
 }
 
-function loadFont(file, callback) {
+function loadFont(file, callback, error, timeout) {
     if (!file) {
         return false
+    }
+    if (typeof(timeout) === "undefined") {
+        timeout = 3000
     }
     var family = file.substring(file.lastIndexOf("/") + 1)
     family = family.substring(0, family.lastIndexOf("."))
     family = family.replace(/\W/gm, "")
 
     var font = new FontFaceObserver(family)
-    font.load().then(function(f) {
+    font.load(null, timeout).then(function(f) {
         if (typeof(callback) === "function") {
             callback(f)
         }
     }).catch(function (e) {
         console.error(font, file, e)
         console.error(new Error(errors.fileNotfound))
+        if (typeof(error) === "function") {
+            error(e)
+        }
     })
     
     if ("FontFace" in window) {
@@ -58,6 +64,9 @@ function loadFont(file, callback) {
         }).catch(function(e) {
             console.error(font, file, e)
             console.error(new Error(errors.fileNotfound))
+            if (typeof(error) === "function") {
+                error(e)
+            }
         })
     } else {
         var newStyle = document.createElement("style");
@@ -66,9 +75,9 @@ function loadFont(file, callback) {
     }
 }
 
-function fromFiles(files, callback) {
+function fromFiles(files, callback, error, timeout) {
     font = bestWoff(files)
-    loadFont(font, callback)
+    loadFont(font, callback, error, timeout)
 }
 
 module.exports = {

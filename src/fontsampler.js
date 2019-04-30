@@ -358,6 +358,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         preloader.pause()
         ui.setStatusClass(options.classes.loadingClass, true)
+        ui.setStatusClass(options.classes.timeoutClass, false)
 
         if (typeof(indexOrKey) === "string") {
             font = fonts.filter(function(value, index) {
@@ -386,10 +387,14 @@ function Fontsampler(_root, _fonts, _options) {
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
                     _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: f }))
-                }                
+                }
                 
                 initFont(f)
-            })
+            }, function (f) {
+                ui.setStatusClass(options.classes.loadingClass, false)
+                ui.setStatusClass(options.classes.timeoutClass, true)
+
+            },options.timeout)
         }
     }
 

@@ -5,10 +5,12 @@ module.exports = {
     multiline: true,
     lazyload: false,
     generate: false,
+    timeout: 3000, // the default loading timeout after which to fail
     classes: {
         rootClass: "fontsamplerjs",
         initClass: "fsjs-initialized",
         loadingClass: "fsjs-loading",
+        timeoutClass: "fsjs-timeout",
         preloadingClass: "fsjs-preloading",
         wrapperClass: "fsjs-wrapper",
         blockClass: "fsjs-block",
