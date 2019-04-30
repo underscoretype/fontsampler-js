@@ -10,7 +10,7 @@
 
     <!-- Fontsampler -->
     <script src="../dist/fontsampler.js"></script>
-    <script src="../dist/fontsampler-skin.min.js"></script>
+    <script src="../dist/fontsampler-skin.js"></script>
 
     <link rel="stylesheet" href="../dist/fontsampler-skin.min.css">
     <!-- /Fontsampler -->
@@ -68,14 +68,16 @@
                         "wght 800|Work Sans ExtraBold",
                         "wght 900|Work Sans Black"
                     ]
-                },{
-                    "name": "Alegreya Regular", 
-                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]
                 }, 
                 { 
-                    "name": "Alegreya Italic", 
+                    "name": "Alegreya Italic",
                     "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]
-                }]
+                },
+                {
+                    "name": "Alegreya Regular", 
+                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]
+                }
+            ]
             var options = { 
                 lazyload: true,
                 order: ["tester", ["fontsize", "lineheight", "fontfamily"], ["alignment", "language", "direction"], "variation"], 

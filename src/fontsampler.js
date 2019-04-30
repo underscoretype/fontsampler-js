@@ -280,13 +280,13 @@ function Fontsampler(_root, _fonts, _options) {
      * has received this update (e.g. dropdown select of a variable
      * font instance)
      */
-    function initFont(f) {
-        that.currentFont.f = f
+    function initFont(fontface) {
+        that.currentFont.fontface = fontface
 
         ui.setStatusClass(options.classes.loadingClass, false)
 
         // Update the css font family
-        ui.setInputCss("fontFamily", f.family)
+        ui.setInputCss("fontFamily", fontface.family)
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
@@ -353,7 +353,7 @@ function Fontsampler(_root, _fonts, _options) {
      * The public interface for showing (and possibly loading) a font
      */
     this.showFont = function(indexOrKey) {
-        console.debug("Fontsampler.showFont", indexOrKey, this.currentFont)
+        console.debug("Fontsampler.showFont", indexOrKey)
         var font
 
         preloader.pause()
@@ -372,29 +372,33 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
-        if (this.currentFont.files && JSON.stringify(this.currentFont.files) === JSON.stringify(font.files)) {
+        if (this.currentFont && this.currentFont.files && JSON.stringify(this.currentFont.files) === JSON.stringify(font.files)) {
             // Same font file (Variation might be different)
-            // Skip straight to "fontLoaded" procedure
-            initFont(this.currentFont.f)
+            // Skip straight to "fontLoaded" procedure, but retain the fontface
+            // of the currentFont
+            font.fontface = this.currentFont.fontface
+            this.currentFont = font
+            initFont(this.currentFont.fontface)
+
         } else {
             // Load a new font file
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, function (f) {
-                var fjson = JSON.stringify(f)
+            Fontloader.fromFiles(font.files, function (fontface) {
+                var fjson = JSON.stringify(fontface)
 
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
-                    _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: f }))
+                    _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))
                 }
                 
-                initFont(f)
-            }, function (f) {
+                initFont(fontface)
+            }, function (fontface) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)
-
-            },options.timeout)
+                that.currentFont = false
+            }, options.timeout)
         }
     }
 

@@ -44,31 +44,38 @@ function loadFont(file, callback, error, timeout) {
     family = family.substring(0, family.lastIndexOf("."))
     family = family.replace(/\W/gm, "")
 
-    var font = new FontFaceObserver(family)
-    font.load(null, timeout).then(function(f) {
-        if (typeof(callback) === "function") {
-            callback(f)
-        }
-    }).catch(function (e) {
-        console.error(font, file, e)
-        console.error(new Error(errors.fileNotfound))
-        if (typeof(error) === "function") {
-            error(e)
-        }
-    })
-    
     if ("FontFace" in window) {
         var ff = new FontFace(family, "url(" + file + ")", {})
         ff.load().then(function() {
             document.fonts.add(ff)
-        }).catch(function(e) {
-            console.error(font, file, e)
+            if (typeof(callback) === "function") {
+                callback(ff)
+            }
+        }, function(e) {
+            console.error(family, file, e)
             console.error(new Error(errors.fileNotfound))
             if (typeof(error) === "function") {
                 error(e)
             }
         })
     } else {
+        // Fallback to loading via @font-face and manually inserted style tag
+        // Utlize the FontFaceObserver to detect when the font is available
+        var font = new FontFaceObserver(family)
+        font.load(null, timeout).then(function(f) {
+            font.load().then(function(f) {
+                if (typeof(callback) === "function") {
+                    callback(f)
+                }
+            }, function (e) {
+                console.error(family, file, e)
+                console.error(new Error(errors.fileNotfound))
+                if (typeof(error) === "function") {
+                    error(e)
+                } 
+            })
+        })
+        
         var newStyle = document.createElement("style");
         newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
         document.head.appendChild(newStyle);

@@ -38,9 +38,11 @@ $elementMargin: 5px !default;
         opacity: 1;
     }
  
-    &.fsjs-loading .fsjs-block-tester {
+    &.fsjs-loading .fsjs-block-tester,
+    &.fsjs-timeout .fsjs-block-tester {
         opacity: 0;
     }
+
 
     // A sensible baseline layout
     @import "_fontsampler.layout";

@@ -15,7 +15,7 @@
   transition: opacity 0.2s ease-out;
   opacity: 1;
 }
-.fsjs-skin.fsjs-loading .fsjs-block-tester {
+.fsjs-skin.fsjs-loading .fsjs-block-tester, .fsjs-skin.fsjs-timeout .fsjs-block-tester {
   opacity: 0;
 }
 .fsjs-skin > .fsjs-wrapper {

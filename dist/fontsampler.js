@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fontsampler = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.Fontsampler = f()}})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 'use strict';
 
 var hasOwn = Object.prototype.hasOwnProperty;
@@ -304,31 +304,38 @@ function loadFont(file, callback, error, timeout) {
     family = family.substring(0, family.lastIndexOf("."))
     family = family.replace(/\W/gm, "")
 
-    var font = new FontFaceObserver(family)
-    font.load(null, timeout).then(function(f) {
-        if (typeof(callback) === "function") {
-            callback(f)
-        }
-    }).catch(function (e) {
-        console.error(font, file, e)
-        console.error(new Error(errors.fileNotfound))
-        if (typeof(error) === "function") {
-            error(e)
-        }
-    })
-    
     if ("FontFace" in window) {
         var ff = new FontFace(family, "url(" + file + ")", {})
         ff.load().then(function() {
             document.fonts.add(ff)
-        }).catch(function(e) {
-            console.error(font, file, e)
+            if (typeof(callback) === "function") {
+                callback(ff)
+            }
+        }, function(e) {
+            console.error(family, file, e)
             console.error(new Error(errors.fileNotfound))
             if (typeof(error) === "function") {
                 error(e)
             }
         })
     } else {
+        // Fallback to loading via @font-face and manually inserted style tag
+        // Utlize the FontFaceObserver to detect when the font is available
+        var font = new FontFaceObserver(family)
+        font.load(null, timeout).then(function(f) {
+            font.load().then(function(f) {
+                if (typeof(callback) === "function") {
+                    callback(f)
+                }
+            }, function (e) {
+                console.error(family, file, e)
+                console.error(new Error(errors.fileNotfound))
+                if (typeof(error) === "function") {
+                    error(e)
+                } 
+            })
+        })
+        
         var newStyle = document.createElement("style");
         newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
         document.head.appendChild(newStyle);
@@ -628,13 +635,13 @@ function Fontsampler(_root, _fonts, _options) {
      * has received this update (e.g. dropdown select of a variable
      * font instance)
      */
-    function initFont(f) {
-        that.currentFont.f = f
+    function initFont(fontface) {
+        that.currentFont.fontface = fontface
 
         ui.setStatusClass(options.classes.loadingClass, false)
 
         // Update the css font family
-        ui.setInputCss("fontFamily", f.family)
+        ui.setInputCss("fontFamily", fontface.family)
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
@@ -701,7 +708,7 @@ function Fontsampler(_root, _fonts, _options) {
      * The public interface for showing (and possibly loading) a font
      */
     this.showFont = function(indexOrKey) {
-        console.debug("Fontsampler.showFont", indexOrKey, this.currentFont)
+        console.debug("Fontsampler.showFont", indexOrKey)
         var font
 
         preloader.pause()
@@ -720,29 +727,33 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts[indexOrKey]
         }
 
-        if (this.currentFont.files && JSON.stringify(this.currentFont.files) === JSON.stringify(font.files)) {
+        if (this.currentFont && this.currentFont.files && JSON.stringify(this.currentFont.files) === JSON.stringify(font.files)) {
             // Same font file (Variation might be different)
-            // Skip straight to "fontLoaded" procedure
-            initFont(this.currentFont.f)
+            // Skip straight to "fontLoaded" procedure, but retain the fontface
+            // of the currentFont
+            font.fontface = this.currentFont.fontface
+            this.currentFont = font
+            initFont(this.currentFont.fontface)
+
         } else {
             // Load a new font file
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, function (f) {
-                var fjson = JSON.stringify(f)
+            Fontloader.fromFiles(font.files, function (fontface) {
+                var fjson = JSON.stringify(fontface)
 
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
-                    _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: f }))
+                    _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))
                 }
                 
-                initFont(f)
-            }, function (f) {
+                initFont(fontface)
+            }, function (fontface) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)
-
-            },options.timeout)
+                that.currentFont = false
+            }, options.timeout)
         }
     }
 
