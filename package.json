@@ -1,6 +1,6 @@
 {
     "name": "fontsampler-js",
-    "version": "0.0.11",
+    "version": "0.0.12",
     "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
     "keywords": [
         "webfont",
