@@ -1,7 +1,15 @@
 {
     "name": "fontsampler-js",
-    "version": "0.0.5",
+    "version": "0.0.13",
     "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
+    "keywords": [
+        "webfont",
+        "font",
+        "variable font",
+        "tester",
+        "browser",
+        "interface"
+    ],
     "author": {
         "name": "Johannes Neumeier",
         "email": "hello@underscoretype.com"
@@ -29,7 +37,7 @@
         "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
-        "rangeslider-pure": "git@github.com:kontur/rangeSlider.git",
+        "rangeslider-pure": "^0.4.9",
         "woff2-feature-test": "^1.0.3"
     },
     "devDependencies": {
