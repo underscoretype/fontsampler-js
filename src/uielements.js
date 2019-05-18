@@ -47,6 +47,7 @@ function UIElements(root, options) {
             type: "range",
             min: opt.min,
             max: opt.max,
+            value: opt.init,
             step: opt.step
         }
 

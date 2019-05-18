@@ -1783,10 +1783,13 @@ function UI(root, fonts, options) {
             // currently only variable font slider group
             var nestedSliders = element.querySelectorAll("[data-fsjs-ui='slider']")
             if (nestedSliders && nestedSliders.length > 0) {
+                
                 for (var a = 0; a < nestedSliders.length; a++) {
                     var nestedSlider = nestedSliders[a]
                     nestedSlider.addEventListener("change", onSlideVariation)
                 }
+                    
+                setVariations(getDefaultVariations())
             }
         }
 
@@ -1819,6 +1822,21 @@ function UI(root, fonts, options) {
         }
 
         return false
+    }
+
+    function getDefaultVariations() {
+        var variations = false
+        if ("ui" in options && "variation" in options.ui && "axes" in options.ui.variation) {
+            variations = {}
+            for (var i in options.ui.variation.axes) {
+                var o = options.ui.variation.axes[i]
+                variations[o.tag] = o.init
+            }
+            return variations
+        } else {
+
+            return {}
+        }
     }
 
     function getElement(key, node) {
@@ -2432,6 +2450,7 @@ function UIElements(root, options) {
             type: "range",
             min: opt.min,
             max: opt.max,
+            value: opt.init,
             step: opt.step
         }
 
