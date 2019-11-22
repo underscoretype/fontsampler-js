@@ -406,12 +406,12 @@ function UI(root, fonts, options) {
             // currently only variable font slider group
             var nestedSliders = element.querySelectorAll("[data-fsjs-ui='slider']")
             if (nestedSliders && nestedSliders.length > 0) {
-                
+
                 for (var a = 0; a < nestedSliders.length; a++) {
                     var nestedSlider = nestedSliders[a]
                     nestedSlider.addEventListener("change", onSlideVariation)
                 }
-                    
+
                 setVariations(getDefaultVariations())
             }
         }
@@ -782,7 +782,7 @@ function UI(root, fonts, options) {
         }
     }
 
-    function fontIsInstance(variation) {
+    function fontIsInstance(variation, fontname) {
         if (typeof(variation) !== "object") {
             return false
         }
@@ -815,7 +815,8 @@ function UI(root, fonts, options) {
                 }
 
                 // elegant compare equal for objects, if equal return font
-                if (JSON.stringify(vars) === JSON.stringify(variation)) {
+                if (JSON.stringify(vars) === JSON.stringify(variation) &&
+                    fontname === f.name) {
                     return f
                 }
             } catch (e) {
@@ -867,7 +868,8 @@ function UI(root, fonts, options) {
         // When a variable font is updated check if the selected values
         // match a defined instance, and if set it active in the font family
         if (dom.isNode(blocks.fontfamily)) {
-            var instanceFont = fontIsInstance(variations)
+            var fontname = getElement("fontfamily", blocks.fontfamily).value
+            var instanceFont = fontIsInstance(variations, fontname)
             if (instanceFont === false) {
                 dom.nodeAddClass(blocks.fontfamily, options.classes.disabledClass)
             } else {

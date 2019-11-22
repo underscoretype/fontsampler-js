@@ -78,6 +78,10 @@ For testing:
     $ webdriver-manager start
     $ npm run test
 
+### Changelog
+
+See [CHANGELOG.md](CHANGELOG.md)
+
 
 ### TODO / Roadmap
 * Implement public event interface (change, click, init, loading, loaded) _mostly done_
