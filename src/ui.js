@@ -29,10 +29,10 @@
 var selection = require("./helpers/selection")
 
 var UIElements = require("./uielements")
-var Fontloader = require("./fontloader")
 
-var errors = require("./constants/errors")
+// var errors = require("./constants/errors")
 var events = require("./constants/events")
+var defaults = require("./constants/defaults")
 
 var dom = require("./helpers/dom")
 var utils = require("./helpers/utils")
@@ -73,10 +73,10 @@ function UI(root, fonts, options) {
         // are the fonts passed in. Let’s make this transformation behind
         // the scenes so we can use the re-usable "dropdown" ui by defining
         // the needed `choices` attribute
-        if (options.ui.fontfamily && typeof(options.ui.fontfamily) === "boolean") {
-            options.ui.fontfamily = {}
+        if (options.config.fontfamily && typeof(options.config.fontfamily) === "boolean") {
+            options.config.fontfamily = {}
         }
-        options.ui.fontfamily.choices = fonts.map(function(value) {
+        options.config.fontfamily.choices = fonts.map(function(value) {
             return value.name
         })
 
@@ -89,6 +89,9 @@ function UI(root, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
+
+        console.warn("ORDER", options.order)
+        console.warn("CONFIG", Object.keys(options.config))
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -104,6 +107,8 @@ function UI(root, fonts, options) {
         }
 
         input = getElement("tester", blocks.tester)
+        console.warn("INPUT", input)
+        console.warn("BLOCKS", blocks)
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
@@ -151,11 +156,15 @@ function UI(root, fonts, options) {
      * @param node parent
      */
     function parseOrder(key) {
+        console.debug("parseOrder", key)
         var child, wrapper
 
         if (typeof(key) === "string") {
-            var block = parseBlock(key)
+            var block = createBlock(key)
+            // block = parseBlock(key, block)
+            blocks[key] = block
 
+            console.warn("BLOCK", block)
             return block
         } else if (Array.isArray(key)) {
             wrapper = document.createElement("div")
@@ -181,92 +190,28 @@ function UI(root, fonts, options) {
     }
 
     /**
-     * Parse an UI element from DOM or options
-     * @param string item 
-     * @return node || boolean (true = in DOM, false = invalid item)
-     */
-    function parseBlock(key) {
-        if (key in ui === false) {
-            throw new Error(errors.invalidUIItem + key)
-        }
-
-        var block = getBlock(key),
-            element = false,
-            label = false,
-            opt = options.ui[key]
-
-        if (block) {
-            // if a block is found, try get its element and optional label
-            element = getElement(key, block)
-            label = getLabel(key, block)
-
-            if (options.ui[key].label && !label) {
-                // create a label if needed
-                label = uifactory.label(opt.label, opt.unit, opt.init, key)
-                block.appendChild(label)
-                sanitizeLabel(label, key)
-            } else if (label) {
-                // or check the existing label
-                sanitizeLabel(label, key)
-            }
-            if (!element) {
-                // create and check the element
-                element = createElement(key)
-                block.appendChild(element)
-                sanitizeElement(element, key)
-            } else {
-                // or check the existing element
-                sanitizeElement(element, key)
-            }
-
-            // check the block itself
-            sanitizeBlock(block, key)
-            blocks[key] = block
-
-            if (options.ui[key].render !== true) {
-                blocks[key] = false
-                if (block.parentNode) {
-                    block.parentNode.removeChild(block)
-                }
-                return false
-            }
-
-            return false
-        } else if (!block && (
-                options.ui[key].render === true ||
-                (key === "variation" && options.ui.variations.render === true)
-            )) {
-            // for missing blocks that should get rendered create them
-            block = createBlock(key)
-            blocks[key] = block
-
-            return block
-        }
-
-        return false
-    }
-
-    /**
      * Create a block wrapper and the UI element it contains
      * 
      * @param {string} key 
      */
     function createBlock(key) {
         var block = document.createElement("div"),
-            element = createElement(key),
-            label = false
+            element = false,
+            label = false,
+            opt = options.config[key]
 
-        opt = options.ui[key]
-
-        if (opt.label) {
+        if (options.config[key].label) {
             label = uifactory.label(opt.label, opt.unit, opt.init, key)
             block.appendChild(label)
-            sanitizeLabel(label, key)
+            addLabelClasses(label, key)
         }
 
+        element = createElement(key)
+
+        addElementClasses(element, key)
+        addBlockClasses(block, key)
+
         block.appendChild(element)
-        sanitizeElement(element, key)
-        sanitizeBlock(block, key)
 
         return block
     }
@@ -277,8 +222,16 @@ function UI(root, fonts, options) {
      * @param {string} key 
      */
     function createElement(key) {
-        var element = uifactory[ui[key]](key, options.ui[key])
-        sanitizeElement(element, key)
+        var element
+
+        console.debug("CREATE ELEMENT", key, isAxisKey(key))
+
+        if (isAxisKey(key)) {
+            element = uifactory.slider(key, options.config[key])
+        } else {
+            element = uifactory[ui[key]](key, options.config[key])
+        }
+        addElementClasses(element, key)
 
         return element
     }
@@ -290,7 +243,7 @@ function UI(root, fonts, options) {
      * @param {node} block 
      * @param {string} key 
      */
-    function sanitizeBlock(block, key) {
+    function addBlockClasses(block, key) {
         var classes = [
             options.classes.blockClass,
             options.classes.blockClass + "-" + key,
@@ -307,12 +260,22 @@ function UI(root, fonts, options) {
      * @param {node} element 
      * @param {string} key 
      */
-    function sanitizeElement(element, key) {
-        element = uifactory[ui[key]](key, options.ui[key], element)
+    function addElementClasses(element, key) {
+        try {
+            var type = ""
+            if (isAxisKey(key)) {
+                type = "slider"
+            } else {
+                type = ui[key]
+            }
+            element = uifactory[type](key, options.config[key], element)
 
-        dom.nodeAddClass(element, options.classes.elementClass)
-        element.dataset.fsjs = key
-        element.dataset.fsjsUi = ui[key]
+            dom.nodeAddClass(element, options.classes.elementClass)
+            element.dataset.fsjs = key
+            element.dataset.fsjsUi = type
+        } catch (e) {
+            console.warn("Failed in addElementClasses()", element, key, e)
+        }
     }
 
     /**
@@ -322,14 +285,14 @@ function UI(root, fonts, options) {
      * @param {node} label 
      * @param {string} key 
      */
-    function sanitizeLabel(label, key) {
+    function addLabelClasses(label, key) {
         var text = label.querySelector("." + options.classes.labelTextClass),
             value = label.querySelector("." + options.classes.labelValueClass),
             unit = label.querySelector("." + options.classes.labelUnitClass),
             element = getElement(key)
 
         if (dom.isNode(text) && text.textContent === "") {
-            text.textContent = options.ui[key].label
+            text.textContent = options.config[key].label
         }
 
         if (dom.isNode(value) && ["slider"].indexOf(ui[key]) === -1) {
@@ -362,13 +325,15 @@ function UI(root, fonts, options) {
         var block = getBlock(key),
             element = getElement(key, block),
             type = ui[key],
-            opt = options.ui[key]
+            opt = options.config[key]
+
+        console.log("initBlock", key, type, opt, isAxisKey(key))
 
         if (!block) {
             return
         }
 
-        if (type === "slider") {
+        if (type === "slider" || isAxisKey(key)) {
             setValue(key, opt.init)
             element.addEventListener("change", onSlide)
         } else if (type === "dropdown") {
@@ -380,14 +345,14 @@ function UI(root, fonts, options) {
             if (buttons.length > 0) {
                 for (var b = 0; b < buttons.length; b++) {
                     buttons[b].addEventListener("click", onClick)
-                    if (buttons[b].dataset.choice === options.ui[key].init) {
+                    if (buttons[b].dataset.choice === options.config[key].init) {
                         dom.nodeAddClass(buttons[b], options.classes.buttonSelectedClass)
                     } else {
                         dom.nodeRemoveClass(buttons[b], options.classes.buttonSelectedClass)
                     }
                 }
             }
-            setValue(key, options.ui[key].init)
+            setValue(key, options.config[key].init)
         } else if (type === "checkboxes") {
             // currently only opentype feature checkboxes
             var checkboxes = element.querySelectorAll("[data-feature]")
@@ -426,33 +391,60 @@ function UI(root, fonts, options) {
      * @param {string} axis 
      * @param {mixed} value 
      */
-    function isValidAxisAndValue(axis, value) {
-        if (!Array.isArray(options.ui.variation.axes)) {
-            return false
+    // function isValidAxisAndValue(axis, value) {
+    //     // if (!Array.isArray(options.config.variation.axes)) {
+    //     //     return false
+    //     // }
+    //     if (isAxisKey(axis)) {
+    //         return false
+    //     }
+
+    //     var axes = getAxisKeys()
+
+    //     for (var a = 0; a < axes.length; a++) {
+    //         var axisoptions = axes[a]
+
+    //         if (axisoptions.tag !== axis) {
+    //             continue
+    //         }
+    //         if (parseFloat(value) < parseFloat(axisoptions.min) || parseFloat(value) > parseFloat(axisoptions.max)) {
+    //             return false
+    //         } else {
+    //             return true
+    //         }
+    //     }
+
+    //     return false
+    // }
+
+    function isAxisKey(key) {
+        return Object.keys(defaults.config).indexOf(key) === -1 &&
+            key.length <= 4
+    }
+
+    function getAxisKeys() {
+        // Get all config keys which are not present in defaults and look like
+        // axis keys (4 letter)
+        var defaultKeys = Object.keys(defaults.config),
+            allKeys = Object.keys(options.config),
+            axisKeys = []
+        
+        for (var i = 0; i < allKeys.length; i++) {
+            var key = allKeys[i]
+            if (defaultKeys.indexOf(key) === -1 && isAxisKey(key)) {
+                axisKeys.push(key)
+            }
         }
 
-        for (var a = 0; a < options.ui.variation.axes.length; a++) {
-            var axisoptions = options.ui.variation.axes[a]
-
-            if (axisoptions.tag !== axis) {
-                continue
-            }
-            if (parseFloat(value) < parseFloat(axisoptions.min) || parseFloat(value) > parseFloat(axisoptions.max)) {
-                return false
-            } else {
-                return true
-            }
-        }
-
-        return false
+        return axisKeys
     }
 
     function getDefaultVariations() {
         var variations = false
-        if ("ui" in options && "variation" in options.ui && "axes" in options.ui.variation) {
+        if ("ui" in options && "variation" in options.config && "axes" in options.config.variation) {
             variations = {}
-            for (var i in options.ui.variation.axes) {
-                var o = options.ui.variation.axes[i]
+            for (var i in options.config.variation.axes) {
+                var o = options.config.variation.axes[i]
                 variations[o.tag] = o.init
             }
             return variations
@@ -480,14 +472,14 @@ function UI(root, fonts, options) {
         return dom.isNode(block) ? block : false
     }
 
-    function getLabel(key, node) {
-        if (typeof(node) === "undefined") {
-            node = root
-        }
-        var block = root.querySelector("[data-fsjs-for='" + key + "']")
+    // function getLabel(key, node) {
+    //     if (typeof(node) === "undefined") {
+    //         node = root
+    //     }
+    //     var block = root.querySelector("[data-fsjs-for='" + key + "']")
 
-        return dom.isNode(block) ? block : false
-    }
+    //     return dom.isNode(block) ? block : false
+    // }
 
     /**
      * Internal event listeners reacting to different UI element’s events
@@ -609,18 +601,18 @@ function UI(root, fonts, options) {
      * @param {*} axis 
      */
     function getVariation(axis) {
-        if (!blocks.variation) {
-            return false
-        }
+        // if (!blocks.variation) {
+        //     return false
+        // }
 
-        var variations = blocks.variation.querySelectorAll("[data-axis]"),
+        var axes = getAxisKeys(),
             input,
             va = {}
 
-        if (variations) {
-            for (var v = 0; v < variations.length; v++) {
-                input = variations[v]
-                va[input.dataset.axis] = input.value
+        if (axes) {
+            for (var v = 0; v < axes.length; v++) {
+                input = getElement(axes[v])
+                va[input.dataset.fsjs] = input.value
             }
         }
 
@@ -669,6 +661,12 @@ function UI(root, fonts, options) {
     function setValue(key, value) {
         var element = getElement(key)
 
+        if (isAxisKey(key)) {
+            var updateVariation = {}
+            updateVariation[key] = value
+            setVariations(updateVariation)
+        }
+
         switch (key) {
             case "fontsize":
             case "lineheight":
@@ -679,8 +677,8 @@ function UI(root, fonts, options) {
                 } else {
                     // if a value was passed in check if it is within bounds,
                     // valid and if the slider needs an update (via native event)
-                    value = utils.clamp(value, options.ui[key].min,
-                        options.ui[key].max, options.ui[key].init)
+                    value = utils.clamp(value, options.config[key].min,
+                        options.config[key].max, options.config[key].init)
 
                     if (element.value.toString() !== value.toString()) {
                         element.value = value
@@ -689,11 +687,7 @@ function UI(root, fonts, options) {
                 }
 
                 setLabelValue(key, value)
-                setInputCss(keyToCss[key], value + options.ui[key].unit)
-                break;
-
-            case "variation":
-                setVariations(value)
+                setInputCss(keyToCss[key], value + options.config[key].unit)
                 break;
 
             case "opentype":
@@ -735,29 +729,31 @@ function UI(root, fonts, options) {
      */
     function setVariation(axis, val) {
         var v = getVariation(),
-            opt
+            opt = null
 
-        if (isValidAxisAndValue(axis, val)) {
+
+        // if (isValidAxisAndValue(axis, val)) {
+        // TODO
+        if (isAxisKey(axis)) {
             // TODO refactor to: getAxisDefaults() and also use
             // it on axis setup / options parsing
-            opt = options.ui.variation.axes.filter(function(optVal) {
-                return optVal.tag === axis
-            })
+            // opt = options.config.variation.axes.filter(function(optVal) {
+            //     return optVal.tag === axis
+            // })
+            opt = options.config[axis]
             if (!opt || typeof(opt) === "undefined") {
                 opt = {
                     min: 100,
                     max: 900
                 }
-            } else {
-                opt = opt[0]
             }
+
             if (typeof(opt.min) === "undefined") {
                 opt.min = 100
             }
             if (typeof(opt.max) === "undefined") {
                 opt.max = 900
             }
-
             v[axis] = utils.clamp(val, opt.min, opt.max)
 
             setLabelValue(axis, val)
@@ -932,7 +928,7 @@ function UI(root, fonts, options) {
 
     function setActiveLanguage(lang) {
         if (dom.isNode(blocks.language) && typeof(lang) === "string") {
-            var languageChoices = options.ui.language.choices.map(function(value) {
+            var languageChoices = options.config.language.choices.map(function(value) {
                 return value.split("|")[0]
             })
 

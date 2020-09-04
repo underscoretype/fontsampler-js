@@ -29,7 +29,7 @@ module.exports = {
         // ["alignment", "direction", "opentype"],
         "tester"
     ],
-    ui: {
+    config: {
         tester: {
             editable: true,
             label: false,
@@ -91,9 +91,9 @@ module.exports = {
             label: "Opentype features",
             render: true,
         },
-        variation: {
-            axes: [],
-            render: true
-        }
+        // variation: {
+        //     axes: [],
+        //     render: true
+        // }
     }
 }

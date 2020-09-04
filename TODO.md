@@ -53,24 +53,25 @@ options = {
         ...append any "ui" elements not listed explicitly...
         ],
 
+    config: {
+        "any element or axis tag": {
+            ... specific options ...
+        }
 
-    "any element or axis tag": {
-        ... specific options ...
+        e.g. axis:
+        "wght": {
+            init: 400,
+            min: 250,
+            max: 900,
+            step: 10,
+            label: "Weight"
+        }
+
+        or predefined element:
+        opentype: {
+            "choices": ["liga", "dlig", "rlig", "calt"]
+        },
     }
-
-    e.g. axis:
-    "wght": {
-        init: 400,
-        min: 250,
-        max: 900,
-        step: 10,
-        label: "Weight"
-    }
-
-    or predefined element:
-    opentype: {
-        "choices": ["liga", "dlig", "rlig", "calt"]
-    },
 }
 
 fonts = [

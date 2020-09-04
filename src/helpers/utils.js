@@ -22,13 +22,7 @@ function clamp(value, min, max, fallback) {
         }
     }
 
-    if (value < min) {
-        value = min
-    } else if (value > max) {
-        value = max
-    }
-
-    return value
+    return Math.min(max, Math.max(value, min))
 }
 
 /**

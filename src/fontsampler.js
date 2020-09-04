@@ -195,17 +195,17 @@ function Fontsampler(_root, _fonts, _options) {
         }
 
         if (typeof(passedInOptions) === "object") {
-            // If any of the passed in options.ui.xxx are simply "true" instead of
+            // If any of the passed in options.config.xxx are simply "true" instead of
             // an boolean let’s copy the default values for this ui element
-            if ("ui" in passedInOptions === true) {
-                for (var u in passedInOptions.ui) {
-                    if (passedInOptions.ui.hasOwnProperty(u)) {
-                        if (typeof(passedInOptions.ui[u]) !== "object") {
-                            passedInOptions.ui[u] = defaults.ui[u]
-                        }
-                    }
-                }
-            }
+            // if ("ui" in passedInOptions === true) {
+            //     for (var u in passedInOptions.config) {
+            //         if (passedInOptions.config.hasOwnProperty(u)) {
+            //             if (typeof(passedInOptions.config[u]) !== "object") {
+            //                 passedInOptions.config[u] = defaults.ui[u]
+            //             }
+            //         }
+            //     }
+            // }
             // Extend the defaults
             options = extend(true, defaults, passedInOptions)
         } else {
@@ -217,7 +217,7 @@ function Fontsampler(_root, _fonts, _options) {
         // blocks get rendered. "Defined" can be a combination of:
         // · block in the DOM
         // · block in options.order
-        // · block in options.ui
+        // · block in options.config
         if (nodesInDom.length > 0) {
             for (var b = 0; b < nodesInDom.length; b++) {
                 blocksInDom[b] = nodesInDom[b].dataset.fsjs
@@ -319,11 +319,13 @@ function Fontsampler(_root, _fonts, _options) {
         console.debug("Fontsampler.init()", this, this.root)
 
         var initialFont = 0
-        if ("init" in options.ui.fontfamily === true &&
-            typeof(options.ui.fontfamily.init) === "string" &&
-            options.ui.fontfamily.init !== "") {
-            initialFont = options.ui.fontfamily.init
+        if ("fontfamily" in options.config &&
+            "init" in options.config.fontfamily === true &&
+            typeof(options.config.fontfamily.init) === "string" &&
+            options.config.fontfamily.init !== "") {
+            initialFont = options.config.fontfamily.init
         }
+
         ui.init()
         setupUIEvents.call(this)
         this.showFont.call(this, initialFont)
@@ -394,7 +396,7 @@ function Fontsampler(_root, _fonts, _options) {
                 }
                 
                 initFont(fontface)
-            }, function (fontface) {
+            }, function (/* fontface */) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)
                 that.currentFont = false
