@@ -89,9 +89,6 @@ function UI(root, fonts, options) {
         }
         options.originalText = originalText
 
-        console.warn("ORDER", options.order)
-        console.warn("CONFIG", Object.keys(options.config))
-
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
         // · UI elements defined via options but missing from the DOM will be created
@@ -106,8 +103,6 @@ function UI(root, fonts, options) {
         }
 
         input = getElement("tester", blocks.tester)
-        console.warn("INPUT", input)
-        console.warn("BLOCKS", blocks)
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
@@ -155,15 +150,12 @@ function UI(root, fonts, options) {
      * @param node parent
      */
     function parseOrder(key) {
-        console.debug("parseOrder", key)
         var child, wrapper
 
         if (typeof(key) === "string") {
             var block = createBlock(key)
-            // block = parseBlock(key, block)
             blocks[key] = block
 
-            console.warn("BLOCK", block)
             return block
         } else if (Array.isArray(key)) {
             wrapper = document.createElement("div")
@@ -222,8 +214,6 @@ function UI(root, fonts, options) {
      */
     function createElement(key) {
         var element
-
-        console.debug("CREATE ELEMENT", key, isAxisKey(key))
 
         if (isAxisKey(key)) {
             element = uifactory.slider(key, options.config[key])
@@ -329,8 +319,6 @@ function UI(root, fonts, options) {
             element = getElement(key, block),
             type = ui[key],
             opt = options.config[key]
-
-        console.log("initBlock", key, type, opt, isAxisKey(key))
 
         if (!block) {
             return
