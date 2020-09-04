@@ -49,8 +49,7 @@ function UI(root, fonts, options) {
             alignment: "buttongroup",
             direction: "buttongroup",
             language: "dropdown",
-            opentype: "checkboxes",
-            variation: "slidergroup"
+            opentype: "checkboxes"
         },
         keyToCss = {
             "fontsize": "fontSize",
@@ -244,10 +243,14 @@ function UI(root, fonts, options) {
      * @param {string} key 
      */
     function addBlockClasses(block, key) {
+        var type = ui[key]
+        if (isAxisKey(key)) {
+            type = "slider"
+        }
         var classes = [
             options.classes.blockClass,
             options.classes.blockClass + "-" + key,
-            options.classes.blockClass + "-type-" + ui[key]
+            options.classes.blockClass + "-type-" + type
         ]
 
         dom.nodeAddClasses(block, classes)
@@ -366,18 +369,6 @@ function UI(root, fonts, options) {
                     }
                 }
                 setInputOpentype(features)
-            }
-        } else if (type === "slidergroup") {
-            // currently only variable font slider group
-            var nestedSliders = element.querySelectorAll("[data-fsjs-ui='slider']")
-            if (nestedSliders && nestedSliders.length > 0) {
-
-                for (var a = 0; a < nestedSliders.length; a++) {
-                    var nestedSlider = nestedSliders[a]
-                    nestedSlider.addEventListener("change", onSlideVariation)
-                }
-
-                setVariations(getDefaultVariations())
             }
         }
 

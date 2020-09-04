@@ -1,4 +1,3 @@
-
 var helpers = require("./helpers/helpers")
 var dom = require("./helpers/dom")
 
@@ -75,39 +74,6 @@ function UIElements(root, options) {
         return input
     }
 
-    function slidergroup(key, opt, node) {
-        var slidergroup = dom.isNode(node) ? node : document.createElement("div")
-
-        for (var s = 0; s < opt.axes.length; s++) {
-            var wrapper = slidergroup.querySelector("[data-axis-block='" + opt.axes[s].tag + "']")
-
-            if (!dom.isNode(wrapper)) {
-                wrapper = document.createElement("div")
-                wrapper.dataset.axisBlock = opt.axes[s].tag
-                slidergroup.appendChild(wrapper)
-            }
-
-            if (opt.axes[s].label) {
-                var label = slidergroup.querySelector("[data-fsjs-for='" + opt.axes[s].tag + "']")
-                if (!dom.isNode(label)) {
-                    label = this.label(opt.axes[s].label, false, opt.axes[s].init, opt.axes[s].tag)
-                    wrapper.appendChild(label)
-                }
-            }
-
-            var slider = slidergroup.querySelector("[data-axis='" + opt.axes[s].tag + "']")
-            if (!dom.isNode(slider)) {
-                slider = this.slider(false, opt.axes[s])
-                slider.dataset.fsjsUi = "slider"
-                wrapper.appendChild(slider)
-            }
-            
-            slider.dataset.axis = opt.axes[s].tag
-        }
-
-        return slidergroup
-    }
-
     function dropdown(key, opt, node) {
         var dropdown = dom.isNode(node) ? node : document.createElement("select")
         if ("choices" in opt === false || opt.choices.length < 1) {
@@ -117,7 +83,7 @@ function UIElements(root, options) {
         for (var c = 0; c < opt.choices.length; c++) {
             var choice = helpers.parseParts(opt.choices[c]),
                 option = dropdown.querySelector("option[value='" + choice.val + "']")
-                
+
             if (!dom.isNode(option)) {
                 option = document.createElement("option")
                 option.appendChild(document.createTextNode(choice.text))
@@ -125,7 +91,7 @@ function UIElements(root, options) {
             }
 
             option.value = choice.val
-            
+
             if ("init" in opt && opt.init === choice.text) {
                 option.selected = true
                 dropdown.value = option.value
@@ -137,7 +103,7 @@ function UIElements(root, options) {
         }
 
         dropdown.dataset.fsjs = key
-        
+
         return dropdown
     }
 
@@ -239,7 +205,6 @@ function UIElements(root, options) {
     return {
         dropdown: dropdown,
         slider: slider,
-        slidergroup: slidergroup,
         label: label,
         textfield: textfield,
         buttongroup: buttongroup,
