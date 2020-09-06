@@ -14,10 +14,13 @@
 - Woff2/Woff structure antiquated
 - Fallback font for Woff2 Variable required
 - Variable font init values buggy
+- Make values configurable without showing the UI element (e.g. init fontsize)
 
 #### Nice to have
 - Typewriter
 - Fit to width
+- Possibility to pass in different inits and configs for different breakpoints
+- Make documentation single page
 
 ### Desired sample configurations
 

@@ -51,6 +51,17 @@ li {
     content: "DEMO";
 }
 
+em {
+    font-family: monospace;
+    font-style: normal;
+    color: #666;
+    background: #EEE;
+    border-radius: 3px;
+    border: 1px solid #CCC;
+    padding: 2px 5px;
+    font-size: smaller;
+}
+
 code {
     background: #f6f6f6;
     border-radius: 0.25rem;
@@ -68,6 +79,15 @@ code {
 code em {
     font-style: normal;
     color: #DE2543;
+    border: 0;
+    padding: initial;
+    font-size: inherit;
+    background: initial;
+}
+
+code i {
+    font-style: normal;
+    color: #999;
 }
 
 code:before {
