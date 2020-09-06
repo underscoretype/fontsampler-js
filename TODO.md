@@ -9,10 +9,10 @@
 
 ### Current issues
 - Programmatic changes not super reliable
-- Code structure for UI changes and UI generation too obfuscated
-- Variable font support treated as one UI element, when each axis should be an element
+- [+] Code structure for UI changes and UI generation too obfuscated
+- [+] Variable font support treated as one UI element, when each axis should be an element
 - Woff2/Woff structure antiquated
-- Fallback font for Woff2 Variable required
+- [+] Fallback font for Woff2 Variable required
 - Variable font init values buggy
 - Make values configurable without showing the UI element (e.g. init fontsize)
 
@@ -21,6 +21,7 @@
 - Fit to width
 - Possibility to pass in different inits and configs for different breakpoints
 - Make documentation single page
+- Unicode range definition and rendering per font
 
 ### Desired sample configurations
 

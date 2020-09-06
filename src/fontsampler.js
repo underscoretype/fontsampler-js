@@ -286,7 +286,11 @@ function Fontsampler(_root, _fonts, _options) {
         ui.setStatusClass(options.classes.loadingClass, false)
 
         // Update the css font family
-        ui.setInputCss("fontFamily", fontface.family)
+        var family = fontface.family
+        if ("fallback" in that.currentFont) {
+            family += "," + that.currentFont.fallback
+        }
+        ui.setInputCss("fontFamily", family)
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)

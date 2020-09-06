@@ -52,6 +52,11 @@
             <li><a href="#styling">Styling</a></li>
             <li><a href="#events">Events</a></li>
             <li><a href="#api">API</a></li>
+            <li><a href="#misc">Miscellaneous other samples</a>
+                <ul>
+                    <li><a href="#fallback-font">Fallback font</a></li>
+                </ul>
+            </li>
             <!-- <li><a href="#more-examples">More examples</a>
                 <ul>
                     <li><a href="#lazyloading">Lazyloading (preloading) fonts</a></li>
@@ -500,6 +505,24 @@ classes: {
         }
         &lt;/script&gt;
     </code>
+
+    <h2 id="misc">Miscellaneous other samples</h2>
+    <h3 id="fallback-font">Fallback font</h3>
+    <p>You can define the name of a <em>font-family</em> to serve as fallback 
+        font for characters not supported by the current webfont. This can be 
+        a browser default font, or a webfont you know is loaded on the page
+        regardless of Fontsampler.</p>
+
+<code>var fonts = [{
+    "name": "Alegreya Regular", 
+    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff"],
+    <em>"fallback": "Arial"</em>
+}]
+</code>
+    
+    <div id="demo-fallback" class="demo">These Hebrew characters in parenthesis (מִבְחָן) are rendered in Arial, because the webfont does not support them.</div>
+    <script src="assets/demo-fallback.js"></script>
+    
 
     <!-- <h2 id="more-examples">Preloading</h2>
     <p>By default Fontsamplers only load the fonts on display as needed, always
