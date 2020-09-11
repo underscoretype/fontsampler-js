@@ -12,7 +12,7 @@
     <script src="../dist/fontsampler.js"></script>
     <script src="../dist/fontsampler-skin.js"></script>
 
-    <link rel="stylesheet" href="../dist/fontsampler-skin.min.css">
+    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
     <!-- /Fontsampler -->
 </head>
 
@@ -20,179 +20,47 @@
     <header>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
         <h1>fontsampler-js</h1>
-        <p>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</p>
+        <strong>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</strong>
     </header>
 
-    <h1>API tests</h1>
+    <div id="demo-api" class="demo">Events & API demo</div>
 
-    <!-- API -->
-    <div id="demo-api" class="half">
-        <div id="demo-api-skin" class="demo">API tests with skin</div>
-        <div id="demo-api-no-skin" class="demo">API tests without skin</div>
+    <div id="api-methods">
+        <button id="api-init">FS.init()</button>
+        <button id="api-destroy">FS.destroy()</button>
+        <br>
+        <select id="api-option">
+            <option value="fontsize">fontsize</option>
+            <option value="lineheight">leading</option>
+            <option value="wght">weight</option>
+        </select>
+        <input id="api-value" type="text"></input>
+        <button id="api-set">FS.setValue(option, value)</button>
+        <button id="api-get">FS.getValue(option)</button>
+        <br>
+        <button id="api-options-minimal">Set minimal options</button>
+        <button id="api-options-extended">Set extended options</button>
+        <br>
+        <input id="api-text" type="text"><button id="api-set-text">Update text</button>
+        <br>
+        <button id="api-show-font">Switch to font number</button>
+        <select>
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="3">3</option>
+        </select>
     </div>
+    <div id="eventlog"></div>
 
-    <div>
-        <strong>Set fontsize:</strong><input type="number"><button data-property="fontsize">Update</button>
-    </div>
-    <div>
-        <strong>Change font:</strong><button class="button-font">Alegreya Regular</button><button class="button-font">Work Sans Regular</button>
-    </div>
-
-    <strong>Events:</strong>
-    <div id="eventlog">
-    </div>
+    <script src="assets/demo-api.js"></script>
 
     <footer>
         <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
-        <em>fontsampler-js is brought to you by Underscore</em><br>
-        <em>&copy; 2019 Johannes 'kontur' Neumeier</em><br>
+        fontsampler-js is brought to you by Underscore<br>
+        &copy; 2019-2020 Johannes 'kontur' Neumeier<br>
         <p><a href="../LICENCE.txt">Licensed under MIT License</a></p>
     </footer>
 
-    <script>
-        window.onload = function() {
-
-            var fonts = [ {
-                    "name": "Work Sans",
-                    "files": [
-                        "./fonts/work-sans/WorkSans-Roman-VF.woff2"
-                    ],
-                    "instances": [
-                        "wght 250|Work Sans Thin",
-                        "wght 275|Work Sans ExtraLight",
-                        "wght 300|Work Sans Light",
-                        "wght 400|Work Sans Regular",
-                        "wght 500|Work Sans Medium",
-                        "wght 600|Work Sans SemiBold",
-                        "wght 700|Work Sans Bold",
-                        "wght 800|Work Sans ExtraBold",
-                        "wght 900|Work Sans Black"
-                    ]
-                }, 
-                { 
-                    "name": "Alegreya Italic",
-                    "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]
-                },
-                {
-                    "name": "Alegreya Regular", 
-                    "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]
-                }
-            ]
-            var options = { 
-                // lazyload: true,
-                order: ["tester", ["fontsize", "lineheight", "fontfamily"], ["alignment", "language", "direction"], "variation"], 
-                ui: { 
-                    tester: true,
-                    fontsize: true, 
-                    lineheight: true, 
-                    fontfamily: {
-                        init: "Alegreya Regular"
-                    },
-                    alignment: true,
-                    opentype: true,
-                    language: true,
-                    variation: {
-                        axes: [{
-                            tag: "wght",
-                            init: 400,
-                            min: 0,
-                            max: 900,
-                            step: 1,
-                            label: "Weight"
-                        }]
-                    }
-                } 
-            }
-
-            var skinned = [
-                new Fontsampler(document.getElementById("demo-api-skin"), fonts, options),
-            ]
-            var raw = [
-                new Fontsampler(document.getElementById("demo-api-no-skin"), fonts, options),
-            ]
-
-            var events = [
-                "fontsampler.events.init",
-                "fontsampler.events.languagechanged",
-                "fontsampler.events.fontchanged",
-                "fontsampler.events.fontloaded",
-                "fontsampler.events.fontrendered",
-                "fontsampler.events.fontspreloaded",
-                "fontsampler.events.valuechanged",
-                "fontsampler.events.opentypechanged",
-            ]
-
-            for (var i = 0; i < skinned.length; i++) {
-                console.log("")
-                console.log("Init skinned Fontsampler:", i, skinned[i])
-                var s = skinned[i]
-                FontsamplerSkin(skinned[i])
-                for (var e = 0; e < events.length; e++) {
-                    skinned[i].root.addEventListener(events[e], logEvent)
-                }
-                skinned[i].init()
-                console.log("")
-            }
-
-            for (var k = 0; k < raw.length; k++) {
-                console.log("")
-                console.log("Init unskinned Fontsampler:", k, raw[k])
-                for (var e = 0; e < events.length; e++) {
-                    raw[k].root.addEventListener(events[e], logEvent)
-                }
-                raw[k].init()
-                console.log("")
-            }
-
-            function logEvent(e) {
-                var log = document.getElementById("eventlog")
-
-                var p = document.createElement("p")
-                p.textContent = e.type + ": "
-                if (e.detail) {
-                    p.textContent += JSON.stringify(e.detail)
-                }
-
-                log.insertBefore(p, log.firstChild)
-            }
-
-            function setValue(e) {
-                var button = e.currentTarget,
-                    attr = button.dataset.property,
-                    input = button.previousSibling,
-                    val = input.value
-
-                for (var i = 0; i < skinned.length; i++) {
-                    skinned[i].setValue(attr, val)                    
-                }
-
-                for (var k = 0; k < raw.length; k++) {
-                    raw[k].setValue(attr, val)
-                }
-            }
-
-            function setFont(e) {
-                
-                for (var i = 0; i < skinned.length; i++) {
-                    skinned[i].showFont(e.currentTarget.textContent)
-                }
-
-                for (var k = 0; k < raw.length; k++) {
-                    raw[k].showFont(e.currentTarget.textContent)
-                }
-            }
-
-            var buttons = document.querySelectorAll("[data-property]")
-            for (var b = 0; b < buttons.length; b++) {
-                buttons[b].addEventListener("click", setValue)
-            }
-
-            var fontbuttons = document.querySelectorAll(".button-font")
-            for (var c = 0; c < fontbuttons.length; c++) {
-                fontbuttons[c].addEventListener("click", setFont)
-            }
-            
-        }
-    </script>
 </body>
+
 </html>

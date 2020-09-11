@@ -296,7 +296,10 @@ function Fontsampler(_root, _fonts, _options) {
         ui.setActiveAxes(that.currentFont.axes)
         if ("instance" in that.currentFont === true) {
             var va = parseFontVariations(that.currentFont)
-            ui.setInputVariation(va)
+            for (var a = 0; a < that.currentFont.axes.length; a++) {
+                var axis = that.currentFont.axes[a]
+                ui.setValue(axis, va[axis])
+            }
         }
 
         // Update available OT features for this font
@@ -422,6 +425,10 @@ function Fontsampler(_root, _fonts, _options) {
 
     this.setLabel = function(key, value) {
         return ui.setLabelValue(key, value)
+    }
+
+    this.addEventListener = function(event, listener) {
+        this.root.addEventListener(event, listener)
     }
 
     return this

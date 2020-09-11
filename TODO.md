@@ -10,7 +10,7 @@
 ### Current issues
 - Programmatic changes not super reliable
 - [+] Code structure for UI changes and UI generation too obfuscated
-- [+] Variable font support treated as one UI element, when each axis should be an element
+- [+]Variable font support treated as one UI element, when each axis should be an element
 - Woff2/Woff structure antiquated
 - [+] Fallback font for Woff2 Variable required
 - Variable font init values buggy
@@ -22,6 +22,8 @@
 - Possibility to pass in different inits and configs for different breakpoints
 - Make documentation single page
 - Unicode range definition and rendering per font
+- Possibility to pass in "custom" elements into the fontsampler UI, this could be done by passing in either ID or DOM node to copy/place
+- Make opentype element optionally either checkbox or button group
 
 ### Desired sample configurations
 
@@ -121,7 +123,7 @@ FS.setFonts(options)
 
 FS.setText(textOrHtml)
 
-FS.setLabel(textOrHtml)
+//FS.setLabel(textOrHtml)
 
 FS.setValue(blockOrAxistag, value)
 

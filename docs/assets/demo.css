@@ -15,6 +15,7 @@ nav {
 
 h2,
 h3 {
+    clear: both;
     margin: 4em auto 2em;
 }
 
@@ -127,7 +128,8 @@ header {
 }
 
 footer {
-    margin-top: 5rem;
+    clear: both;
+    padding-top: 5rem;
 }
 
 .underscore-logo {
@@ -146,7 +148,22 @@ footer {
     width: 45%;
 }
 
+#api-methods {
+    width: 50%;
+    float: left;
+}
+
 #eventlog {
+    float: right;
+    width: 50%;
     max-height: 25vh;
     overflow-y: scroll;
+    background: #EEE;
+    min-height: 10em;
+    font-size: smaller;
+    font-family: monospace;
+    color: #666;
+    padding: 0.5em;
+    line-height: 1.5;
+    box-sizing: border-box;
 }

@@ -407,7 +407,7 @@ function UI(root, fonts, options) {
         var defaultKeys = Object.keys(defaults.config),
             allKeys = Object.keys(options.config),
             axisKeys = []
-        
+
         for (var i = 0; i < allKeys.length; i++) {
             var key = allKeys[i]
             if (defaultKeys.indexOf(key) === -1 && isAxisKey(key)) {
@@ -468,9 +468,9 @@ function UI(root, fonts, options) {
         setValue(e.target.dataset.fsjs, e.target.value)
     }
 
-    function onSlideVariation(e) {
-        setVariation(e.target.dataset.axis, e.target.value)
-    }
+    // function onSlideVariation(e) {
+    //     setVariation(e.target.dataset.axis, e.target.value)
+    // }
 
     function onSlide(e) {
         setValue(e.target.dataset.fsjs)
@@ -504,6 +504,7 @@ function UI(root, fonts, options) {
     }
 
     function sendNativeEvent(type, node) {
+        console.debug("sendNativeEvent", type, node)
         var evt = document.createEvent("HTMLEvents")
 
         evt.initEvent(type, false, true)
@@ -637,14 +638,17 @@ function UI(root, fonts, options) {
         return false
     }
 
-    function setValue(key, value) {
+    function _updateSlider(key, value) {
         var element = getElement(key)
-
-        if (isAxisKey(key)) {
-            var updateVariation = {}
-            updateVariation[key] = value
-            setVariations(updateVariation)
+        if (parseFloat(element.value) !== parseFloat(value)) {
+            element.value = value
+            sendNativeEvent("change", element)
         }
+    }
+
+    function setValue(key, value) {
+        console.debug("Fontsampler.ui.setValue()", key, value)
+        var element = getElement(key)
 
         switch (key) {
             case "fontsize":
@@ -659,11 +663,11 @@ function UI(root, fonts, options) {
                     value = utils.clamp(value, options.config[key].min,
                         options.config[key].max, options.config[key].init)
 
-                    if (element.value.toString() !== value.toString()) {
-                        element.value = value
-                        sendNativeEvent("change", element)
-                    }
                 }
+                if (parseFloat(element.value) !== parseFloat(value)) {
+                    sendNativeEvent("change", element)
+                }
+                _updateSlider(key, value)
 
                 setLabelValue(key, value)
                 setInputCss(keyToCss[key], value + options.config[key].unit)
@@ -697,6 +701,27 @@ function UI(root, fonts, options) {
 
             case "tester":
                 break;
+
+            default:
+                if (isAxisKey(key)) {
+                    // console.error("setValue AXIS", key, value, element)
+                    var updateVariation = {}
+
+                    if (typeof(value) === "undefined") {
+                        value = element.value
+                    }
+
+                    if (typeof(value) !== "object") {
+                        updateVariation[axis] = value
+                    }
+
+                    for (var axis in updateVariation) {
+                        if (updateVariation.hasOwnProperty(axis)) {
+                            val = setVariation(key, updateVariation[axis])
+                        }
+                    }
+                }
+                break;
         }
         var obj = {}
         obj[key] = value
@@ -707,55 +732,60 @@ function UI(root, fonts, options) {
      * Update a single variation axis and UI
      */
     function setVariation(axis, val) {
+        console.debug("Fontsampler.ui.setVariation()", axis, val)
         var v = getVariation(),
             opt = null
-
 
         // if (isValidAxisAndValue(axis, val)) {
         // TODO
         if (isAxisKey(axis)) {
-            // TODO refactor to: getAxisDefaults() and also use
+            // TODO refactor to: getAxisOptions() and also use
             // it on axis setup / options parsing
-            // opt = options.config.variation.axes.filter(function(optVal) {
-            //     return optVal.tag === axis
-            // })
-            opt = options.config[axis]
-            if (!opt || typeof(opt) === "undefined") {
-                opt = {
-                    min: 100,
-                    max: 900
-                }
-            }
-
-            if (typeof(opt.min) === "undefined") {
-                opt.min = 100
-            }
-            if (typeof(opt.max) === "undefined") {
-                opt.max = 900
-            }
+            opt = getAxisOptions(axis)
             v[axis] = utils.clamp(val, opt.min, opt.max)
 
-            setLabelValue(axis, val)
+            setLabelValue(axis, v[axis])
             setInputVariation(v)
+            _updateSlider(axis, v[axis])
+
+            return v[axis]
         }
     }
 
-    /**
-     * Bulk update several variations from object
-     * 
-     * @param object vals with variation:value pairs 
-     */
-    function setVariations(vals) {
-        if (typeof(vals) !== "object") {
-            return false
-        }
-
-        for (var axis in vals) {
-            if (vals.hasOwnProperty(axis)) {
-                setVariation(axis, vals[axis])
+    function getAxisOptions(axis) {
+        opt = options.config[axis]
+        if (!opt || typeof(opt) === "undefined") {
+            opt = {
+                min: 100,
+                max: 900
             }
         }
+
+        if (typeof(opt.min) === "undefined") {
+            opt.min = 100
+        }
+        if (typeof(opt.max) === "undefined") {
+            opt.max = 900
+        }
+        return opt
     }
+
+    // /**
+    //  * Bulk update several variations from object
+    //  * 
+    //  * @param object vals with variation:value pairs 
+    //  */
+    // function setVariations(vals) {
+    //     if (typeof(vals) !== "object") {
+    //         return false
+    //     }
+
+    //     for (var axis in vals) {
+    //         if (vals.hasOwnProperty(axis)) {
+    //             setVariation(axis, vals[axis])
+    //         }
+    //     }
+    // }
 
     function fontIsInstance(variation, fontname) {
         if (typeof(variation) !== "object") {
@@ -858,7 +888,7 @@ function UI(root, fonts, options) {
                         option.selected = true
                     }
                     element.value = instanceFont.name
-                    sendNativeEvent("change", element)
+                    // sendNativeEvent("change", element)
                 }
             }
         }
@@ -974,8 +1004,6 @@ function UI(root, fonts, options) {
         getValue: getValue,
         setValue: setValue,
 
-        setVariations: setVariations,
-
         getCssValue: getCssValue,
         getButtongroupValue: getButtongroupValue,
         getOpentype: getOpentype,
@@ -983,10 +1011,11 @@ function UI(root, fonts, options) {
         getCssAttrForKey: getCssAttrForKey,
         getKeyForCssAttr: getKeyForCssAttr,
         setInputCss: setInputCss,
-        setInputAttr: setInputAttr,
+        // setInputAttr: setInputAttr,
         setInputOpentype: setInputOpentype,
-        setInputVariation: setInputVariation,
+        // setInputVariation: setInputVariation,
         setInputText: setInputText,
+        
         setStatusClass: setStatusClass,
 
         setActiveFont: setActiveFont,

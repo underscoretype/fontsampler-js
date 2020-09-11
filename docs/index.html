@@ -506,6 +506,46 @@ classes: {
         &lt;/script&gt;
     </code>
 
+
+
+    <h2 id="events">Events & API</h2>
+    <p>Fontsampler instances have a variety of methods and events for 
+        programmatic manipulation. To demo these, below Fontsampler shows all
+        events and exposes API methods as buttons.</p>
+
+    <div id="demo-api" class="demo">Events & API demo</div>
+
+    <div id="api-methods">
+        <button id="api-init">FS.init()</button>
+        <button id="api-destroy">FS.destroy()</button>
+        <br>
+        <select id="api-option">
+            <option value="fontsize">fontsize</option>
+            <option value="lineheight">leading</option>
+            <option value="wght">weight</option>
+        </select>
+        <input id="api-value" type="text"></input>
+        <button id="api-set">FS.setValue(option, value)</button>
+        <button id="api-get">FS.getValue(option)</button>
+        <br>
+        <button id="api-options-minimal">Set minimal options</button>
+        <button id="api-options-extended">Set extended options</button>
+        <br>
+        <input id="api-text" type="text"><button id="api-set-text">Update text</button>
+        <br>
+        <button id="api-show-font">Switch to font number</button>
+        <select>
+            <option value="0">1</option>
+            <option value="1">2</option>
+            <option value="3">3</option>
+        </select>
+    </div>
+    <div id="eventlog"></div>
+
+    <script src="assets/demo-api.js"></script>
+
+
+
     <h2 id="misc">Miscellaneous other samples</h2>
     <h3 id="fallback-font">Fallback font</h3>
     <p>You can define the name of a <em>font-family</em> to serve as fallback 
