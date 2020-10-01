@@ -42,11 +42,11 @@
     },
     "devDependencies": {
         "browserify": "^16.2.3",
-        "derequire": "^2.0.6",
-        "http-server": "^0.11.1",
+        "derequire": "^2.1.1",
+        "http-server": "^0.12.3",
         "jasmine": "^3.4.0",
         "jasmine-ts-console-reporter": "^3.1.1",
-        "protractor": "^5.4.2",
+        "protractor": "^7.0.0",
         "uglifyjs": "^2.4.11"
     }
 }

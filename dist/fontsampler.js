@@ -436,7 +436,6 @@ var utils = _dereq_("./helpers/utils")
 var dom = _dereq_("./helpers/dom")
 var supports = _dereq_("./helpers/supports")
 
-
 /**
  * The main constructor for setting up a new Fontsampler instance
  * @param Node root 
@@ -808,16 +807,16 @@ function Fontsampler(_root, _fonts, _options) {
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, function (fontface) {
+            Fontloader.fromFiles(font.files, function(fontface) {
                 var fjson = JSON.stringify(fontface)
 
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
                     _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))
                 }
-                
+
                 initFont(fontface)
-            }, function (/* fontface */) {
+            }, function( /* fontface */ ) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)
                 that.currentFont = false
@@ -967,6 +966,7 @@ module.exports = {
 },{}],9:[function(_dereq_,module,exports){
 
 var supports = _dereq_("./supports")
+var errors = _dereq_("../constants/errors")
 
 /**
  * App specific helpers
@@ -1139,7 +1139,7 @@ module.exports = {
     extractFontsFromDOM: extractFontsFromDOM,
     bestWoff: bestWoff,
 }
-},{"./supports":11}],10:[function(_dereq_,module,exports){
+},{"../constants/errors":4,"./supports":11}],10:[function(_dereq_,module,exports){
 /**
  * Helper module to deal with caret position
  */
@@ -1299,9 +1299,14 @@ function clamp(value, min, max, fallback) {
  * @return {Array} flatten array
  */
 function flattenDeep(array) {
-    return array.reduce(function(acc, current) {
-        return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
-    }, []);
+    try {
+        return array.reduce(function(acc, current) {
+            return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
+        }, []);
+    } catch (e) {
+        console.error(e)
+        return []
+    }
 }
 
 function arrayUnique(a) {
@@ -1472,6 +1477,9 @@ function UI(root, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
+        while (root.childNodes.length) {
+            root.removeChild(root.childNodes[0])
+        }
 
         // Process the possible nested arrays in order one by one
         // · Existing DOM nodes will be validated and initiated
@@ -1487,6 +1495,13 @@ function UI(root, fonts, options) {
         }
 
         input = getElement("tester", blocks.tester)
+        if (options.originalText) {
+            console.warn("SET ORIGINAL TEXT", options.originalText.trim())
+            this.setInputText(options.originalText.trim())
+        }
+        if ("initialText" in options && options.initialText !== "") {
+            this.setInputText(options.initialText.trim())
+        }
 
         // after all nodes are instantiated, update the tester to reflect
         // the current state
@@ -1573,9 +1588,16 @@ function UI(root, fonts, options) {
         var block = document.createElement("div"),
             element = false,
             label = false,
-            opt = options.config[key]
+            opt = null
 
-        if (options.config[key].label) {
+        if (key in options.config === false) {
+            console.error("No options defined for block", key)
+            return false
+        }
+
+        opt = options.config[key]
+
+        if (opt.label) {
             label = uifactory.label(opt.label, opt.unit, opt.init, key)
             block.appendChild(label)
             addLabelClasses(label, key)
@@ -1627,6 +1649,10 @@ function UI(root, fonts, options) {
             options.classes.blockClass + "-type-" + type
         ]
 
+        if (key in options.config && "classes" in options.config[key]) {
+            classes.push(options.config[key].classes)
+        }
+
         dom.nodeAddClasses(block, classes)
         block.dataset.fsjsBlock = key
     }
@@ -1648,6 +1674,7 @@ function UI(root, fonts, options) {
             element = uifactory[type](key, options.config[key], element)
 
             dom.nodeAddClass(element, options.classes.elementClass)
+            
             element.dataset.fsjs = key
             element.dataset.fsjsUi = type
         } catch (e) {
@@ -2399,7 +2426,7 @@ function UI(root, fonts, options) {
         setInputOpentype: setInputOpentype,
         // setInputVariation: setInputVariation,
         setInputText: setInputText,
-        
+
         setStatusClass: setStatusClass,
 
         setActiveFont: setActiveFont,

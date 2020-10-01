@@ -3,14 +3,23 @@
  */
 body {
     margin: 5rem auto;
-    max-width: 50rem;
-    padding: 0 2rem;
+    max-width: 60rem;
+    padding: 0 2rem 0 17rem;
     color: #333;
     font-size: 18px;
+    position: relative;
 }
 
 nav {
-    font-size: larger;
+    width: 15rem;
+    position: fixed;
+    top: 12rem;
+    margin-left: -15rem;
+}
+
+main {
+    /* max-width: 50rem; */
+    width: 45rem;
 }
 
 h2,
@@ -33,11 +42,11 @@ a {
 }
 
 ul {
-    padding-left: 0.75em;
+    padding-left: 0.5em;
 }
 
 li {
-    padding: 0.25em 0;
+    padding: 0.1em 0;
 }
 
 .demo {
@@ -75,6 +84,7 @@ code {
     line-height: 1.35em;
     letter-spacing: 0.025em;
     font-size: smaller;
+    overflow-x: scroll;
 }
 
 code em {
@@ -138,29 +148,26 @@ footer {
     max-width: 150px;
 }
 
-.half {
+.split {
     display: flex;
     justify-content: space-between;
-    margin: 0 -10em;
 }
-.half .demo {
+.split > *{
     box-sizing: border-box;
-    width: 45%;
+    width: 50%;
+    padding: 0 10px;
 }
 
 #api-methods {
-    width: 50%;
-    float: left;
+    line-height: 1.5;
 }
 
 #eventlog {
-    float: right;
-    width: 50%;
     max-height: 25vh;
     overflow-y: scroll;
     background: #EEE;
     min-height: 10em;
-    font-size: smaller;
+    font-size: 0.75rem;
     font-family: monospace;
     color: #666;
     padding: 0.5em;

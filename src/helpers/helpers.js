@@ -1,5 +1,6 @@
 
 var supports = require("./supports")
+var errors = require("../constants/errors")
 
 /**
  * App specific helpers

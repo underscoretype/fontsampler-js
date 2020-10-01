@@ -82,22 +82,15 @@ options = {
 
 fonts = [
     {
-        name: "Optional name",
-        files: [
+        "name": "Optional name",
+        "files": [
             variable.woff2,
             fallback.woff
-        ]
-        "instances": [
-            "wght 250|Work Sans Thin",
-            "wght 275|Work Sans ExtraLight",
-            "wght 300|Work Sans Light",
-            "wght 400|Work Sans Regular",
-            "wght 500|Work Sans Medium",
-            "wght 600|Work Sans SemiBold",
-            "wght 700|Work Sans Bold",
-            "wght 800|Work Sans ExtraBold",
-            "wght 900|Work Sans Black"
         ],
+        "variation": {
+            "wght": 250,
+            "opsz": 12
+        }
         "language": "ar-afb",
         "features": ["rlig", "calt"]
     }

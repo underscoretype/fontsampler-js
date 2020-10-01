@@ -22,7 +22,6 @@ var utils = require("./helpers/utils")
 var dom = require("./helpers/dom")
 var supports = require("./helpers/supports")
 
-
 /**
  * The main constructor for setting up a new Fontsampler instance
  * @param Node root 
@@ -394,16 +393,16 @@ function Fontsampler(_root, _fonts, _options) {
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, function (fontface) {
+            Fontloader.fromFiles(font.files, function(fontface) {
                 var fjson = JSON.stringify(fontface)
 
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
                     _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))
                 }
-                
+
                 initFont(fontface)
-            }, function (/* fontface */) {
+            }, function( /* fontface */ ) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)
                 that.currentFont = false

@@ -9,17 +9,17 @@ window.addEventListener("load", function () {
             "files": [
                 "./fonts/work-sans/WorkSans-Roman-VF.woff2"
             ],
-            "instances": [
-                "wght 250|Work Sans Thin",
-                "wght 275|Work Sans ExtraLight",
-                "wght 300|Work Sans Light",
-                "wght 400|Work Sans Regular",
-                "wght 500|Work Sans Medium",
-                "wght 600|Work Sans SemiBold",
-                "wght 700|Work Sans Bold",
-                "wght 800|Work Sans ExtraBold",
-                "wght 900|Work Sans Black"
-            ],
+            // "instances": [
+            //     "wght 250|Work Sans Thin",
+            //     "wght 275|Work Sans ExtraLight",
+            //     "wght 300|Work Sans Light",
+            //     "wght 400|Work Sans Regular",
+            //     "wght 500|Work Sans Medium",
+            //     "wght 600|Work Sans SemiBold",
+            //     "wght 700|Work Sans Bold",
+            //     "wght 800|Work Sans ExtraBold",
+            //     "wght 900|Work Sans Black"
+            // ],
             "language": "ar-afb",
             "features": ["rlig", "calt"]
         },
@@ -94,7 +94,7 @@ window.addEventListener("load", function () {
             // The letter-spacing slider
             letterspacing: {
                 unit: "em",
-                init: -1,
+                init: 0,
                 min: -1,
                 max: 1,
                 step: 0.05,
@@ -161,6 +161,6 @@ window.addEventListener("load", function () {
     fs.addEventListener("fontsampler.events.valuechanged", function (e) {
         console.error("CHANGE", e.detail)
     })
-    // FontsamplerSkin(fs)
+    FontsamplerSkin(fs)
     fs.init()
 })
