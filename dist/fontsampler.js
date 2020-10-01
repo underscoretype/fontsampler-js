@@ -1572,8 +1572,16 @@ function UI(root, fonts, options) {
             }
 
             return wrapper
+        } else if (key instanceof HTMLElement) {
+            console.warn("adding custom DOM element", key)
+            wrapper = document.createElement("div")
+            wrapper.className = options.classes.blockClass
+            wrapper.appendChild(key)
+
+            return wrapper  
         } else {
             // Skipping not defined UI element
+            console.warn("Skipping unspecified 'order' item, not a known Fontsampler JS element nor a valid DOM node: " + key)
 
             return false
         }

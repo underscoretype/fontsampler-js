@@ -46,6 +46,7 @@
                 <ul>
                     <li><a href="#lazyloading">Lazyloading</a></li>
                     <li><a href="#fallback-font">Fallback font</a></li>
+                    <li><a href="#inserting-dom-elements">Inserting DOM elements</a></li>
                 </ul>
             </li>
             <!-- <li><a href="#more-examples">More examples</a>
@@ -607,6 +608,45 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
         the other fonts are only loaded when a user selects them.
     </p>
     <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser developer tools’ network throttling and network tab to see what’s going on).</p>
+    
+    
+    <h3 id="inserting-dom-elements">Inserting DOM elements</h3>
+    <p>If you have a need to insert some custom DOM node into the Fontsampler
+        UI, for example to implement some additional custom UI control, you can
+        pass in a reference to a <em>HTMLElement</em>.</p>
+    
+    <button id="custom-button" onclick="window.alert('Custom button clicked');">Custom button</button>
+    <img id="custom-image" src="assets/underscore-logo.svg">
+    <div id="demo-custom-elements" class="demo">Hello World</div>
+    <script src="assets/demo-custom-elements.js"></script>
+
+    <code>&lt;!-- somewhere outside the Fontsampler DOM node --&gt;
+&lt;button id="<em>custom-bottom</em>"&gt;Custom button&lt;/button&gt;
+&lt;img id="<em>custom-image</em>" src="…" /&gt;
+
+&lt;div id="demo"&gt;Hello custom DOM elements&lt;/div&gt;
+
+&lt;script&gt;
+<i>// Get the HTMLElement (use getElementById, querySelector, etc.)</i>
+<i>// It is important to pass in a single node, not an Array/Selection</i>
+var <em>customButton</em> = document.getElementById("<em>custom-button</em>")
+var <em>customImage</em> = document.getElementById("<em>custom-image</em>")
+
+var fonts = […]
+
+var options = {
+    order: [
+        <i>// Note that you are passing a reference to the actual HTMLElement, not its id!</i>
+        [<em>customImage</em>, "fontsize", "lineheight"],
+        ["fontfamily", "alignment", <em>customButton</em>],
+        ["tester"],
+    ]
+}
+
+new Fontsampler(document.getElementById("demo"), fonts, options).init()
+&lt;/script&gt;</code>
+    
+    
     <!--
     
 

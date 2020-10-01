@@ -174,3 +174,18 @@ footer {
     line-height: 1.5;
     box-sizing: border-box;
 }
+
+#custom-button {
+    border: 1px solid #DE2543;
+    color: #DE2543;
+    padding: 0.45em 1em;
+    border-radius: 2px;
+    font-size: inherit;
+    font-family: inherit;
+    margin-top: 1.5em;
+    cursor: pointer;
+}
+
+#custom-image {
+    padding: 0 1em 1em 0;
+}
