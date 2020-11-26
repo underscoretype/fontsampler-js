@@ -15,6 +15,10 @@ function UIElements(root, options) {
             text = document.createElement("span"),
             val, unit
 
+        if (labelText === false) {
+            return false
+        }
+
         label.dataset.fsjsFor = relatedInput
         dom.nodeAddClass(label, options.classes.labelClass)
 

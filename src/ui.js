@@ -38,7 +38,7 @@ var dom = require("./helpers/dom")
 var utils = require("./helpers/utils")
 var supports = require("./helpers/supports")
 
-function UI(root, fonts, options) {
+function UI(fs, fonts, options) {
 
     var ui = {
             tester: "textfield",
@@ -60,7 +60,8 @@ function UI(root, fonts, options) {
         blocks = {},
         uifactory = null, // instance of uielements
         input = null, // the tester text field
-        originalText = "" // used to store textContent that was in the root node on init
+        originalText = "", // used to store textContent that was in the root node on init
+        root = fs.root
 
     function init() {
         console.debug("Fontsampler.Interface.init()", root, fonts, options)
@@ -107,7 +108,6 @@ function UI(root, fonts, options) {
 
         input = getElement("tester", blocks.tester)
         if (options.originalText) {
-            console.warn("SET ORIGINAL TEXT", options.originalText.trim())
             this.setInputText(options.originalText.trim())
         }
         if ("initialText" in options && options.initialText !== "") {
@@ -186,10 +186,20 @@ function UI(root, fonts, options) {
         } else if (key instanceof HTMLElement) {
             console.warn("adding custom DOM element", key)
             wrapper = document.createElement("div")
-            wrapper.className = options.classes.blockClass
+            if (key.classList) {
+                wrapper.classList = key.classList
+                key.className = ""
+            }
+            wrapper.className += " " + options.classes.blockClass
+
+            if (key.hasAttribute("id")) {
+                wrapper.setAttribute("id", key.getAttribute("id"))
+                key.removeAttribute("id")
+            }
+            console.log("custom", wrapper)
             wrapper.appendChild(key)
 
-            return wrapper  
+            return wrapper
         } else {
             // Skipping not defined UI element
             console.warn("Skipping unspecified 'order' item, not a known Fontsampler JS element nor a valid DOM node: " + key)
@@ -267,6 +277,9 @@ function UI(root, fonts, options) {
             options.classes.blockClass + "-" + key,
             options.classes.blockClass + "-type-" + type
         ]
+        if (isAxisKey(key)) {
+            classes.push(options.classes.blockClassAxis)
+        }
 
         if (key in options.config && "classes" in options.config[key]) {
             classes.push(options.config[key].classes)
@@ -530,11 +543,16 @@ function UI(root, fonts, options) {
     }
 
     function sendEvent(type, opt) {
+        opt.fontsampler = fs
         root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }
 
     function sendNativeEvent(type, node) {
         console.debug("sendNativeEvent", type, node)
+        if (!type || !node) {
+            console.error("Fontsampler.ui.sendNativeEvent: type or node not defined")
+            return
+        }
         var evt = document.createEvent("HTMLEvents")
 
         evt.initEvent(type, false, true)
@@ -618,6 +636,10 @@ function UI(root, fonts, options) {
         var axes = getAxisKeys(),
             input,
             va = {}
+
+        if (!input) {
+            return {}
+        }
 
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
@@ -714,11 +736,7 @@ function UI(root, fonts, options) {
             case "fontfamily":
                 // Trigger an event that will start the loading process in the
                 // Fontsampler instance
-                root.dispatchEvent(new CustomEvent(events.fontChanged, {
-                    detail: {
-                        font: value
-                    }
-                }))
+                sendEvent(events.fontChanged, { font: value })
                 break;
 
             case "alignment":
@@ -734,7 +752,6 @@ function UI(root, fonts, options) {
 
             default:
                 if (isAxisKey(key)) {
-                    // console.error("setValue AXIS", key, value, element)
                     var updateVariation = {}
 
                     if (typeof(value) === "undefined") {
@@ -980,7 +997,7 @@ function UI(root, fonts, options) {
                     option.selected = true
                     sendNativeEvent("change", blocks.language)
 
-                    root.dispatchEvent(new CustomEvent(events.languageChanged))
+                    sendEvent(events.languageChanged)
                 }
             }
         }

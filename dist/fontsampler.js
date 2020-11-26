@@ -144,6 +144,7 @@ module.exports = {
         preloadingClass: "fsjs-preloading",
         wrapperClass: "fsjs-wrapper",
         blockClass: "fsjs-block",
+        blockClassAxis: "fsjs-block-axis",
         elementClass: "fsjs-element",
         labelClass: "fsjs-label",
         labelTextClass: "fsjs-label-text",
@@ -234,7 +235,10 @@ module.exports = {
     "noFonts": "Fontsampler: No fonts were passed in.",
     "initFontFormatting": "Fontsampler: Passed in fonts are not in expected format. Expected [ { name: 'Font Name', files: [ 'fontfile.woff', 'fontfile.woff2' ] }, … ]",
     "fileNotfound": "Fontsampler: The passed in file could not be loaded.",
+
     "missingRoot": "Fontsampler: Passed in root element invalid: ",
+    "missingFonts": "Fontsampler: No fonts passed in",
+    
     "tooManyFiles": "Fontsampler: Supplied more than one woff or woff2 for a font: ",
     "invalidUIItem": "Fontsampler: The supplied UI item is not supported: ",
     "invalidEvent": "Fontsampler: Invalid event type. You can only register Fontsampler events on the Fontsampler instance.",
@@ -463,6 +467,10 @@ function Fontsampler(_root, _fonts, _options) {
     if (!_root) {
         throw new Error(errors.missingRoot + _root)
     }
+    
+    if (!Array.isArray(_fonts) || _fonts.length < 1) {
+        throw new Error(errors.missingFonts)
+    }
     this.root = _root
     this.initialized = false
     this.currentFont = false
@@ -472,100 +480,36 @@ function Fontsampler(_root, _fonts, _options) {
     // from the root node data attributes
     options = parseOptions.call(this, _options)
     fonts = parseFonts.call(this, _fonts)
-    fonts = parseFontInstances.call(this, fonts)
+    ui = Interface(this, fonts, options)
 
-    ui = Interface(this.root, fonts, options)
-
-    function parseFontInstances(fonts) {
-
-        // CSS.supports support superseds variable font support, so it is a 
-        // handy way to eliminate pre-variable font browsers
-        // Bail early if not support for variations
-        if (!supports.variableFonts) {
-            return fonts
-        }
-
-        var parsed = []
-
-        for (var f = 0; f < fonts.length; f++) {
-            var font = fonts[f],
-                bestWoff = helpers.bestWoff(font.files)
-
-            if ("instances" in font === true && Array.isArray(font.instances)) {
-
-                if (bestWoff === false || bestWoff.substr(-4) === "woff" || !supports.woff2) {
-                    // no point in registering instances as fonts with no variable font support
-                    font.axes = []
-                    font.instances = []
-                    parsed.push(font)
-
-                    continue
-                }
-
-                for (var v = 0; v < font.instances.length; v++) {
-                    var parts = helpers.parseParts(font.instances[v])
-                    axes = parts.val.split(",").map(function(value /*, index*/ ) {
-                        var parts = value.trim().split(" ")
-                        return parts[0]
-                    })
-                    if ("axes" in font === true) {
-                        axes = utils.arrayUnique(axes.concat(font.axes))
-                    }
-                    parsed.push({
-                        name: parts.text,
-                        files: font.files,
-                        instance: parts.val,
-                        axes: axes,
-                        language: font.language,
-                        features: font.features
-                    })
-                }
-            } else {
-                font.axes = font.axes ? font.axes : []
-                parsed.push(font)
-            }
-        }
-
-        return parsed
-    }
-
-    function parseFontVariations(font) {
-        var va = {},
-            parts
-
-        if ("instance" in font === false) {
-            return va
-        }
-
-        parts = font.instance.split(",")
-        for (var p = 0; p < parts.length; p++) {
-            var split = parts[p].trim().split(" ")
-            va[split[0]] = split[1]
-            var input = _root.querySelector("[data-axis='" + split[0] + "']")
-            if (input) {
-                input.value = split[1]
-                ui.sendNativeEvent("change", input)
-            }
-            ui.setLabelValue(split[0], split[1])
-        }
-
-        return va
-    }
 
     function parseFonts(fonts) {
-        var extractedFonts = helpers.extractFontsFromDOM(this.root)
+        // FIXME review or ditch
+        // var extractedFonts = helpers.extractFontsFromDOM(this.root)
 
-        // Extract fonts; Look first on root element, then on select, then in
-        // passed in fonts Array
-        if ((!fonts || fonts.length < 1) && extractedFonts) {
-            fonts = extractedFonts
-        }
-        if (!fonts) {
-            throw new Error(errors.noFonts)
-        }
-        if (!helpers.validateFontsFormatting(fonts)) {
-            console.error(fonts)
-            throw new Error(errors.initFontFormatting)
+        // // Extract fonts; Look first on root element, then on select, then in
+        // // passed in fonts Array
+        // if ((!fonts || fonts.length < 1) && extractedFonts) {
+        //     fonts = extractedFonts
+        // }
+        // if (!fonts) {
+        //     throw new Error(errors.noFonts)
+        // }
+        // if (!helpers.validateFontsFormatting(fonts)) {
+        //     console.error(fonts)
+        //     throw new Error(errors.initFontFormatting)
+        // }
+
+        // Store each font's axes and parse instance definitions into obj form
+        for (var i = 0; i < fonts.length; i++) {
+            var font = fonts[i]
+
+            if ("instance" in Object.keys(font)) {
+                font.instance = helpers.parseVariation(font.instance)
+                font.axes = Object.keys(font.instance)
+            } else {
+                font.axes = []
+            }
         }
 
         return fonts
@@ -708,10 +652,8 @@ function Fontsampler(_root, _fonts, _options) {
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
         if ("instance" in that.currentFont === true) {
-            var va = parseFontVariations(that.currentFont)
-            for (var a = 0; a < that.currentFont.axes.length; a++) {
-                var axis = that.currentFont.axes[a]
-                ui.setValue(axis, va[axis])
+            for (var tag in that.currentFont.instance) {
+                ui.setValue(tag, that.currentFont.instance[tag])
             }
         }
 
@@ -727,7 +669,16 @@ function Fontsampler(_root, _fonts, _options) {
 
         preloader.resume()
 
-        _root.dispatchEvent(new CustomEvent(events.fontRendered))
+        // Set the is-instance or is-static class on the root
+        dom.nodeRemoveClass(that.root, "is-instance")
+        dom.nodeRemoveClass(that.root, "is-static")
+        dom.nodeAddClass(that.root, !!that.currentFont.instance ? "is-instance": "is-static")
+
+        _root.dispatchEvent(new CustomEvent(events.fontRendered, {
+            detail: {
+                fontsampler: that
+            }
+        }))
 
     }
 
@@ -1132,12 +1083,42 @@ function bestWoff(files) {
     return false
 }
 
+
+function parseVariation(stringOrObj) {
+    var variations = {},
+        parts;
+        
+    if (typeof(stringOrObj) === "string" && stringOrObj.trim() !== "") {
+        // split all declarations by commas, then parse each axis to value pair
+        stringOrObj = stringOrObj.replace(/'|"/gm, "")
+        
+        parts = stringOrObj.split(",")
+        for (var i = 0; i < parts.length; i++) {
+            try {
+                var part = parts[i],
+                    axis = part.match(/^\s?[A-z]{4}\s?/gm),
+                    val = part.match(/\s?[0-9\.]+\s?/gm)
+                if (axis.length > 0 && val.length > 0) {
+                    variations[axis[0].trim()] = val[0].trim()
+                }
+            } catch (e) {
+                error.log(e)
+            }
+        }
+    } else {
+        // TODO validate/parse
+        variations = stringOrObj
+    }
+    return variations
+}
+
 module.exports = {
     getExtension: getExtension,   
     parseParts: parseParts,
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
     bestWoff: bestWoff,
+    parseVariation: parseVariation
 }
 },{"../constants/errors":4,"./supports":11}],10:[function(_dereq_,module,exports){
 /**
@@ -1427,7 +1408,7 @@ var dom = _dereq_("./helpers/dom")
 var utils = _dereq_("./helpers/utils")
 var supports = _dereq_("./helpers/supports")
 
-function UI(root, fonts, options) {
+function UI(fs, fonts, options) {
 
     var ui = {
             tester: "textfield",
@@ -1449,7 +1430,8 @@ function UI(root, fonts, options) {
         blocks = {},
         uifactory = null, // instance of uielements
         input = null, // the tester text field
-        originalText = "" // used to store textContent that was in the root node on init
+        originalText = "", // used to store textContent that was in the root node on init
+        root = fs.root
 
     function init() {
         console.debug("Fontsampler.Interface.init()", root, fonts, options)
@@ -1496,7 +1478,6 @@ function UI(root, fonts, options) {
 
         input = getElement("tester", blocks.tester)
         if (options.originalText) {
-            console.warn("SET ORIGINAL TEXT", options.originalText.trim())
             this.setInputText(options.originalText.trim())
         }
         if ("initialText" in options && options.initialText !== "") {
@@ -1575,10 +1556,20 @@ function UI(root, fonts, options) {
         } else if (key instanceof HTMLElement) {
             console.warn("adding custom DOM element", key)
             wrapper = document.createElement("div")
-            wrapper.className = options.classes.blockClass
+            if (key.classList) {
+                wrapper.classList = key.classList
+                key.className = ""
+            }
+            wrapper.className += " " + options.classes.blockClass
+
+            if (key.hasAttribute("id")) {
+                wrapper.setAttribute("id", key.getAttribute("id"))
+                key.removeAttribute("id")
+            }
+            console.log("custom", wrapper)
             wrapper.appendChild(key)
 
-            return wrapper  
+            return wrapper
         } else {
             // Skipping not defined UI element
             console.warn("Skipping unspecified 'order' item, not a known Fontsampler JS element nor a valid DOM node: " + key)
@@ -1656,6 +1647,9 @@ function UI(root, fonts, options) {
             options.classes.blockClass + "-" + key,
             options.classes.blockClass + "-type-" + type
         ]
+        if (isAxisKey(key)) {
+            classes.push(options.classes.blockClassAxis)
+        }
 
         if (key in options.config && "classes" in options.config[key]) {
             classes.push(options.config[key].classes)
@@ -1919,11 +1913,16 @@ function UI(root, fonts, options) {
     }
 
     function sendEvent(type, opt) {
+        opt.fontsampler = fs
         root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }
 
     function sendNativeEvent(type, node) {
         console.debug("sendNativeEvent", type, node)
+        if (!type || !node) {
+            console.error("Fontsampler.ui.sendNativeEvent: type or node not defined")
+            return
+        }
         var evt = document.createEvent("HTMLEvents")
 
         evt.initEvent(type, false, true)
@@ -2007,6 +2006,10 @@ function UI(root, fonts, options) {
         var axes = getAxisKeys(),
             input,
             va = {}
+
+        if (!input) {
+            return {}
+        }
 
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
@@ -2103,11 +2106,7 @@ function UI(root, fonts, options) {
             case "fontfamily":
                 // Trigger an event that will start the loading process in the
                 // Fontsampler instance
-                root.dispatchEvent(new CustomEvent(events.fontChanged, {
-                    detail: {
-                        font: value
-                    }
-                }))
+                sendEvent(events.fontChanged, { font: value })
                 break;
 
             case "alignment":
@@ -2123,7 +2122,6 @@ function UI(root, fonts, options) {
 
             default:
                 if (isAxisKey(key)) {
-                    // console.error("setValue AXIS", key, value, element)
                     var updateVariation = {}
 
                     if (typeof(value) === "undefined") {
@@ -2369,7 +2367,7 @@ function UI(root, fonts, options) {
                     option.selected = true
                     sendNativeEvent("change", blocks.language)
 
-                    root.dispatchEvent(new CustomEvent(events.languageChanged))
+                    sendEvent(events.languageChanged)
                 }
             }
         }
@@ -2465,6 +2463,10 @@ function UIElements(root, options) {
         var label = document.createElement("label"),
             text = document.createElement("span"),
             val, unit
+
+        if (labelText === false) {
+            return false
+        }
 
         label.dataset.fsjsFor = relatedInput
         dom.nodeAddClass(label, options.classes.labelClass)

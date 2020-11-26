@@ -166,10 +166,40 @@ function bestWoff(files) {
     return false
 }
 
+
+function parseVariation(stringOrObj) {
+    var variations = {},
+        parts;
+        
+    if (typeof(stringOrObj) === "string" && stringOrObj.trim() !== "") {
+        // split all declarations by commas, then parse each axis to value pair
+        stringOrObj = stringOrObj.replace(/'|"/gm, "")
+        
+        parts = stringOrObj.split(",")
+        for (var i = 0; i < parts.length; i++) {
+            try {
+                var part = parts[i],
+                    axis = part.match(/^\s?[A-z]{4}\s?/gm),
+                    val = part.match(/\s?[0-9\.]+\s?/gm)
+                if (axis.length > 0 && val.length > 0) {
+                    variations[axis[0].trim()] = val[0].trim()
+                }
+            } catch (e) {
+                error.log(e)
+            }
+        }
+    } else {
+        // TODO validate/parse
+        variations = stringOrObj
+    }
+    return variations
+}
+
 module.exports = {
     getExtension: getExtension,   
     parseParts: parseParts,
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
     bestWoff: bestWoff,
+    parseVariation: parseVariation
 }
