@@ -4,21 +4,77 @@
 window.addEventListener("load", function() {
 
     var fonts = [{
-            "name": "Work Sans",
+            "name": "Work Sans Thin",
             "files": [
                 "./fonts/work-sans/WorkSans-Roman-VF.woff2"
             ],
-            "instances": [
-                "wght 250|Work Sans Thin",
-                "wght 275|Work Sans ExtraLight",
-                "wght 300|Work Sans Light",
-                "wght 400|Work Sans Regular",
-                "wght 500|Work Sans Medium",
-                "wght 600|Work Sans SemiBold",
-                "wght 700|Work Sans Bold",
-                "wght 800|Work Sans ExtraBold",
-                "wght 900|Work Sans Black"
+            // Define instances either as "css" variation string
+            "instance": '"wght" 250',
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Extralight",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
             ],
+            // Or define instances as objects
+            "instance": { wght: 275 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Light",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 300 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Regular",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 400 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Medium",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 500 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans SemiBold",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 600 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Bold",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 700 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans ExtraBold",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 800 },
+            "language": "ar-afb",
+            "features": ["rlig", "calt"]
+        }, {
+            "name": "Work Sans Black",
+            "files": [
+                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
+            ],
+            "instance": { wght: 900 },
             "language": "ar-afb",
             "features": ["rlig", "calt"]
         },
@@ -106,7 +162,7 @@ window.addEventListener("load", function() {
 
                 // Supply the exact name of the Font (fontname, not file!) to be selected
                 // and loaded first, by default the first font passed in
-                init: ""
+                // init: "Alegreya Italic"
             },
 
             // The set of buttons controlling alignment

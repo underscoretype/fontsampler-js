@@ -14,6 +14,7 @@ module.exports = {
         preloadingClass: "fsjs-preloading",
         wrapperClass: "fsjs-wrapper",
         blockClass: "fsjs-block",
+        blockClassAxis: "fsjs-block-axis",
         elementClass: "fsjs-element",
         labelClass: "fsjs-label",
         labelTextClass: "fsjs-label-text",
