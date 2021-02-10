@@ -1038,8 +1038,8 @@ function UI(fs, fonts, options) {
 
     function setInputText(text) {
         if (text && input) {
-            input.textContent = text
-        }
+            input.innerHTML = text
+        } 
     }
 
     function setLabelValue(key, value) {
