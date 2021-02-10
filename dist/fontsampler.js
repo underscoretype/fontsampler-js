@@ -2410,9 +2410,10 @@ function UI(fs, fonts, options) {
     }
 
     function setInputText(text) {
+        console.warn("SET TEXT")
         if (text && input) {
-            input.textContent = text
-        }
+            input.innerHTML = text
+        } 
     }
 
     function setLabelValue(key, value) {
