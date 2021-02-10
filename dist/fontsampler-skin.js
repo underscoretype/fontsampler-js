@@ -1218,6 +1218,8 @@ module.exports = {
     "fontsPreloaded": "fontsampler.events.fontspreloaded",
     "valueChanged": "fontsampler.events.valuechanged",
     "opentypeChanged": "fontsampler.events.opentypechanged",
+    "focused": "fontsampler.events.focused",
+    "blurred": "fontsampler.events.blurred",
 }
 
 },{}],4:[function(_dereq_,module,exports){

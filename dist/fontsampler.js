@@ -153,6 +153,7 @@ module.exports = {
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
         disabledClass: "fsjs-disabled",
+        focusedClass: "fsjs-focused",
     },
     order: [
         // ["fontsize", "lineheight", "letterspacing"],
@@ -259,6 +260,8 @@ module.exports = {
     "fontsPreloaded": "fontsampler.events.fontspreloaded",
     "valueChanged": "fontsampler.events.valuechanged",
     "opentypeChanged": "fontsampler.events.opentypechanged",
+    "focused": "fontsampler.events.focused",
+    "blurred": "fontsampler.events.blurred",
 }
 
 },{}],6:[function(_dereq_,module,exports){
@@ -1522,6 +1525,16 @@ function UI(fs, fonts, options) {
                 document.execCommand('paste', false, text);
             }
         });
+
+        blocks.tester.addEventListener('focusin', function(e) {
+            sendEvent(events.focused)
+            dom.nodeAddClass(root, options.classes.focusedClass)
+        })
+
+        blocks.tester.addEventListener('focusout', function (e) {
+            sendEvent(events.blurred)
+            dom.nodeRemoveClass(root, options.classes.focusedClass)
+        })
     }
 
     /**
@@ -1554,7 +1567,6 @@ function UI(fs, fonts, options) {
 
             return wrapper
         } else if (key instanceof HTMLElement) {
-            console.warn("adding custom DOM element", key)
             wrapper = document.createElement("div")
             if (key.classList) {
                 wrapper.classList = key.classList
@@ -1913,6 +1925,9 @@ function UI(fs, fonts, options) {
     }
 
     function sendEvent(type, opt) {
+        if (typeof(opt) === "undefined") {
+            var opt = {}
+        }
         opt.fontsampler = fs
         root.dispatchEvent(new CustomEvent(type, { detail: opt }))
     }

@@ -23,6 +23,7 @@ module.exports = {
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
         disabledClass: "fsjs-disabled",
+        focusedClass: "fsjs-focused",
     },
     order: [
         // ["fontsize", "lineheight", "letterspacing"],
