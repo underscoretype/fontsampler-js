@@ -30,6 +30,7 @@ var supports = require("./helpers/supports")
  */
 function Fontsampler(_root, _fonts, _options) {
     console.debug("Fontsampler()", _root, _fonts, _options)
+    console.error("HELLO WORLD")
 
     var ui, options, fonts,
         preloader = new Preloader(),
@@ -233,6 +234,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
+        console.log("CURRENT FONT", that.currentFont)
         if ("instance" in that.currentFont === true) {
             for (var tag in that.currentFont.instance) {
                 ui.setValue(tag, that.currentFont.instance[tag])

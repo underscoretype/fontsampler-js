@@ -449,8 +449,7 @@ function UI(fs, fonts, options) {
     // }
 
     function isAxisKey(key) {
-        return Object.keys(defaults.config).indexOf(key) === -1 &&
-            key.length <= 4
+        return Object.keys(options.config).indexOf(key) !== -1 && String(key).length === 4
     }
 
     function getAxisKeys() {
@@ -641,17 +640,10 @@ function UI(fs, fonts, options) {
      * @param {*} axis 
      */
     function getVariation(axis) {
-        // if (!blocks.variation) {
-        //     return false
-        // }
 
         var axes = getAxisKeys(),
             input,
-            va = {}
-
-        if (!input) {
-            return {}
-        }
+            va = {};
 
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
@@ -771,7 +763,7 @@ function UI(fs, fonts, options) {
                     }
 
                     if (typeof(value) !== "object") {
-                        updateVariation[axis] = value
+                        updateVariation[key] = value
                     }
 
                     for (var axis in updateVariation) {
@@ -793,11 +785,11 @@ function UI(fs, fonts, options) {
     function setVariation(axis, val) {
         console.debug("Fontsampler.ui.setVariation()", axis, val)
         var v = getVariation(),
-            opt = null
+            opt = null;
 
-        // if (isValidAxisAndValue(axis, val)) {
         // TODO
         if (isAxisKey(axis)) {
+            console.log("AXIS KEY", axis, isAxisKey(axis))
             // TODO refactor to: getAxisOptions() and also use
             // it on axis setup / options parsing
             opt = getAxisOptions(axis)
