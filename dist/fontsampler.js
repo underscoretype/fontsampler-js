@@ -451,6 +451,7 @@ var supports = _dereq_("./helpers/supports")
  */
 function Fontsampler(_root, _fonts, _options) {
     console.debug("Fontsampler()", _root, _fonts, _options)
+    console.error("HELLO WORLD")
 
     var ui, options, fonts,
         preloader = new Preloader(),
@@ -654,6 +655,7 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
+        console.log("CURRENT FONT", that.currentFont)
         if ("instance" in that.currentFont === true) {
             for (var tag in that.currentFont.instance) {
                 ui.setValue(tag, that.currentFont.instance[tag])
@@ -1822,8 +1824,7 @@ function UI(fs, fonts, options) {
     // }
 
     function isAxisKey(key) {
-        return Object.keys(defaults.config).indexOf(key) === -1 &&
-            key.length <= 4
+        return Object.keys(options.config).indexOf(key) !== -1 && String(key).length === 4
     }
 
     function getAxisKeys() {
@@ -2014,17 +2015,10 @@ function UI(fs, fonts, options) {
      * @param {*} axis 
      */
     function getVariation(axis) {
-        // if (!blocks.variation) {
-        //     return false
-        // }
 
         var axes = getAxisKeys(),
             input,
-            va = {}
-
-        if (!input) {
-            return {}
-        }
+            va = {};
 
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
@@ -2144,7 +2138,7 @@ function UI(fs, fonts, options) {
                     }
 
                     if (typeof(value) !== "object") {
-                        updateVariation[axis] = value
+                        updateVariation[key] = value
                     }
 
                     for (var axis in updateVariation) {
@@ -2166,11 +2160,11 @@ function UI(fs, fonts, options) {
     function setVariation(axis, val) {
         console.debug("Fontsampler.ui.setVariation()", axis, val)
         var v = getVariation(),
-            opt = null
+            opt = null;
 
-        // if (isValidAxisAndValue(axis, val)) {
         // TODO
         if (isAxisKey(axis)) {
+            console.log("AXIS KEY", axis, isAxisKey(axis))
             // TODO refactor to: getAxisOptions() and also use
             // it on axis setup / options parsing
             opt = getAxisOptions(axis)
@@ -2410,7 +2404,6 @@ function UI(fs, fonts, options) {
     }
 
     function setInputText(text) {
-        console.warn("SET TEXT")
         if (text && input) {
             input.innerHTML = text
         } 

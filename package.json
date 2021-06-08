@@ -37,6 +37,7 @@
         "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
+        "fontsampler-js": "file:",
         "rangeslider-pure": "^0.4.9",
         "woff2-feature-test": "^1.0.3"
     },
