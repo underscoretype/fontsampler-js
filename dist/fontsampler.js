@@ -451,7 +451,6 @@ var supports = _dereq_("./helpers/supports")
  */
 function Fontsampler(_root, _fonts, _options) {
     console.debug("Fontsampler()", _root, _fonts, _options)
-    console.error("HELLO WORLD")
 
     var ui, options, fonts,
         preloader = new Preloader(),
