@@ -1211,6 +1211,7 @@ var between = exports.between = function between(pos, min, max) {
 
 module.exports = {
     "init": "fontsampler.events.init",
+    "skinInit": "fontsampler.events.skininit",
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
@@ -1384,6 +1385,13 @@ function Skin(FS) {
                 })
             }
         }
+
+        // Provide a hook for when the UI has finished setting up
+        FS.root.dispatchEvent(new CustomEvent(events.skinInit, {
+            detail: {
+                fontsampler: FS
+            }
+        }))
     }
 
     function updateSlider(position /*, value*/ ) {

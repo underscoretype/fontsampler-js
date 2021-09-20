@@ -3,7 +3,6 @@
  */
 body {
     margin: 5rem auto;
-    max-width: 60rem;
     padding: 0 2rem 0 17rem;
     color: #333;
     font-size: 18px;
@@ -18,8 +17,10 @@ nav {
 }
 
 main {
-    /* max-width: 50rem; */
-    width: 45rem;
+}
+
+p, code, .demo {
+    max-width: 60rem;
 }
 
 h2,
@@ -53,7 +54,7 @@ li {
     border: 2px solid #DE2543;
     box-shadow: 0 0 5px #dcdcdc;
     padding: 2rem;
-    margin: 2rem auto;
+    margin: 2rem 0;
     position: relative;
 }
 
@@ -79,7 +80,7 @@ code {
     display: block;
     padding: 1rem;
     position: relative;
-    margin: 2rem auto;
+    margin: 2rem 0 2rem;
     white-space: pre;
     line-height: 1.35em;
     letter-spacing: 0.025em;

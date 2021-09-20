@@ -25,7 +25,7 @@
     },
     "scripts": {
         "test": "protractor conf.js",
-        "start": "http-server -a 127.0.0.1 -p 8080 -o",
+        "start": "http-server -a 127.0.0.1 -p 8888 -o",
         "js": "watchify src/fontsampler.js -o 'derequire > dist/fontsampler.js' -v -s 'Fontsampler'",
         "js-compressed": "watchify src/fontsampler.js -o 'derequire | uglifyjs -c drop_console=true > dist/fontsampler.min.js' -v -s 'Fontsampler'",
         "js-skin": "watchify src/skin.js -o 'derequire > dist/fontsampler-skin.js' -v -s 'FontsamplerSkin'",

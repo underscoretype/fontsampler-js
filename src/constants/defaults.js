@@ -8,20 +8,25 @@ module.exports = {
     timeout: 3000, // the default loading timeout after which to fail
     classes: {
         rootClass: "fontsamplerjs",
+        
         initClass: "fsjs-initialized",
         loadingClass: "fsjs-loading",
         timeoutClass: "fsjs-timeout",
         preloadingClass: "fsjs-preloading",
+
         wrapperClass: "fsjs-wrapper",
         blockClass: "fsjs-block",
         blockClassAxis: "fsjs-block-axis",
         elementClass: "fsjs-element",
+
         labelClass: "fsjs-label",
         labelTextClass: "fsjs-label-text",
         labelValueClass: "fsjs-label-value",
         labelUnitClass: "fsjs-label-unit",
+
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
+
         disabledClass: "fsjs-disabled",
         focusedClass: "fsjs-focused",
     },

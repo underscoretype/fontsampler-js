@@ -138,20 +138,25 @@ module.exports = {
     timeout: 3000, // the default loading timeout after which to fail
     classes: {
         rootClass: "fontsamplerjs",
+        
         initClass: "fsjs-initialized",
         loadingClass: "fsjs-loading",
         timeoutClass: "fsjs-timeout",
         preloadingClass: "fsjs-preloading",
+
         wrapperClass: "fsjs-wrapper",
         blockClass: "fsjs-block",
         blockClassAxis: "fsjs-block-axis",
         elementClass: "fsjs-element",
+
         labelClass: "fsjs-label",
         labelTextClass: "fsjs-label-text",
         labelValueClass: "fsjs-label-value",
         labelUnitClass: "fsjs-label-unit",
+
         buttonClass: "fsjs-button",
         buttonSelectedClass: "fsjs-button-selected",
+
         disabledClass: "fsjs-disabled",
         focusedClass: "fsjs-focused",
     },
@@ -253,6 +258,7 @@ module.exports = {
 
 module.exports = {
     "init": "fontsampler.events.init",
+    "skinInit": "fontsampler.events.skininit",
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",
@@ -677,7 +683,6 @@ function Fontsampler(_root, _fonts, _options) {
         dom.nodeRemoveClass(that.root, "is-instance")
         dom.nodeRemoveClass(that.root, "is-static")
         dom.nodeAddClass(that.root, !!that.currentFont.instance ? "is-instance": "is-static")
-
         _root.dispatchEvent(new CustomEvent(events.fontRendered, {
             detail: {
                 fontsampler: that
@@ -743,6 +748,7 @@ function Fontsampler(_root, _fonts, _options) {
             }).pop()
             // If no font or instance of that name is found in fonts default to first
             if (!font) {
+                console.warn("Fontsampler.showFont(" + indexOrKey + ") - font not found, using first font.", fonts)
                 font = fonts[0]
             }
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {
@@ -2022,7 +2028,11 @@ function UI(fs, fonts, options) {
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
                 input = getElement(axes[v])
-                va[input.dataset.fsjs] = input.value
+                if (!input) {
+                    console.warn("No axis element found for:", axes[v])
+                }  else {
+                    va[input.dataset.fsjs] = input.value
+                }
             }
         }
 
@@ -2161,9 +2171,7 @@ function UI(fs, fonts, options) {
         var v = getVariation(),
             opt = null;
 
-        // TODO
         if (isAxisKey(axis)) {
-            console.log("AXIS KEY", axis, isAxisKey(axis))
             // TODO refactor to: getAxisOptions() and also use
             // it on axis setup / options parsing
             opt = getAxisOptions(axis)

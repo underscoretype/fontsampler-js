@@ -106,7 +106,7 @@ $dk-disabled-color: #BBBBBB !default;
 }
 
 .dk-select-options {
-    background-color: white;
+    background-color: $bgColor;
     border: 1px solid $dk-border-color;
     border-radius: $dk-border-radius;
     list-style: none;

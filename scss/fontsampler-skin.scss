@@ -43,7 +43,6 @@ $elementMargin: 5px !default;
         opacity: 0;
     }
 
-
     // A sensible baseline layout
     @import "_fontsampler.layout";
 
@@ -52,7 +51,6 @@ $elementMargin: 5px !default;
     @import "_fontsampler.checkboxes";
 
     // Overwrite included libraries’ and polyfill’s styling
-    // @import "_choices";
     @import "_dropkick";
     @import "_rangeslider";
 
@@ -87,5 +85,4 @@ $elementMargin: 5px !default;
             display: block;
         }
     }
-
 }

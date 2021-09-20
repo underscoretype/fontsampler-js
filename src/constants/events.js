@@ -1,6 +1,7 @@
 
 module.exports = {
     "init": "fontsampler.events.init",
+    "skinInit": "fontsampler.events.skininit",
     "languageChanged": "fontsampler.events.languagechanged",
     "fontChanged": "fontsampler.events.fontchanged",
     "fontLoaded": "fontsampler.events.fontloaded",

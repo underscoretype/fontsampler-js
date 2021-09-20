@@ -44,6 +44,13 @@ function Skin(FS) {
                 })
             }
         }
+
+        // Provide a hook for when the UI has finished setting up
+        FS.root.dispatchEvent(new CustomEvent(events.skinInit, {
+            detail: {
+                fontsampler: FS
+            }
+        }))
     }
 
     function updateSlider(position /*, value*/ ) {

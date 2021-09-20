@@ -256,7 +256,6 @@ function Fontsampler(_root, _fonts, _options) {
         dom.nodeRemoveClass(that.root, "is-instance")
         dom.nodeRemoveClass(that.root, "is-static")
         dom.nodeAddClass(that.root, !!that.currentFont.instance ? "is-instance": "is-static")
-
         _root.dispatchEvent(new CustomEvent(events.fontRendered, {
             detail: {
                 fontsampler: that
@@ -322,6 +321,7 @@ function Fontsampler(_root, _fonts, _options) {
             }).pop()
             // If no font or instance of that name is found in fonts default to first
             if (!font) {
+                console.warn("Fontsampler.showFont(" + indexOrKey + ") - font not found, using first font.", fonts)
                 font = fonts[0]
             }
         } else if (typeof(indexOrKey) === "number" && indexOrKey >= 0 && indexOrKey <= fonts.length) {

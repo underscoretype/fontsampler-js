@@ -648,7 +648,11 @@ function UI(fs, fonts, options) {
         if (axes) {
             for (var v = 0; v < axes.length; v++) {
                 input = getElement(axes[v])
-                va[input.dataset.fsjs] = input.value
+                if (!input) {
+                    console.warn("No axis element found for:", axes[v])
+                }  else {
+                    va[input.dataset.fsjs] = input.value
+                }
             }
         }
 
@@ -787,9 +791,7 @@ function UI(fs, fonts, options) {
         var v = getVariation(),
             opt = null;
 
-        // TODO
         if (isAxisKey(axis)) {
-            console.log("AXIS KEY", axis, isAxisKey(axis))
             // TODO refactor to: getAxisOptions() and also use
             // it on axis setup / options parsing
             opt = getAxisOptions(axis)
