@@ -1606,7 +1606,7 @@ function UI(fs, fonts, options) {
         var block = document.createElement("div"),
             element = false,
             label = false,
-            opt = null
+            opt = null;
 
         if (key in options.config === false) {
             console.error("No options defined for block", key)
