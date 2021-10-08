@@ -1396,7 +1396,7 @@ function Skin(FS) {
 
     function updateSlider(position /*, value*/ ) {
         var key = this.element.dataset.fsjs,
-            opt = {}
+            opt = {};
 
         // Catch special case for variable font axis sliders
         if (typeof(key) === "undefined") {

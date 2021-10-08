@@ -431,7 +431,7 @@ module.exports = {
  * A configurable standalone webfont type tester for displaying and manipulating sample text.
  * 
  * @author Johannes Neumeier <hello@underscoretype.com>
- * @copyright 2019 Johannes Neumeier
+ * @copyright 2019-2021 Johannes Neumeier
  * @license GNU GPLv3
  */
 var extend = _dereq_("../node_modules/extend")
@@ -660,7 +660,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
-        console.log("CURRENT FONT", that.currentFont)
         if ("instance" in that.currentFont === true) {
             for (var tag in that.currentFont.instance) {
                 ui.setValue(tag, that.currentFont.instance[tag])
@@ -698,12 +697,16 @@ function Fontsampler(_root, _fonts, _options) {
     this.init = function() {
         console.debug("Fontsampler.init()", this, this.root)
 
-        var initialFont = 0
+        var initialFont = 0,
+            initialFontSetExplicitly = false;
+
         if ("fontfamily" in options.config &&
             "init" in options.config.fontfamily === true &&
             typeof(options.config.fontfamily.init) === "string" &&
             options.config.fontfamily.init !== "") {
+
             initialFont = options.config.fontfamily.init
+            initialFontSetExplicitly = true
         }
 
         ui.init()
@@ -1469,15 +1472,17 @@ function UI(fs, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
+        
+        // Clear the slate
         while (root.childNodes.length) {
             root.removeChild(root.childNodes[0])
         }
 
-        // Process the possible nested arrays in order one by one
-        // · Existing DOM nodes will be validated and initiated
+        // Process the possible nested order arrays in order one by one
+        // · Existing DOM nodes will be validated and initiated (TBD drop or check implementation)
         // · UI elements defined via options but missing from the DOM will be created
         // · UI elements defined in ui option but not in order option will be 
-        //   appended in the end
+        //   appended to the end
         // · Items neither in the DOM nor in options are skipped
         for (var i = 0; i < options.order.length; i++) {
             var elementA = parseOrder(options.order[i])
@@ -1486,7 +1491,9 @@ function UI(fs, fonts, options) {
             }
         }
 
+        // Save the tester for convenience
         input = getElement("tester", blocks.tester)
+
         if (options.originalText) {
             this.setInputText(options.originalText.trim())
         }
@@ -1882,15 +1889,6 @@ function UI(fs, fonts, options) {
         return dom.isNode(block) ? block : false
     }
 
-    // function getLabel(key, node) {
-    //     if (typeof(node) === "undefined") {
-    //         node = root
-    //     }
-    //     var block = root.querySelector("[data-fsjs-for='" + key + "']")
-
-    //     return dom.isNode(block) ? block : false
-    // }
-
     /**
      * Internal event listeners reacting to different UI element’s events
      * and passing them on to trigger the appropriate changes
@@ -1899,12 +1897,8 @@ function UI(fs, fonts, options) {
         setValue(e.target.dataset.fsjs, e.target.value)
     }
 
-    // function onSlideVariation(e) {
-    //     setVariation(e.target.dataset.axis, e.target.value)
-    // }
-
     function onSlide(e) {
-        setValue(e.target.dataset.fsjs)
+        setValue(e.target.dataset.fsjs, e.target.dataset.init)
     }
 
     function onCheck() {
@@ -1944,10 +1938,9 @@ function UI(fs, fonts, options) {
             console.error("Fontsampler.ui.sendNativeEvent: type or node not defined")
             return
         }
-        var evt = document.createEvent("HTMLEvents")
-
-        evt.initEvent(type, false, true)
-        node.dispatchEvent(evt)
+        // TODO maybe have fallback for deprecated Event.init way of sending
+        // native browser events?
+        node.dispatchEvent(new Event(type))
     }
 
     function onKey(event) {
@@ -2456,6 +2449,8 @@ function UI(fs, fonts, options) {
         setActiveLanguage: setActiveLanguage,
         setActiveOpentype: setActiveOpentype,
         setLabelValue: setLabelValue,
+
+        isAxisKey: isAxisKey,
 
         sendEvent: sendEvent,
         sendNativeEvent: sendNativeEvent

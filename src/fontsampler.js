@@ -4,7 +4,7 @@
  * A configurable standalone webfont type tester for displaying and manipulating sample text.
  * 
  * @author Johannes Neumeier <hello@underscoretype.com>
- * @copyright 2019 Johannes Neumeier
+ * @copyright 2019-2021 Johannes Neumeier
  * @license GNU GPLv3
  */
 var extend = require("../node_modules/extend")
@@ -233,7 +233,6 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
-        console.log("CURRENT FONT", that.currentFont)
         if ("instance" in that.currentFont === true) {
             for (var tag in that.currentFont.instance) {
                 ui.setValue(tag, that.currentFont.instance[tag])
@@ -271,12 +270,16 @@ function Fontsampler(_root, _fonts, _options) {
     this.init = function() {
         console.debug("Fontsampler.init()", this, this.root)
 
-        var initialFont = 0
+        var initialFont = 0,
+            initialFontSetExplicitly = false;
+
         if ("fontfamily" in options.config &&
             "init" in options.config.fontfamily === true &&
             typeof(options.config.fontfamily.init) === "string" &&
             options.config.fontfamily.init !== "") {
+
             initialFont = options.config.fontfamily.init
+            initialFontSetExplicitly = true
         }
 
         ui.init()
