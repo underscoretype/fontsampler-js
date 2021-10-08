@@ -270,8 +270,8 @@ function Fontsampler(_root, _fonts, _options) {
     this.init = function() {
         console.debug("Fontsampler.init()", this, this.root)
 
-        var initialFont = 0,
-            initialFontSetExplicitly = false;
+        var that = this,
+            initialFont = 0;
 
         if ("fontfamily" in options.config &&
             "init" in options.config.fontfamily === true &&
@@ -279,7 +279,25 @@ function Fontsampler(_root, _fonts, _options) {
             options.config.fontfamily.init !== "") {
 
             initialFont = options.config.fontfamily.init
-            initialFontSetExplicitly = true
+        } else {
+            // If the initial font was not set explicity and we have variable
+            // axes, then their init values should be set once the font has
+            // loaded
+            var axesInits = {}
+            for (var key in options.config) {
+                if (ui.isAxisKey(key) && "init" in options.config[key]) {
+                    axesInits[key] = options.config[key].init
+                }
+            }
+            if (axesInits !== {}) {
+                function setAxesInits() {
+                    for (var axis in axesInits) {
+                        ui.setValue(axis, axesInits[axis])
+                    }
+                    that.root.removeEventListener(events.fontRendered, setAxesInits)
+                }
+                that.root.addEventListener(events.fontRendered, setAxesInits)
+            }
         }
 
         ui.init()

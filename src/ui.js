@@ -516,9 +516,9 @@ function UI(fs, fonts, options) {
 
     function onSlide(e) {
         try {
-            setValue(e.target.dataset.fsjs, e.target.dataset.init)
+            setValue(e.target.dataset.fsjs)
         } catch (e) {
-            console.warn("Could not set slider value:", e))
+            console.warn("Could not set slider value:", e)
         }
     }
 
@@ -756,6 +756,10 @@ function UI(fs, fonts, options) {
                 if (isAxisKey(key)) {
                     var updateVariation = {}
 
+                    // onSlide triggers an update of just the axis without
+                    // value to propagate Skin interaction, so on "first" call
+                    // this should use the init value, if existing, otherwise
+                    // simply "set" the current value of the axis slider
                     if (typeof(value) === "undefined") {
                         value = element.value
                     }
