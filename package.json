@@ -37,7 +37,6 @@
         "dropkickjs": "^2.2.4",
         "extend": "^3.0.2",
         "fontfaceobserver": "^2.1.0",
-        "fontsampler-js": "file:",
         "rangeslider-pure": "^0.4.9",
         "woff2-feature-test": "^1.0.3"
     },
@@ -48,6 +47,7 @@
         "jasmine": "^3.4.0",
         "jasmine-ts-console-reporter": "^3.1.1",
         "protractor": "^7.0.0",
-        "uglifyjs": "^2.4.11"
+        "uglifyjs": "^2.4.11",
+        "watchify": "^4.0.0"
     }
 }

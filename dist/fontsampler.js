@@ -660,9 +660,9 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
-        if ("instance" in that.currentFont === true) {
-            for (var tag in that.currentFont.instance) {
-                ui.setValue(tag, that.currentFont.instance[tag])
+        if ("variation" in that.currentFont === true) {
+            for (var tag in that.currentFont.variation) {
+                ui.setValue(tag, that.currentFont.variation[tag])
             }
         }
 
