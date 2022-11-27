@@ -29,8 +29,19 @@ function UIElements(root, options) {
         if (labelValue !== "") {
             val = document.createElement("span")
             val.className = options.classes.labelValueClass
+            val.contentEditable = true
             val.appendChild(document.createTextNode(labelValue))
             label.appendChild(val)
+
+            // Register event propagation for the editable value
+            // val.addEventListener("keyup", function () {
+            //     console.log("label val keyup", val.innerText)
+            //     label.dispatchEvent(new Event("keyup"))
+            // })
+            // val.addEventListener("blur", function () {
+            //     console.log("label val blur", val.innerText)
+            //     label.dispatchEvent(new Event("blur"))
+            // })
         }
 
         if (typeof(labelUnit) === "string") {

@@ -41,6 +41,10 @@
             margin-right: auto;
         }
 
+        .fsjs-label-value {
+            cursor: text;
+        }
+
         .fsjs-label-unit {
             &:before {
                 content: " "; // figure space #2007

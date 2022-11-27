@@ -260,6 +260,32 @@ function UI(fs, fonts, options) {
 
         block.appendChild(element)
 
+        if (label) {
+            // Make the label value a some of usable input
+            let labelValue = label.querySelector(".fsjs-label-value")
+            if (opt.label && labelValue) {
+                // Select all on focus
+                labelValue.addEventListener("focus", function (e) {
+                    window.getSelection().selectAllChildren( e.currentTarget );
+                })
+
+                // Limit typing input to apply only when within min max
+                labelValue.addEventListener("keyup", function (e) {
+                    let val = parseFloat(e.currentTarget.innerText);
+                    if (val > opt.min && val < opt.max) {
+                        setValue(key, val)
+                    }
+                    
+                })
+
+                // On blur clamp value to winthin min max
+                labelValue.addEventListener("blur", function (e) {
+                    let val = parseFloat(e.currentTarget.innerText)
+                    setValue(key, Math.max(opt.min, Math.min(opt.max, val)))
+                })
+            }
+        }
+
         return block
     }
 
@@ -711,7 +737,7 @@ function UI(fs, fonts, options) {
     function setValue(key, value) {
         console.debug("Fontsampler.ui.setValue()", key, value)
         var element = getElement(key),
-            has_ui = key in Object.keys(blocks);
+            has_ui = Object.keys(blocks).indexOf(key) !== -1;
 
         switch (key) {
             case "fontsize":
@@ -729,9 +755,9 @@ function UI(fs, fonts, options) {
                 }
 
                 if (parseFloat(element.value) !== parseFloat(value) &&
+                    has_ui) {
                     // Trigger native input element change only if this is an
                     // config value that has a UI rendered
-                    has_ui) {
                     sendNativeEvent("change", element)
                 }
 
@@ -807,7 +833,7 @@ function UI(fs, fonts, options) {
         console.debug("Fontsampler.ui.setVariation()", axis, val)
         var v = getVariation(),
             opt = null,
-            has_ui = typeof(has_ui) === "undefined" ? true : !!has_ui;
+            has_ui = typeof (has_ui) === "undefined" ? true : !!has_ui;
 
         if (isAxisKey(axis)) {
             // TODO refactor to: getAxisOptions() and also use
@@ -961,7 +987,6 @@ function UI(fs, fonts, options) {
                         option.selected = true
                     }
                     element.value = instanceFont.name
-                    // sendNativeEvent("change", element)
                 }
             }
         }

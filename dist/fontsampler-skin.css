@@ -49,6 +49,10 @@
 .fsjs-skin .fsjs-block-type-slidergroup .fsjs-label span:first-child {
   margin-right: auto;
 }
+.fsjs-skin .fsjs-block-type-slider .fsjs-label .fsjs-label-value,
+.fsjs-skin .fsjs-block-type-slidergroup .fsjs-label .fsjs-label-value {
+  cursor: text;
+}
 .fsjs-skin .fsjs-block-type-slider .fsjs-label .fsjs-label-unit:before,
 .fsjs-skin .fsjs-block-type-slidergroup .fsjs-label .fsjs-label-unit:before {
   content: " ";
