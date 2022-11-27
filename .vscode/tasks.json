@@ -1,47 +1,61 @@
 {
-    "version": "2.0.0",
-    "tasks": [
-      {
-        "label": "npm run js",
-        "type": "npm",
-        "script": "js",
-        "auto": true
-      },
-      {
-        "label": "npm run js-skin",
-        "type": "npm",
-        "script": "js-skin",
-        "auto": true
-      },
-      {
-        "label": "npm run js-compressed",
-        "type": "npm",
-        "script": "js-compressed",
-        "auto": true
-      },
-      {
-        "label": "npm run js-skin-compressed",
-        "type": "npm",
-        "script": "js-skin-compressed",
-        "auto": true
-      },
-      {
-        "label": "npm run scss",
-        "type": "npm",
-        "script": "scss",
-        "auto": true
-      },
-      {
-        "label": "npm run scss-compressed",
-        "type": "npm",
-        "script": "scss-compressed",
-        "auto": true
-      },
-      {
-        "label": "npm run start",
-        "type": "npm",
-        "script": "start",
-        "auto": true
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm run js",
+      "type": "npm",
+      "script": "js",
+      "runOptions": {
+        "runOn": "folderOpen"
       }
-    ]
-  }
+    },
+    {
+      "label": "npm run js-skin",
+      "type": "npm",
+      "script": "js-skin",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "npm run js-compressed",
+      "type": "npm",
+      "script": "js-compressed",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "npm run js-skin-compressed",
+      "type": "npm",
+      "script": "js-skin-compressed",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "npm run scss",
+      "type": "npm",
+      "script": "scss",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "npm run scss-compressed",
+      "type": "npm",
+      "script": "scss-compressed",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
+    {
+      "label": "npm run start",
+      "type": "npm",
+      "script": "start",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
+}

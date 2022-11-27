@@ -19,8 +19,6 @@ window.addEventListener("load", function () {
     ]
 
     var options = {
-        
-        // initialText: "",
 
         multiline: true,
 
@@ -33,7 +31,11 @@ window.addEventListener("load", function () {
         ],
     }
     
-    var fs = new Fontsampler(document.getElementById("example-with-styling"), fonts, options)
-    FontsamplerSkin(fs)
-    fs.init()
+    let nodes = document.querySelectorAll(".example-with-styling");
+
+    nodes.forEach(node => {
+        var fs = new Fontsampler(node, fonts, options)
+        FontsamplerSkin(fs)
+        fs.init()
+    })
 })

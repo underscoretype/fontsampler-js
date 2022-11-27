@@ -85,7 +85,8 @@ code {
     line-height: 1.35em;
     letter-spacing: 0.025em;
     font-size: smaller;
-    overflow-x: scroll;
+    overflow-x: auto;
+    min-height: 2rem
 }
 
 code em {
@@ -176,7 +177,7 @@ footer {
     box-sizing: border-box;
 }
 
-#custom-button {
+#custom-button button {
     border: 1px solid #DE2543;
     color: #DE2543;
     padding: 0.45em 1em;
@@ -189,4 +190,13 @@ footer {
 
 #custom-image {
     padding: 0 1em 1em 0;
+}
+
+.css-inheritance-demo {
+    color: white;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    line-height: 18px;
+    background: teal;
+    padding: 40px;
 }

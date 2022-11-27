@@ -41,16 +41,16 @@ var supports = require("./helpers/supports")
 function UI(fs, fonts, options) {
 
     var ui = {
-            tester: "textfield",
-            fontsize: "slider",
-            lineheight: "slider",
-            letterspacing: "slider",
-            fontfamily: "dropdown",
-            alignment: "buttongroup",
-            direction: "buttongroup",
-            language: "dropdown",
-            opentype: "checkboxes"
-        },
+        tester: "textfield",
+        fontsize: "slider",
+        lineheight: "slider",
+        letterspacing: "slider",
+        fontfamily: "dropdown",
+        alignment: "buttongroup",
+        direction: "buttongroup",
+        language: "dropdown",
+        opentype: "checkboxes"
+    },
         keyToCss = {
             "fontsize": "fontSize",
             "lineheight": "lineHeight",
@@ -73,10 +73,10 @@ function UI(fs, fonts, options) {
         // are the fonts passed in. Let’s make this transformation behind
         // the scenes so we can use the re-usable "dropdown" ui by defining
         // the needed `choices` attribute
-        if (options.config.fontfamily && typeof(options.config.fontfamily) === "boolean") {
+        if (options.config.fontfamily && typeof (options.config.fontfamily) === "boolean") {
             options.config.fontfamily = {}
         }
-        options.config.fontfamily.choices = fonts.map(function(value) {
+        options.config.fontfamily.choices = fonts.map(function (value) {
             return value.name
         })
 
@@ -89,7 +89,7 @@ function UI(fs, fonts, options) {
             root.removeChild(root.childNodes[0])
         }
         options.originalText = originalText
-        
+
         // Clear the slate
         while (root.childNodes.length) {
             root.removeChild(root.childNodes[0])
@@ -126,6 +126,15 @@ function UI(fs, fonts, options) {
             }
         }
 
+        // Set values for configs that are set but do not have a rendered block
+        let block_keys = Object.keys(blocks),
+            options_without_ui = Object.keys(options.config).filter(k => block_keys.indexOf(k) === -1);
+
+        options_without_ui.forEach(key => {
+            // Set the initial value
+            setValue(key, options.config[key].init)
+        })
+
         // prevent line breaks on single line instances
         if (!options.multiline) {
             var typeEvents = ["keypress", "keyup", "change", "paste"]
@@ -137,7 +146,7 @@ function UI(fs, fonts, options) {
         }
 
         // prevent pasting styled content
-        blocks.tester.addEventListener('paste', function(e) {
+        blocks.tester.addEventListener('paste', function (e) {
             e.preventDefault();
             var text = '';
             if (e.clipboardData || e.originalEvent.clipboardData) {
@@ -157,7 +166,7 @@ function UI(fs, fonts, options) {
             }
         });
 
-        blocks.tester.addEventListener('focusin', function(e) {
+        blocks.tester.addEventListener('focusin', function (e) {
             sendEvent(events.focused)
             dom.nodeAddClass(root, options.classes.focusedClass)
         })
@@ -176,7 +185,7 @@ function UI(fs, fonts, options) {
     function parseOrder(key) {
         var child, wrapper
 
-        if (typeof(key) === "string") {
+        if (typeof (key) === "string") {
             var block = createBlock(key)
             blocks[key] = block
 
@@ -209,7 +218,6 @@ function UI(fs, fonts, options) {
                 wrapper.setAttribute("id", key.getAttribute("id"))
                 key.removeAttribute("id")
             }
-            console.log("custom", wrapper)
             wrapper.appendChild(key)
 
             return wrapper
@@ -319,7 +327,7 @@ function UI(fs, fonts, options) {
             element = uifactory[type](key, options.config[key], element)
 
             dom.nodeAddClass(element, options.classes.elementClass)
-            
+
             element.dataset.fsjs = key
             element.dataset.fsjsUi = type
         } catch (e) {
@@ -489,7 +497,7 @@ function UI(fs, fonts, options) {
     }
 
     function getElement(key, node) {
-        if (typeof(node) === "undefined" || key in ui === false) {
+        if (typeof (node) === "undefined" || key in ui === false) {
             node = root
         }
         var element = root.querySelector("[data-fsjs='" + key + "']")
@@ -498,7 +506,7 @@ function UI(fs, fonts, options) {
     }
 
     function getBlock(key, node) {
-        if (typeof(node) === "undefined" || key in ui === false) {
+        if (typeof (node) === "undefined" || key in ui === false) {
             node = root
         }
         var block = root.querySelector("[data-fsjs-block='" + key + "']")
@@ -546,7 +554,7 @@ function UI(fs, fonts, options) {
     }
 
     function sendEvent(type, opt) {
-        if (typeof(opt) === "undefined") {
+        if (typeof (opt) === "undefined") {
             var opt = {}
         }
         opt.fontsampler = fs
@@ -555,8 +563,8 @@ function UI(fs, fonts, options) {
 
     function sendNativeEvent(type, node) {
         console.debug("sendNativeEvent", type, node)
-        if (!type || !node) {
-            console.error("Fontsampler.ui.sendNativeEvent: type or node not defined")
+        if (!type || !node) {
+            console.error("Fontsampler.ui.sendNativeEvent: type or node not defined", type, node)
             return
         }
         // TODO maybe have fallback for deprecated Event.init way of sending
@@ -644,13 +652,13 @@ function UI(fs, fonts, options) {
                 input = getElement(axes[v])
                 if (!input) {
                     console.warn("No axis element found for:", axes[v])
-                }  else {
+                } else {
                     va[input.dataset.fsjs] = input.value
                 }
             }
         }
 
-        if (typeof(axis) === "string" && axis in va) {
+        if (typeof (axis) === "string" && axis in va) {
             return va[axis]
         }
 
@@ -702,13 +710,14 @@ function UI(fs, fonts, options) {
 
     function setValue(key, value) {
         console.debug("Fontsampler.ui.setValue()", key, value)
-        var element = getElement(key)
+        var element = getElement(key),
+            has_ui = key in Object.keys(blocks);
 
         switch (key) {
             case "fontsize":
             case "lineheight":
             case "letterspacing":
-                if (typeof(value) === "undefined") {
+                if (typeof (value) === "undefined") {
                     // no value means get and use the element value
                     value = getValue(key)
                 } else {
@@ -718,12 +727,21 @@ function UI(fs, fonts, options) {
                         options.config[key].max, options.config[key].init)
 
                 }
-                if (parseFloat(element.value) !== parseFloat(value)) {
+
+                if (parseFloat(element.value) !== parseFloat(value) &&
+                    // Trigger native input element change only if this is an
+                    // config value that has a UI rendered
+                    has_ui) {
                     sendNativeEvent("change", element)
                 }
-                _updateSlider(key, value)
 
-                setLabelValue(key, value)
+                if (has_ui) {
+                    // Trigger UI change only if this is an
+                    // config value that has a UI rendered
+                    _updateSlider(key, value)
+                    setLabelValue(key, value)
+                }
+
                 setInputCss(keyToCss[key], value + options.config[key].unit)
                 break;
 
@@ -760,17 +778,18 @@ function UI(fs, fonts, options) {
                     // value to propagate Skin interaction, so on "first" call
                     // this should use the init value, if existing, otherwise
                     // simply "set" the current value of the axis slider
-                    if (typeof(value) === "undefined") {
+                    if (typeof (value) === "undefined") {
                         value = element.value
                     }
 
-                    if (typeof(value) !== "object") {
+                    if (typeof (value) !== "object") {
                         updateVariation[key] = value
                     }
 
                     for (var axis in updateVariation) {
                         if (updateVariation.hasOwnProperty(axis)) {
-                            val = setVariation(key, updateVariation[axis])
+                            val = setVariation(key, updateVariation[axis],
+                                has_ui)
                         }
                     }
                 }
@@ -784,10 +803,11 @@ function UI(fs, fonts, options) {
     /**
      * Update a single variation axis and UI
      */
-    function setVariation(axis, val) {
+    function setVariation(axis, val, has_ui) {
         console.debug("Fontsampler.ui.setVariation()", axis, val)
         var v = getVariation(),
-            opt = null;
+            opt = null,
+            has_ui = typeof(has_ui) === "undefined" ? true : !!has_ui;
 
         if (isAxisKey(axis)) {
             // TODO refactor to: getAxisOptions() and also use
@@ -795,9 +815,11 @@ function UI(fs, fonts, options) {
             opt = getAxisOptions(axis)
             v[axis] = utils.clamp(val, opt.min, opt.max)
 
-            setLabelValue(axis, v[axis])
+            if (has_ui) {
+                _updateSlider(axis, v[axis])
+                setLabelValue(axis, v[axis])
+            }
             setInputVariation(v)
-            _updateSlider(axis, v[axis])
 
             return v[axis]
         }
@@ -805,17 +827,17 @@ function UI(fs, fonts, options) {
 
     function getAxisOptions(axis) {
         opt = options.config[axis]
-        if (!opt || typeof(opt) === "undefined") {
+        if (!opt || typeof (opt) === "undefined") {
             opt = {
                 min: 100,
                 max: 900
             }
         }
 
-        if (typeof(opt.min) === "undefined") {
+        if (typeof (opt.min) === "undefined") {
             opt.min = 100
         }
-        if (typeof(opt.max) === "undefined") {
+        if (typeof (opt.max) === "undefined") {
             opt.max = 900
         }
         return opt
@@ -839,7 +861,7 @@ function UI(fs, fonts, options) {
     // }
 
     function fontIsInstance(variation, fontname) {
-        if (typeof(variation) !== "object") {
+        if (typeof (variation) !== "object") {
             return false
         }
 
@@ -900,7 +922,7 @@ function UI(fs, fonts, options) {
         var parsed = [],
             val
         for (var key in features) {
-            if (features.hasOwnProperty(key) && key && typeof(key) !== "undefined") {
+            if (features.hasOwnProperty(key) && key && typeof (key) !== "undefined") {
                 parsed.push('"' + key + '" ' + (features[key] ? "1" : "0"))
             }
         }
@@ -912,7 +934,7 @@ function UI(fs, fonts, options) {
     function setInputVariation(variations) {
         var parsed = []
         for (var key in variations) {
-            if (variations.hasOwnProperty(key) && key && typeof(key) !== "undefined") {
+            if (variations.hasOwnProperty(key) && key && typeof (key) !== "undefined") {
                 parsed.push('"' + key + '" ' + (variations[key]))
             }
         }
@@ -987,8 +1009,8 @@ function UI(fs, fonts, options) {
     }
 
     function setActiveLanguage(lang) {
-        if (dom.isNode(blocks.language) && typeof(lang) === "string") {
-            var languageChoices = options.config.language.choices.map(function(value) {
+        if (dom.isNode(blocks.language) && typeof (lang) === "string") {
+            var languageChoices = options.config.language.choices.map(function (value) {
                 return value.split("|")[0]
             })
 
@@ -1031,7 +1053,7 @@ function UI(fs, fonts, options) {
     function setInputText(text) {
         if (text && input) {
             input.innerHTML = text
-        } 
+        }
     }
 
     function setLabelValue(key, value) {

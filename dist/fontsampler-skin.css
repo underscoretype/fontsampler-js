@@ -2,10 +2,9 @@
 .fsjs-skin {
   transition: opacity 0.2s ease-out;
   opacity: 0;
-  /* The bare minimum styling applied to all demo Fontsamplers */
-  /**
-   * A customized and trimmed down version of the rangeSlider.js SCSS
-   */
+  /* The bare minimum styling applied to all demo Fontsamplers */ /**
+ * A customized and trimmed down version of the rangeSlider.js SCSS
+ */
 }
 .fsjs-skin.fsjs-initialized {
   opacity: 1;

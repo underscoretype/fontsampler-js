@@ -2,8 +2,12 @@
 <html>
 
 <head>
-    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</title>
+    <title>fontsampler-js — A configurable standalone webfont type tester for displaying and manipulating sample text in
+        the browser.</title>
     <meta charset="utf8">
+    <link rel="icon" href="assets/favicon.png">
+
+
     <!-- Just some styling for this documentaiton page -->
     <link rel="stylesheet" href="assets/demo.css">
 
@@ -18,9 +22,11 @@
 
 <body>
     <header>
-        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg"
+                alt="Underscore"></a>
         <h1>fontsampler-js</h1>
-        <strong>A configurable standalone webfont type tester for displaying and manipulating sample text in the browser.</strong>
+        <strong>A configurable standalone webfont type tester for displaying and manipulating sample text in the
+            browser.</strong>
     </header>
 
     <nav>
@@ -60,70 +66,66 @@
 
     <main>
 
-    <p>Fontsampler takes care of, webfont (pre) loading, detecting variable font and woff(2) support and providing
-        an interface to manipulate type tester.
-    </p>
+        <p>Fontsampler takes care of, <strong>webfont (pre) loading</strong>,
+            <strong>detecting variable font and woff(2) support</strong> and providing
+            a <strong>customizable interface</strong> to manipulate type tester.
+            It <strong>deliberately uses a bare minimum of styling</strong> for the UI
+            so it can be adopted and styled according to the website it is embedded on.
+        </p>
 
-    <p>Fontsampler aims to be a barebones solution for developers to customize. You
-        can use your own styles, eventlisteners and layouts to create a fully customized
-        experience. This is what an example Fontsampler looks like with basic 
-        styling and (some) features active:
-    </p>
+        <p>Fontsampler aims to be a barebones solution for developers to customize. You
+            can use your own styles, eventlisteners and layouts to create a fully customized
+            experience. This is what an example Fontsampler looks like with basic
+            styling and (some) features active:
+        </p>
 
-    <h2>A basic example</h2>
-    <div id="demo-intro" class="demo">This is a Fontsampler! Type here to test this webfont…</div>
-    <script src="assets/demo-intro.js"></script>
+        <h2>A basic example</h2>
+        <div id="demo-intro" class="demo">This is a Fontsampler! Type here to test this webfont…</div>
+        <script src="assets/demo-intro.js"></script>
 
-    <h2 id="examples">Examples</h2>
-    <p>Fontsampler.js can be configured either through DOM nodes and attributes
-        or entirely from Javascript.</p>
+        <h2 id="examples">Examples</h2>
+        <p>Fontsampler.js can be configured either through DOM nodes and attributes
+            or entirely from Javascript.</p>
 
-    <p>For all setups include the <em>fontsampler.js</em> file from the dist folder:</p>
-<code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
+        <p>For all setups include the <em>fontsampler.js</em> file from the dist folder:</p>
+        <code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
 </code>
 
-    <p>You can configure Fontsamplers via an options object.</p>
+        <p>You can configure Fontsamplers via an options object.</p>
 
-    <h3 id="examples-bare-minimum">Bare minimum</h3>
-    <p>Transform a DOM node into a simple typetester with one webfont…</p>
-
-    <p>…fonts passed in as object:</p>
-<code>&lt;div id="<em>demo</em>"&gt;Demo minimal&lt;/div&gt;
+        <h3 id="examples-bare-minimum">Bare minimum</h3>
+        <p>Transform a DOM node into a simple typetester with one webfont passed:</p>
+        <code>&lt;div id="<em>demo</em>"&gt;Demo minimal&lt;/div&gt;
 
 &lt;script&gt;
-var <em>fonts</em> = [{
-    name: "Font name",
-    files: ["path/to/font-name.woff", "path/to/font-name.woff2"]
-}]
-new Fontsampler(document.getElementById("<em>demo</em>"), <em>fonts</em>).init()
+let <em>node</em> = document.getElementById("<em>demo</em>"),
+    <em>fonts</em> = [{
+        name: "Font name",
+        files: ["path/to/fontfile.woff2"]
+    }];
+new Fontsampler(<em>node</em>, <em>fonts</em>).init()
 &lt;/script&gt;
 </code>
 
-    <p>…or fonts defined as a JSON attribute; for a single-font Fontsampler you can use:</p>
+        <div id="demo-dom" class="demo">Demo minimal — just load a font and transform this into an editable textarea
+        </div>
+        <script src="assets/demo-dom.js"></script>
+        <a href="assets/demo-dom.js">See code</a>
 
-<code>&lt;div id="demo"
-<em>data-fonts</em>='[{"name": "Your font name", "files": ["…/font.woff", "…/font.woff2"], {…}]'
-&gt;Demo minimal&lt;/div&gt;
 
-&lt;script&gt;
-new Fontsampler(document.getElementById("demo")).init()
-&lt;/script&gt;
-</code>
 
-    <div id="demo-dom" class="demo" data-fonts='[{ "name": "Alegreya Regular", "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff", "./fonts/alegreya/alegreya-v12-latin-regular.woff2"]}, { "name": "Alegreya Italic", "files": ["./fonts/alegreya/alegreya-v12-latin-italic.woff", "./fonts/alegreya/alegreya-v12-latin-italic.woff2"]}]'>Demo minimal — just load a font and transform this into an editable textarea</div>
-    <script src="assets/demo-dom.js"></script>
-
-    <h3 id="examples-demo-configuration">Demo configuration</h3>
-    <p>To configure a Fontsampler via Javascript and supply several fonts, you
-        can pass in a fonts Array and options Object:</p>
-<code>&lt;div id="demo"&gt;&lt;/div&gt;
+        <h3 id="examples-demo-configuration">Demo configuration</h3>
+        <p>To configure a Fontsampler via Javascript and supply several fonts,
+            define the UI elements and their order, you
+            can pass in a fonts Array and options Object:</p>
+        <code>&lt;div id="demo"&gt;&lt;/div&gt;
 
 &lt;script&gt;
-var <em>options</em> = {
+let <em>options</em> = {
     ...
 }
 
-var <em>fonts</em> = [
+let <em>fonts</em> = [
 …
 ]
 
@@ -131,44 +133,52 @@ Fontsampler(document.getElementById("demo"), <em>fonts</em>, <em>options</em>).i
 &lt;/script&gt;
 </code>
 
-    <div id="demo-js" class="demo">Demo JS configuration</div>
-    <script src="assets/demo-js.js"></script>
-
-    <p>See below how to use the <a href="#fonts">fonts</a> and
-        <a href="#options">options</a> configuration.
-    </p>
+        <p>See details on how to use the <a href="#fonts">fonts</a> and
+            <a href="#options">options</a> configuration.
+        </p>
 
 
 
-    <h3 id="examples-all-options">All options</h3>
+        <h3 id="examples-all-options">Example with all options</h3>
 
-    <p>To see what UI elements and options are available, here is a 
-        Fontsampler instance using all available options (…hardly not advisable).</p>
-    
-    <div id="demo-all" class="demo">Demo configuration with all UI elements</div>
-    <script src="assets/demo-all.js"></script>
+        <p>To see what UI elements and options are available, here is a
+            Fontsampler instance using all available options (…hardly advisable).
+            Note that you can use CSS to use images for the buttons, instead of text.
+            Any number of variable font axes can be defined (e.g. Weight here).
+            Language and direction may be used to show different scripts and
+            localised opentype features in action.<br>
+            You can also configure those attributes <strong>without</strong> rendering an
+            UI element for them, e.g. set a specific leading but not render
+            a slider.
+        </p>
+
+        <div id="demo-all" class="demo">Demo configuration with all UI elements</div>
+        <script src="assets/demo-all.js"></script>
+        <a href="assets/demo-all.js">See code</a>
 
 
 
-    <h2 id="fonts">Fonts</h2>
-    <p>The webfonts to render in the Fontsampler can be passed in either as
-        <em>Array</em> in the <em>Fontsampler()</em> method or via <em>data-fonts</em> attributes.</p>
 
-    <p>When supplying several woff2/woff2variable/woff files Fontsampler will 
-        automatically serve the best option — it is recommended to supply
-        both files, but at the very least the woff format.</p>
+        <h2 id="fonts">Fonts</h2>
+        <p>The webfonts to render in the Fontsampler are passed in as an
+            <em>Array</em> in the <em>Fontsampler()</em> constructor.
+        </p>
 
-    <h3>Fonts as Array:</h3>
-<code><i>// Supply fonts, even a single font, as Objects in an Array</i>
+        <p>When supplying several woff2/woff2variable/woff files Fontsampler will
+            automatically serve the best option (Variable woff2 > woff2 > woff).</p>
+
+        <h3>Fonts as Array:</h3>
+        <code><i>// Supply fonts, even a single font, as Objects in an Array</i>
 <i>// The order of the Array elements is the fonts’ order in the dropdown select</i>
-var fonts = [
+let node = document.getElementById("demo"),
+    fonts = [
 <i>// <em>Each font is one Object inside the Array, even a single font!</em></i>
 {
     <i>// Provide at the very least a woff file to render. When passing in</i>
     <i>// a woff and a woff2 file Fontsampler will determine the best font</i>
     <i>// to use</i>
-    <i>// If you pass in more than one woff file or more than one woff2 file</i>
-    <i>// only the first will be used</i>
+    <i>// If you pass in more than one file or more than one woff2 file</i>
+    <i>// the first found file will be used</i>
     <em>files</em>: [
         "path/to/font-file.<em>woff2</em>",
         "path/to/font-file.<em>woff</em>",
@@ -196,7 +206,7 @@ var fonts = [
 
     <i>// *optional, for variable fonts only</i>
     <i>// Define the variable font axes location this instance represents</i>
-    variation: {
+    instance: {
         "wght": 400,
         "opsz": 12
     }
@@ -211,14 +221,14 @@ var fonts = [
     …another font…
 }
 ]
-new Fontsampler(document.getElementById("demo"), <em>fonts</em>).init()
+new Fontsampler(node, <em>fonts</em>).init()
 </code>
 
-    <p>The same options can also be passed in as a <em>data-fonts</em> 
-        attribute on the DOM node in JSON notation. Defining complex fonts arrays
-        like this is, of course, quite unwiedly — but possible.</p>
+        <p>The same options can also be passed in as a <em>data-fonts</em>
+            attribute on the DOM node in JSON notation. Defining complex fonts arrays
+            like this is, of course, quite unwiedly — but possible.</p>
 
-<code>&lt;div id="demo" <em>data-fonts</em>="[{ 'files': [path/to/font-name.woff] }]"&gt;
+        <code>&lt;div id="demo" <em>data-fonts</em>="[{ 'files': [path/to/font-name.woff] }]"&gt;
     Demo minimal
 &lt;/div&gt;
 
@@ -229,14 +239,14 @@ new Fontsampler(document.getElementById("demo")).init()
 
 
 
-    <h2 id="options">Options</h2>
-    <p>You can pass in an options object that will overwrite the below defaults.
-        If you omit some of the options, defaults will be used.</p>
-    <p>The order option can be used to define the UI elements’ DOM structure. Use
-        nested Arrays to group elements into the same wrapper element.</p>
-    <p>Here is a full list of all default options (and values):</p>
+        <h2 id="options">Options</h2>
+        <p>You can pass in an options object that will overwrite the below defaults.
+            If you omit some of the options, defaults will be used.</p>
+        <p>The order option can be used to define the UI elements’ DOM structure. Use
+            nested Arrays to group elements into the same wrapper element.</p>
+        <p>Here is a full list of all default options (and values):</p>
 
-<code><i>// Leave empty to set no text or inherit the DOM node’s current text</i>
+        <code><i>// Leave empty to set no text or inherit the DOM node’s current text</i>
 initialText: "",
 
 <i>// Set false to force single line input</i>
@@ -380,64 +390,88 @@ classes: {
 </code>
 
 
-    
 
 
-    <h2 id="styling">Styling</h2>
 
-    <p>Fontsampler JS aims to be as light-weight as possible. You can use the 
-        Javascript library without any dependencies and Fontsampler JS will
-        render all the DOM elements needed (without styling).</p>
-        
-    <p id="styling-skin">If you wish to apply a sensible minimum styling you can include the css
-        (or scss file). If you further wish to enhance the basic HTML controls
-        used in the UI (<em>&lt;input type="range"&gt;</em>, 
-        <em>&lt;input type="checkbox"&gt;</em>, <em>&lt;select&gt;</em>, and 
-        <em>&lt;button&gt;</em>) you can further include and apply the shipped 
-        Skin. This skin in turn includes a view lightweight UI control modules.
-        Feel free to build your own Skin module using the built in as a sample.
-    </p>
+        <h2 id="styling">Styling</h2>
+                
 
-    <div class="split">
-        <div>
-            <h4>Use the Javascript module without styling</h4>
-            <div class="demo" id="example-without-styling">No styling, no skin</div>
-            <script src="assets/demo-without-styling.js"></script>
-            <code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
+        <p>Fontsampler JS aims to be as light-weight as possible. You can use the
+            Javascript library without any dependencies and Fontsampler JS will
+            render all the DOM elements needed (without styling).</p>
+
+        <p id="styling-skin">If you wish to apply a sensible minimum styling you can include the css
+            (or scss file). If you further wish to enhance the basic HTML controls
+            used in the UI (<em>&lt;input type="range"&gt;</em>,
+            <em>&lt;input type="checkbox"&gt;</em>, <em>&lt;select&gt;</em>, and
+            <em>&lt;button&gt;</em>) you can further include and apply the shipped
+            Skin. This skin includes a few lightweight Javascript modules to transform the UI controls.
+            Feel free to build your own Skin module using the built in as a sample.
+        </p>
+
+        <div class="split">
+            <div>
+                <h4>Use the Javascript module without styling</h4>
+                <div class="demo example-without-styling">No styling, no skin</div>
+                <script src="assets/demo-without-styling.js"></script>
+                <code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
 …
 &lt;div id="demo"&gt;Hello world&lt;/div&gt;
 …
 &lt;script&gt;
-var fs = Fontsampler(document.getElementById("demo"), fonts, options)
+let fs = Fontsampler(document.getElementById("demo"), fonts, options)
 fs.init()
 &lt;/script&gt;</code>
-        </div>
-        <div>
-            <h4>Use the Javascript module with CSS styling and a UI skin</h4>
-            <div class="demo" id="example-with-styling">Styling and skin applied</div>
-            <script src="assets/demo-with-styling.js"></script>
-            <code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
+            </div>
+            <div>
+                <h4>Use the Javascript module with CSS styling and a UI skin</h4>
+                <div class="demo example-with-styling">UI styled with CSS and UI elements augmented with JS components
+                </div>
+                <code>&lt;script src="node_modules/fontsampler-js/dist/fontsampler.js"&gt;&lt;/script&gt;
 <em>&lt;script src="node_modules/fontsampler-js/dist/fontsampler-skin.js"&gt;&lt;/script&gt;</em>
 <em>&lt;link rel="stylesheet" href="node_modules/fontsampler-js/dist/fontsampler-skin.css" &gt;</em>
 …
 &lt;div id="demo"&gt;Hello world&lt;/div&gt;
 …
 &lt;script&gt;
-var fs = Fontsampler(document.getElementById("demo"), fonts, options)
+let fs = Fontsampler(document.getElementById("demo"), fonts, options)
 <em>FontsamplerSkin(fs)</em>
 fs.init()
 &lt;/script&gt;</code>
+            </div>
         </div>
-    </div>
+
+        <div class="css-inheritance-demo">
+            <p>With or without skin, the minimal default CSS for Fontsampler is
+                written so that styles from the container or website it is on
+                are inherited as much as possible. For example this Fontsampler
+                will inherit (the rather tasteless) font and color styling from
+                this container:
+            </p>
+            <div class="split">
+                <div>
+                    <div class="demo example-without-styling">No styling, no skin</div>
+                </div>
+                <div>
+                    <div class="demo example-with-styling">UI styled with CSS and UI elements augmented with JS
+                        components</div>
+                    <p>For the Skinned version you will obviously want to 
+                        overwrite the custom Slider, Dropdown abd Button elements’ styling.</p>
+                </div>
+            </div>
+        </div>
+        
+        <script src="assets/demo-without-styling.js"></script>
+        <script src="assets/demo-with-styling.js"></script>
 
 
 
 
-    <h3 id="styling-classes">Styling classes</h3>
-    <p>You can use some default CSS classes to style Fontsampler or pass in
-        custom classes to use instead.
-    </p>
-    <code><i>// The root element on which Fontsampler was initiated</i>
+        <h3 id="styling-classes">Styling classes</h3>
+        <p>You can use some default CSS classes to style Fontsampler or pass in
+            custom classes to use instead.
+        </p>
+        <code><i>// The root element on which Fontsampler was initiated</i>
 rootClass: "fontsamplerjs",
 
 <i>// Root element class after the Fontsampler has been initialized</i>
@@ -509,11 +543,11 @@ in the options attribute, those wrappers will have this class */
 .fsjs-block-fontsize [data-fsjs-for=fontsize] .fsjs-label-value {…}
 .fsjs-block-fontsize [data-fsjs-for=fontsize] .fsjs-label-unit {…}
 &lt;/style&gt;</code>
-    <p>You can overwrite many classes by passing in an options object. Note that
-        the default skin relies on many of the default classes!
-    </p>
-    <code>&lt;script&gt;
-var options = {
+        <p>You can overwrite many classes by passing in an options object. Note that
+            the default skin relies on many of the default classes!
+        </p>
+        <code>&lt;script&gt;
+let options = {
     …
     classes: {
         <em>rootClass</em>: "fontsamplerjs",
@@ -529,73 +563,74 @@ var options = {
 
 
 
-    <h2 id="events-api">Events & API</h2>
-    <p>Fontsampler instances have a variety of methods and events for 
-        programmatic manipulation. To demo these, below Fontsampler shows all
-        events and exposes API methods as buttons.</p>
+        <h2 id="events-api">Events & API</h2>
+        <p>Fontsampler instances have a variety of methods and events for
+            programmatic manipulation. To demo these, below Fontsampler shows all
+            events and exposes API methods as buttons.</p>
 
-    <div id="demo-api" class="demo">Events & API demo</div>
+        <div id="demo-api" class="demo">Events & API demo</div>
 
-    <div class="split">
-        <div id="api-methods">
-            <button id="api-init">FS.init()</button>
-            <button id="api-destroy">FS.destroy()</button>
-            <br>
-            <select id="api-option">
-                <option value="fontsize">fontsize</option>
-                <option value="lineheight">leading</option>
-                <option value="wght">weight</option>
-            </select>
-            <input id="api-value" type="text"></input>
-            <button id="api-set">FS.setValue(option, value)</button>
-            <button id="api-get">FS.getValue(option)</button>
-            <br>
-            <button id="api-options-minimal">Set minimal options</button>
-            <button id="api-options-extended">Set extended options</button>
-            <br>
-            <input id="api-text" type="text"><button id="api-set-text">Update text</button>
-            <br>
-            <button id="api-show-font">Switch to font number</button>
-            <select>
-                <option value="0">1</option>
-                <option value="1">2</option>
-                <option value="3">3</option>
-            </select>
+        <div class="split">
+            <div id="api-methods">
+                <button id="api-init">FS.init()</button>
+                <button id="api-destroy">FS.destroy()</button>
+                <br>
+                <select id="api-option">
+                    <option value="fontsize">fontsize</option>
+                    <option value="lineheight">leading</option>
+                    <option value="wght">weight</option>
+                </select>
+                <input id="api-value" type="text"></input>
+                <button id="api-set">FS.setValue(option, value)</button>
+                <button id="api-get">FS.getValue(option)</button>
+                <br>
+                <button id="api-options-minimal">Set minimal options</button>
+                <button id="api-options-extended">Set extended options</button>
+                <br>
+                <input id="api-text" type="text"><button id="api-set-text">Update text</button>
+                <br>
+                <button id="api-show-font">Switch to font number</button>
+                <select>
+                    <option value="0">1</option>
+                    <option value="1">2</option>
+                    <option value="3">3</option>
+                </select>
+            </div>
+            <div id="eventlog"></div>
         </div>
-        <div id="eventlog"></div>
-    </div>
 
-    <script src="assets/demo-api.js"></script>
+        <script src="assets/demo-api.js"></script>
 
 
 
-    <h2 id="misc">Miscellaneous other samples</h2>
-    <h3 id="fallback-font">Fallback font</h3>
-    <p>You can define the name of a <em>font-family</em> to serve as fallback 
-        font for characters not supported by the current webfont. This can be 
-        a browser default font, or a webfont you know is loaded on the page
-        regardless of Fontsampler.</p>
+        <h2 id="misc">Miscellaneous other samples</h2>
+        <h3 id="fallback-font">Fallback font</h3>
+        <p>You can define the name of a <em>font-family</em> to serve as fallback
+            font for characters not supported by the current webfont. This can be
+            a browser default font, or a webfont you know is loaded on the page
+            regardless of Fontsampler.</p>
 
-<code>var fonts = [{
+        <code>let fonts = [{
     "name": "Alegreya Regular", 
     "files": ["./fonts/alegreya/alegreya-v12-latin-regular.woff"],
     <em>"fallback": "Arial"</em>
 }]
 </code>
-    
-    <div id="demo-fallback" class="demo">These Hebrew characters in parenthesis (מִבְחָן) are rendered in Arial, because the webfont does not support them.</div>
-    <script src="assets/demo-fallback.js"></script>
-    
 
-    <h3 id="lazyloading">Lazyloading</h3>
-    <p>Setting the <em>lazyload</em> option to <em>true</em> Fontsampler will initiate with the first
-        font and then preload any other fonts in the Fontsampler in the background.
-        If the font is switched before all fonts have loaded the requested font will
-        be the next to be loaded and displayed.
-    </p> 
+        <div id="demo-fallback" class="demo">These Hebrew characters in parenthesis (מִבְחָן) are rendered in Arial,
+            because the webfont does not support them.</div>
+        <script src="assets/demo-fallback.js"></script>
 
-    <code>&lt;script&gt;
-var options = {
+
+        <h3 id="lazyloading">Lazyloading</h3>
+        <p>Setting the <em>lazyload</em> option to <em>true</em> Fontsampler will initiate with the first
+            font and then preload any other fonts in the Fontsampler in the background.
+            If the font is switched before all fonts have loaded the requested font will
+            be the next to be loaded and displayed.
+        </p>
+
+        <code>&lt;script&gt;
+let options = {
     <em>lazyload: true</em>
 }
 …
@@ -603,24 +638,30 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
 &lt;/script&gt;
     </code>
 
-    <p>By default Fontsampler JS only loads the fonts on display as needed, always
-        initiating with the first font. If a Fontsampler has more than one fonts,
-        the other fonts are only loaded when a user selects them.
-    </p>
-    <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser developer tools’ network throttling and network tab to see what’s going on).</p>
-    
-    
-    <h3 id="inserting-dom-elements">Inserting DOM elements</h3>
-    <p>If you have a need to insert some custom DOM node into the Fontsampler
-        UI, for example to implement some additional custom UI control, you can
-        pass in a reference to a <em>HTMLElement</em>.</p>
-    
-    <button id="custom-button" onclick="window.alert('Custom button clicked');">Custom button</button>
-    <img id="custom-image" src="assets/underscore-logo.svg">
-    <div id="demo-custom-elements" class="demo">Hello World</div>
-    <script src="assets/demo-custom-elements.js"></script>
+        <p>By default Fontsampler JS only loads the fonts on display as needed, always
+            initiating with the first font. If a Fontsampler has more than one fonts,
+            the other fonts are only loaded when a user selects them.
+        </p>
+        <p>See the <a href="./lazyload.html">lazyloading example page</a> (use your browser developer tools’ network
+            throttling and network tab to see what’s going on).</p>
 
-    <code>&lt;!-- somewhere outside the Fontsampler DOM node --&gt;
+
+        <h3 id="inserting-dom-elements">Inserting DOM elements</h3>
+        <p>If you have a need to insert some custom DOM node into the Fontsampler
+            UI, for example to implement some additional custom UI control or
+            insert a link or decorative element. You can pass in a reference to
+            any <em>HTMLElement</em> and insert that node in the <em>order</em>
+            at the location you would like it rendered. The node is removed from
+            the DOM Tree and re-inserted in the rendered Fontsampler wrapped in
+            a <em>div</em> which inherits the original node’ id! Apply
+            custom styling as needed.</p>
+
+        <button id="custom-button" onclick="window.alert('Custom button clicked');">Custom button</button>
+        <img id="custom-image" src="assets/underscore-logo.svg">
+        <div id="demo-custom-elements" class="demo">Hello custom DOM elements</div>
+        <script src="assets/demo-custom-elements.js"></script>
+
+        <code>&lt;!-- somewhere outside the Fontsampler DOM node --&gt;
 &lt;button id="<em>custom-bottom</em>"&gt;Custom button&lt;/button&gt;
 &lt;img id="<em>custom-image</em>" src="…" /&gt;
 
@@ -629,12 +670,12 @@ new Fontsampler(document.getElementById("demo"), fonts, <em>options</em>).init()
 &lt;script&gt;
 <i>// Get the HTMLElement (use getElementById, querySelector, etc.)</i>
 <i>// It is important to pass in a single node, not an Array/Selection</i>
-var <em>customButton</em> = document.getElementById("<em>custom-button</em>")
-var <em>customImage</em> = document.getElementById("<em>custom-image</em>")
+let <em>customButton</em> = document.getElementById("<em>custom-button</em>")
+let <em>customImage</em> = document.getElementById("<em>custom-image</em>")
 
-var fonts = […]
+let fonts = […]
 
-var options = {
+let options = {
     order: [
         <i>// Note that you are passing a reference to the actual HTMLElement, not its id!</i>
         [<em>customImage</em>, "fontsize", "lineheight"],
@@ -645,22 +686,15 @@ var options = {
 
 new Fontsampler(document.getElementById("demo"), fonts, options).init()
 &lt;/script&gt;</code>
-    
-    
-    <!--
-    
 
-    <h3 id="variable-font">Variable font support</h3>
-    <p>Fontsampler supports Variable Fonts and has a built in ui element for displaying any
-        number of custom axes defined in the options.
-    </p>
-
-    <p>See the <a href="./variable.html">variable font example page</a> for examples.</p> -->
     </main>
+
+
     <footer>
-        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg" alt="Underscore"></a>
+        <a class="underscore-logo" href="//underscoretype.com"><img src="assets/underscore-logo.svg"
+                alt="Underscore"></a>
         fontsampler-js is brought to you by Underscore<br>
-        &copy; 2019-2020 Johannes 'kontur' Neumeier<br>
+        &copy; 2019-2022 Johannes 'kontur' Neumeier<br>
         <p><a href="../LICENCE.txt">Licensed under MIT License</a></p>
     </footer>
 

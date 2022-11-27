@@ -5,22 +5,66 @@ window.addEventListener("load", function () {
 
     var fonts = [
         {
-            "name": "Work Sans",
-            "files": [
-                "./fonts/work-sans/WorkSans-Roman-VF.woff2"
-            ],
-            // "instances": [
-            //     "wght 250|Work Sans Thin",
-            //     "wght 275|Work Sans ExtraLight",
-            //     "wght 300|Work Sans Light",
-            //     "wght 400|Work Sans Regular",
-            //     "wght 500|Work Sans Medium",
-            //     "wght 600|Work Sans SemiBold",
-            //     "wght 700|Work Sans Bold",
-            //     "wght 800|Work Sans ExtraBold",
-            //     "wght 900|Work Sans Black"
-            // ],
-            "language": "ar-afb",
+            "name": "Work Sans Thin",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 250 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans ExtraLight",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 275 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans Light",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 300 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans Regular",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 400 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans Medium",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 500 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans SemiBold",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 600 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans Bold",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 700 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans ExtraBold",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 800 },
+            "language": "en-GB",
+            "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Work Sans Black",
+            "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
+            "instance": { wght: 900 },
+            "language": "en-GB",
             "features": ["rlig", "calt"]
         },
         {
@@ -38,8 +82,6 @@ window.addEventListener("load", function () {
     ]
 
     var options = {
-        
-        // initialText: "",
 
         multiline: true,
 
@@ -159,7 +201,7 @@ window.addEventListener("load", function () {
     
     var fs = new Fontsampler(document.getElementById("demo-all"), fonts, options)
     fs.addEventListener("fontsampler.events.valuechanged", function (e) {
-        console.error("CHANGE", e.detail)
+        console.debug("valuechanged event triggered", e.detail)
     })
     FontsamplerSkin(fs)
     fs.init()

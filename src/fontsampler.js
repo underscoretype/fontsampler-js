@@ -50,7 +50,7 @@ function Fontsampler(_root, _fonts, _options) {
         throw new Error(errors.missingRoot + _root)
     }
     
-    if (!Array.isArray(_fonts) || _fonts.length < 1) {
+    if (!Array.isArray(_fonts) || _fonts.length < 1) {
         throw new Error(errors.missingFonts)
     }
     this.root = _root
@@ -66,27 +66,12 @@ function Fontsampler(_root, _fonts, _options) {
 
 
     function parseFonts(fonts) {
-        // FIXME review or ditch
-        // var extractedFonts = helpers.extractFontsFromDOM(this.root)
-
-        // // Extract fonts; Look first on root element, then on select, then in
-        // // passed in fonts Array
-        // if ((!fonts || fonts.length < 1) && extractedFonts) {
-        //     fonts = extractedFonts
-        // }
-        // if (!fonts) {
-        //     throw new Error(errors.noFonts)
-        // }
-        // if (!helpers.validateFontsFormatting(fonts)) {
-        //     console.error(fonts)
-        //     throw new Error(errors.initFontFormatting)
-        // }
 
         // Store each font's axes and parse instance definitions into obj form
         for (var i = 0; i < fonts.length; i++) {
-            var font = fonts[i]
+            var font = fonts[i];
 
-            if ("instance" in Object.keys(font)) {
+            if (Object.keys(font).indexOf("instance") !== -1) {
                 font.instance = helpers.parseVariation(font.instance)
                 font.axes = Object.keys(font.instance)
             } else {
@@ -233,9 +218,9 @@ function Fontsampler(_root, _fonts, _options) {
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
-        if ("variation" in that.currentFont === true) {
-            for (var tag in that.currentFont.variation) {
-                ui.setValue(tag, that.currentFont.variation[tag])
+        if ("instance" in that.currentFont === true) {
+            for (var tag in that.currentFont.instance) {
+                ui.setValue(tag, that.currentFont.instance[tag])
             }
         }
 
@@ -330,7 +315,7 @@ function Fontsampler(_root, _fonts, _options) {
      */
     this.showFont = function(indexOrKey) {
         console.debug("Fontsampler.showFont", indexOrKey)
-        var font
+        var font;
 
         preloader.pause()
         ui.setStatusClass(options.classes.loadingClass, true)

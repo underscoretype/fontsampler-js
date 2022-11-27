@@ -98,9 +98,12 @@ module.exports = {
             label: "Opentype features",
             render: true,
         },
-        // variation: {
-        //     axes: [],
-        //     render: true
-        // }
+        wght: {
+            init: 400,
+            min: 250,
+            max: 900,
+            step: 10,
+            label: "Weight",
+        }
     }
 }

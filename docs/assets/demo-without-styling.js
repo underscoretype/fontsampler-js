@@ -34,6 +34,10 @@ window.addEventListener("load", function () {
 
     }
     
-    var fs = new Fontsampler(document.getElementById("example-without-styling"), fonts, options)
-    fs.init()
+    let nodes = document.querySelectorAll(".example-without-styling")
+
+    nodes.forEach(node => {
+        var fs = new Fontsampler(node, fonts, options)
+        fs.init()
+    })
 })
