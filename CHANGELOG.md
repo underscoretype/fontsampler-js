@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.1.0 (WIP)
+## 0.1.2 (8 Mar 2024)
+
+- Implemented way to reuse CSS fontface declaration already on loading on the page
+
+## 0.1.1 (28 Jul 2023)
+
+- Fixed an issue with wght defaults
+
+## 0.1.0 (27 Nov 2022)
 
 - Refactored font instantiation format
 - Refactored options instantiation format
