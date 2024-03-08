@@ -170,6 +170,10 @@ function bestWoff(files) {
 function parseVariation(stringOrObj) {
     var variations = {},
         parts;
+
+    if (stringOrObj === "normal") {
+        return {}
+    }
         
     if (typeof(stringOrObj) === "string" && stringOrObj.trim() !== "") {
         // split all declarations by commas, then parse each axis to value pair
@@ -195,11 +199,75 @@ function parseVariation(stringOrObj) {
     return variations
 }
 
+/**
+ * For a given CSS class retrieve the used font-family.
+ * 
+ * @param {*} cls 
+ */
+function getFamilyFromCSSClass(cls) {
+    span = pseudoElement(cls)
+    
+    const family = getComputedStyle(span).fontFamily;
+    document.querySelector("body").removeChild(span)
+
+    return family
+}
+
+
+function pseudoElement(cls, hasWidth, additionalStyles) {
+    const body = document.querySelector("body"),
+        span = document.createElement("span");
+
+    span.className = cls
+    span.style.position = "absolute"
+    span.style.left = "-1000px"
+    span.style.top = "-1000px"
+    span.style.height = "0"
+    
+    if (!!hasWidth) {
+        span.style.width = "auto"
+        span.style.overflow = "auto"
+    } else {
+        span.style.width = "0"
+        span.style.overflow = "hidden"
+    }
+
+    if (typeof(additionalStyles) === "object") {
+        for (let attr in additionalStyles) {
+            span.style[attr] = additionalStyles[attr]
+        }
+    }
+
+    body.appendChild(span)
+
+    return span
+}
+
+function variationString(obj, ignore) {
+    let variationSettings = "normal",
+        axes = [];
+
+    for (let axis in obj) {
+        if (ignore && ignore.length > 0) {
+            if (ignore.indexOf(axis) !== -1) {
+                continue
+            }
+        }
+        axes.push('"' + axis + '" ' + obj[axis])
+    }
+    variationSettings = axes.join(",")
+
+    return variationSettings
+}
+
 module.exports = {
     getExtension: getExtension,   
     parseParts: parseParts,
     validateFontsFormatting: validateFontsFormatting,
     extractFontsFromDOM: extractFontsFromDOM,
     bestWoff: bestWoff,
-    parseVariation: parseVariation
+    parseVariation: parseVariation,
+    pseudoElement: pseudoElement,
+    getFamilyFromCSSClass: getFamilyFromCSSClass,
+    variationString: variationString,
 }

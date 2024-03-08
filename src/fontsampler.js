@@ -25,8 +25,8 @@ var supports = require("./helpers/supports")
 /**
  * The main constructor for setting up a new Fontsampler instance
  * @param Node root 
- * @param Object | null fonts 
- * @param Object | null opt 
+ * @param Object | null fonts
+ * @param Object | null opt
  */
 function Fontsampler(_root, _fonts, _options) {
     console.debug("Fontsampler()", _root, _fonts, _options)
@@ -66,16 +66,36 @@ function Fontsampler(_root, _fonts, _options) {
 
 
     function parseFonts(fonts) {
-
-        // Store each font's axes and parse instance definitions into obj form
+        
+        // Store each font, axes and parse instance definitions into obj form
         for (var i = 0; i < fonts.length; i++) {
             var font = fonts[i];
 
-            if (Object.keys(font).indexOf("instance") !== -1) {
+            if ("instance" in font) {
                 font.instance = helpers.parseVariation(font.instance)
                 font.axes = Object.keys(font.instance)
             } else {
                 font.axes = []
+            }
+
+            if (!("style" in font)) {
+                font.style = "normal"
+            }
+
+            if (!("weight" in font)) {
+                font.weight = 400
+                
+                // Set font weight implicitly from instance
+                if ("instance" in font && "wght" in font.instance) {
+                    font.weight = font.instance["wght"]
+                }
+            }
+
+            if (!("family" in font)) {
+                let family = file.substring(file.lastIndexOf("/") + 1);
+
+                family = family.substring(0, family.lastIndexOf("."))
+                font.family = family.replace(/\W/gm, "")
             }
         }
 
@@ -204,17 +224,36 @@ function Fontsampler(_root, _fonts, _options) {
      * has received this update (e.g. dropdown select of a variable
      * font instance)
      */
-    function initFont(fontface) {
-        that.currentFont.fontface = fontface
+    // function initFont(fontface) {
+    function initFont(font) {
+        var family = ""
+        let fontface = font.fontface;
 
         ui.setStatusClass(options.classes.loadingClass, false)
 
+        // Try show a font by using a predefined 'cls'
+        if ("cls" in that.currentFont && that.currentFont.cls) {
+            console.debug("Fontsampler.initFont with class", that.currentFont.cls)
+            ui.setInputCss("fontStyle", font.style || "normal")
+            ui.setInputCss("fontWeight", font.weight || "normal")
+            ui.setInputCss("fontFamily", "")
+            ui.setFontClass(that.currentFont.cls)
+            family = that.currentFont["font-family"]
+            
+        } else {
+            console.debug("Fontsampler.initFont without class", that.currentFont)
+            that.currentFont.fontface = fontface
+            ui.setInputCss("fontFamily", fontface.family)
+            ui.setInputCss("fontStyle", fontface.style || "normal")
+            ui.setInputCss("fontWeight", fontface.weight || "normal")
+            ui.setFontClass("")
+            family = fontface.family
+        }
+
         // Update the css font family
-        var family = fontface.family
         if ("fallback" in that.currentFont) {
             family += "," + that.currentFont.fallback
         }
-        ui.setInputCss("fontFamily", family)
 
         // Update active axes and set variation of this instance
         ui.setActiveAxes(that.currentFont.axes)
@@ -274,7 +313,7 @@ function Fontsampler(_root, _fonts, _options) {
                     axesInits[key] = options.config[key].init
                 }
             }
-            if (axesInits !== {}) {
+            if (Object.keys(axesInits).length === 0) {
                 function setAxesInits() {
                     for (var axis in axesInits) {
                         ui.setValue(axis, axesInits[axis])
@@ -325,6 +364,7 @@ function Fontsampler(_root, _fonts, _options) {
             font = fonts.filter(function(value, index) {
                 return fonts[index].name === indexOrKey
             }).pop()
+
             // If no font or instance of that name is found in fonts default to first
             if (!font) {
                 console.warn("Fontsampler.showFont(" + indexOrKey + ") - font not found, using first font.", fonts)
@@ -340,14 +380,15 @@ function Fontsampler(_root, _fonts, _options) {
             // of the currentFont
             font.fontface = this.currentFont.fontface
             this.currentFont = font
-            initFont(this.currentFont.fontface)
+            initFont(this.currentFont)
 
         } else {
             // Load a new font file
             this.currentFont = font
 
             // The actual font load
-            Fontloader.fromFiles(font.files, function(fontface) {
+            Fontloader.fromFiles(font, function(fontface) {
+
                 var fjson = JSON.stringify(fontface)
 
                 if (that.loadedFonts.indexOf(fjson) === -1) {
@@ -355,7 +396,7 @@ function Fontsampler(_root, _fonts, _options) {
                     _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))
                 }
 
-                initFont(fontface)
+                initFont(font)
             }, function( /* fontface */ ) {
                 ui.setStatusClass(options.classes.loadingClass, false)
                 ui.setStatusClass(options.classes.timeoutClass, true)

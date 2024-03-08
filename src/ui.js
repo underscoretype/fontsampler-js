@@ -223,7 +223,7 @@ function UI(fs, fonts, options) {
             return wrapper
         } else {
             // Skipping not defined UI element
-            console.warn("Skipping unspecified 'order' item, not a known Fontsampler JS element nor a valid DOM node: " + key)
+            console.warn("Skipping unspecified order item, not a known Fontsampler JS element nor a valid DOM node: " + key)
 
             return false
         }
@@ -1097,6 +1097,16 @@ function UI(fs, fonts, options) {
         }
     }
 
+    function setFontClass(classString) {
+        if (input.dataset.fontClass) {
+            dom.nodeRemoveClass(input, input.dataset.fontClass)
+        }
+        if (classString) {
+            input.dataset.fontClass = classString
+            dom.nodeAddClass(input, classString)
+        }
+    }
+
     return {
         init: init,
         getValue: getValue,
@@ -1113,6 +1123,7 @@ function UI(fs, fonts, options) {
         setInputOpentype: setInputOpentype,
         // setInputVariation: setInputVariation,
         setInputText: setInputText,
+        setFontClass: setFontClass,
 
         setStatusClass: setStatusClass,
 

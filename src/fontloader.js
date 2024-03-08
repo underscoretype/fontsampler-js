@@ -5,6 +5,28 @@ var helpers = require("./helpers/helpers")
 
 
 /**
+ * Helper to generate a unique string for a fontface with given parameters.
+ * 
+ * @param {*} family 
+ * @param {*} weight 
+ * @param {*} fontstyle 
+ * @param {*} variations 
+ * @returns {str} like ACMEFOnt-100-normal-normal-wght-100
+ */
+function ffSignature(family, weight, fontstyle, variations) {
+    let vars = "normal"
+    if (variations && variations !== "normal") {
+        vars = ""
+        variations = helpers.parseVariation(variations)
+        Object.keys(variations).sort().forEach((axis) => {
+            vars += axis + "-" + variations[axis]
+        })
+    }
+    let id = [family.replace(/[^A-z0-9-]/gi, ""), weight, fontstyle, vars].join("-")
+    return id
+}
+
+/**
  * To avoid initiating simultanouse file load requests for the same font file
  * orchestrate font loading through this global load queuer
  */
@@ -12,36 +34,43 @@ function GlobalLoader() {
 
     var queue = [], // array of loading fonts
         done = {}, // object with fontface objects
-        callbacks = {} // object with family name index and lists of success/error
-        // callbacks to do when loaded
+        callbacks = {}; // object with family name index and lists of success/error
 
-    function onFontDone(family, file, success, error, timeout) {
+    function onFontDone(font, file, success, error, timeout) {
 
         // If Is font loaded? -> to cb responses, return true
         // El Is font loading? -> add responses to queue, return true
         // El Add font to loading, add responses to queue, return false (init loading)
 
-        if (family in done === true) {
-            // font is loaded
-            if (done[family].isLoaded === true) {
-                success(done[family])
-            } else {
-                error(done[family])
-            }
+        let id = ffSignature(font.family, font.weight, font.style, font.instance || "normal")
 
-        } else if (queue.indexOf(family) !== -1) {
-            // font in load queue but not loaded
-            callbacks[family].success.push(success)
-            callbacks[family].error.push(error)
+        if (id in done === true) {
+            console.debug("GlobalLoader.onFontDone: ID already in done")
+            // Font is loaded already, just trigger the callback according to the result of the
+            // load.
+            if (done[id].isLoaded === true) {
+                success(done[id])
+            } else {
+                error(done[id])
+            }
+            
+        } else if (queue.indexOf(id) !== -1) {
+            console.debug("GlobalLoader.onFontDone: ID queued")
+            // Font in load queue but not loaded, let the original loading happen and add this
+            // call to the callbacks for once it loads.
+            callbacks[id].success.push(success)
+            callbacks[id].error.push(error)
 
         } else {
-            queue.push(family)
-            callbacks[family] = {
+            console.debug("GlobalLoader.onFontDone: ID neither done yet nor queued, add to callbacks")
+            // Default case for a new font, add callbacks, then proceed to load it.
+            queue.push(id)
+            callbacks[id] = {
                 success: [success],
                 error: [error]
             }
 
-            load(family, file, timeout)
+            load(font, file, timeout)
         }
     }
 
@@ -49,22 +78,30 @@ function GlobalLoader() {
      * When a font is loaded remove it from the queue, call all listeners’
      * callbacks and save it’s FontFace in `done` for later-coming requests
      * 
-     * @param {obj} fontface 
+     * @param {obj} fontface (actual fontface object or just a mock object with same attributes)
+     * @param {str} _id - can optionally be provided to overwrite the ffSignature generated from
+     *      the passed in fontface (e.g. ignore/force 'wght')
      */
-    function onSuccess(fontface) {
+    function onSuccess(fontface, _id) {
+        console.debug("GlobalLoader.onSuccess", fontface)
+        let id = _id;
 
-        queue.splice(queue.indexOf(fontface.family), 1)
+        if (typeof(_id) === "undefined") {
+            id = ffSignature(fontface.family, fontface.weight, fontface.style, fontface.variationSettings)
+        }
+
+        queue.splice(queue.indexOf(id), 1)
 
         // Order matters here; the callbacks might rely on this family
         // as being marked loaded (e.g. lazyloading)
         fontface.isLoaded = true
-        done[fontface.family] = fontface
+        done[id] = fontface
 
-        if (fontface.family in callbacks && "success" in callbacks[fontface.family]) {
-            for (var i = 0; i < callbacks[fontface.family].success.length; i++) {
-                callbacks[fontface.family].success[i](fontface)
+        if (id in callbacks && "success" in callbacks[id]) {
+            for (var i = 0; i < callbacks[id].success.length; i++) {
+                callbacks[id].success[i](fontface)
             }
-            callbacks[fontface.family] = {}
+            callbacks[id] = {}
         }
     }
 
@@ -79,37 +116,183 @@ function GlobalLoader() {
     /**
      * The actual load logic with FontFace API or @font-face fallback
      * 
-     * @param {str} family 
+     * @param {obj} font 
      * @param {str} file 
      * @param {int} timeout 
      */
-    function load(family, file, timeout) {
+    async function load(font, file, timeout) {
+        console.debug("GlobalLoader.load", font, file)
+
+        let ff;
+
         if (typeof(timeout) === "undefined") {
             timeout = 3000
         }
 
-        if ("FontFace" in window) {
-            var ff = new FontFace(family, "url(" + file + ")", {})
-            ff.load().then(function() {
-                document.fonts.add(ff)
-                onSuccess(ff)
-            }, function(e) {
-                onError(family, file, e)
-            })
-        } else {
-            // Fallback to loading via @font-face and manually inserted style tag
-            // Utlize the FontFaceObserver to detect when the font is available
-            var font = new FontFaceObserver(family)
-            font.load(null, timeout).then(function(ff) {
-                onSuccess(ff)
-            }, function(e) {
-                onError(family, file, e)
+        // Get any fonts defined so far, e.g. via CSS, so we can check if a
+        // CSS-defined font has the same parameters as a fontsampler font, and
+        // if so reuse that Fontface instead of creating a duplicate (and
+        // loading the same file twice!)
+        let variationSettings = "normal";
+        if ("instance" in font) {
+            variationSettings = helpers.variationString(font.instance, ["wght"])
+        }
+
+        // User supplied a cls and family to use for this font. Let's check
+        // if this class is defined and renders with a the same family.
+        if ("cls" in font) {
+
+            const fontFaceSet = await document.fonts.ready,
+                fontFaces = [... fontFaceSet];
+
+            // By process of elimination go through all declared (but possibly unloaded)
+            // font face declarations. Check each one if all parameters are a match for the
+            // font we're looking to load.
+            const match = fontFaces.filter((f) => {
+                // Parsing the font families can be a bit iffy, e.g.
+                // font-family: "ACME Sans"
+                // will return '"ACME Sans"' (with the extra quotes)
+                // To get around this check for matches ignoring any quotes
+                // and if matched, explicitly overwrite the CSS definitions
+                // font-family value to the FS font declaration
+                let fplain = f.family.replace(/["']/gi, ""),
+                    familyplain = font.family.replace(/["']/gi, "");
+                
+
+                if (fplain !== familyplain) {
+                    return false
+                }
+
+                if ("style" in f && font.style.toLowerCase() !== f.style.toLowerCase()) {
+                    return false
+                }
+
+                if ("weight" in f) {
+                    let w = parseFloat(f.weight)
+                    // Weight could be 
+                    // font-weight: xxx
+                    // font-weight: normal|bold
+                    // (we're ignoring lighter and bolder, those don't make sense in this context)
+                    // font-weight: xxx xxx
+
+                    // Deal with keyword weights;
+                    if (f.weight.toLowerCase() === "normal") {
+                        f.weight = 400
+                        w = 400.0
+                    }
+                    if (f.weight.toLowerCase() === "bold") {
+                        f.weight = 700
+                        w = 700.0
+                    }
+                    
+                    // Check if weight was specified as two integers
+                    const wghtVals = [... f.weight.matchAll(/(\d+)\s+(\d+)/gi)]
+                    
+                    if (wghtVals.length !== 0 && wghtVals[0].length === 3) {
+                        const min = parseFloat(wghtVals[1]),
+                            max = parseFloat(wghtVals[2]);
+                        
+                        if (min > w || max < w) {
+                            return false
+                        } else {
+                        }
+                    } else if (w !== parseFloat(font.weight)) {
+                        // Last resort, was is a single integer, and does it match?
+                        return false
+                    }
+                }
+
+                return true
             })
 
-            var newStyle = document.createElement("style");
-            newStyle.appendChild(document.createTextNode("@font-face { font-family: '" + family + "'; src: url('" + file + "'); }"));
-            document.head.appendChild(newStyle);
+            
+            // The provided 'cls' and 'family' match with a CSS font face declaration. To avoid 
+            // double loading the file (with JS Fontface API) we perform some tests to determine if the font
+            // has in face loaded (with a timeout of 3000ms).
+            // If nothing was matched, or if the cls based declaration did not in fact result in
+            // a loaded font, fall through and use JS Fontface API.
+            if (match.length > 0) {
+                
+                if (match.length > 1) {
+                    console.warn("Matching fontsampler font cls to fontface returned more than one match, using first:", match)
+                }
+                
+                ff = match[0]
+
+                console.debug("Matched a CSS font face declaration for font", font, ff)
+
+                const plain = helpers.pseudoElement("", true, { "fontWeight": font.weight, "fontFamily": "monospace"}),
+                    withCls = helpers.pseudoElement(font.cls, true, { "fontWeight": font.weight }),
+                    abortAfter = Date.now() + timeout;
+                    
+                let clsLoaded = false;
+
+                // fontfaceobserver uses this string... it may be more suitable than others
+                plain.innerText = "BESbswy"
+                withCls.innerText = "BESbswy"
+
+                await new Promise((resolve, reject) => {
+                    function check() {
+                        if (Date.now() > abortAfter) {
+                            console.warn("Exceeded timeout, mark font ", font, "as loaded")
+                            // No need to catch the reject, not-setting clsLoaded is the flag we need
+                            reject()
+                            return
+                        }
+
+                        if (Math.round(plain.getBoundingClientRect().width * 100) !== Math.round(withCls.getBoundingClientRect().width * 100)) {
+                            clsLoaded = true
+                            resolve()
+                            return
+                        }
+
+                        setTimeout(check, 10)
+                    }
+                    check()
+                })
+
+                plain.parentElement.removeChild(plain)
+                withCls.parentElement.removeChild(withCls)
+                
+                if (clsLoaded) {
+                    if ("instance" in font) {
+                        variationSettings = helpers.variationString(font.instance)
+                    }
+
+                    // Pass explicit signature including the original variationSettings
+                    const id = ffSignature(ff.family, font.weight, ff.style, variationSettings)
+                    
+                    // The fontface was a match, and it is loaded (via CSS) now, so call success
+                    onSuccess(ff, id)
+                    
+                    return
+                }
+
+                console.warn("Font with 'cls' " + font.cls + " didn't load, loading as new Fontface.")
+                font.cls = false
+            } else {
+                console.warn("Font with 'cls' " + font.cls + " didn't match any CSS font-face, loading as new Fontface.")
+                font.cls = false
+            }
         }
+        
+        // else: not returned above, not using a 'cls' to possible match, so use 
+        // FontFace API to load the font and trigger success/error.
+        
+        ff = new FontFace(font.family, "url(" + file + ")", {
+            variationSettings: helpers.variationString(font.instance) || "normal", 
+            style: font.style,
+            weight: font.weight,
+        })
+        font.fontface = ff
+
+        document.fonts.add(ff)
+
+        ff.load().then(function() {
+            onSuccess(ff)
+        }, function(e) {
+            onError(ff.family, file, e)
+        })
     }
 
     return {
@@ -117,20 +300,15 @@ function GlobalLoader() {
     }
 }
 
-function loadFont(file, callback, error, timeout) {
-    if (!file) {
-        return false
-    }
+function loadFont(font, callback, error, timeout) {
 
-    var family = file.substring(file.lastIndexOf("/") + 1)
-    family = family.substring(0, family.lastIndexOf("."))
-    family = family.replace(/\W/gm, "")
+    const file = helpers.bestWoff(font.files)
 
     // Create or get global Loader queuer, append request
     if ("FontsamplerFontloader" in window === false) {
         window.FontsamplerFontloader = GlobalLoader()
     }
-    window.FontsamplerFontloader.onFontDone(family, file, callback, error, timeout)
+    window.FontsamplerFontloader.onFontDone(font, file, callback, error, timeout)
 }
 
 /**
@@ -142,8 +320,7 @@ function loadFont(file, callback, error, timeout) {
  * @param {object} error 
  * @param {int} timeout 
  */
-function fromFiles(files, callback, error, timeout) {
-    font = helpers.bestWoff(files)
+function fromFiles(font, callback, error, timeout) {    
     loadFont(font, callback, error, timeout)
 }
 
