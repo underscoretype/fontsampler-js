@@ -83,7 +83,7 @@ function GlobalLoader() {
      *      the passed in fontface (e.g. ignore/force 'wght')
      */
     function onSuccess(fontface, _id) {
-        console.debug("GlobalLoader.onSuccess", fontface)
+        console.debug("GlobalLoader.onSuccess", fontface, fontface.variationSettings, _id)
         let id = _id;
 
         if (typeof(_id) === "undefined") {
@@ -280,6 +280,7 @@ function GlobalLoader() {
         // else: not returned above, not using a 'cls' to possible match, so use 
         // FontFace API to load the font and trigger success/error.
         
+
         ff = new FontFace(font.family, "url(" + file + ")", {
             variationSettings: helpers.variationString(font.instance) || "normal", 
             style: font.style,
@@ -289,8 +290,14 @@ function GlobalLoader() {
 
         document.fonts.add(ff)
 
+        if ("instance" in font) {
+            variationSettings = helpers.variationString(font.instance)
+        }
+
         ff.load().then(function() {
-            onSuccess(ff)
+            // Explicitly pass id, since fontface.variationSettings isn't widely supported yet
+            const id = ffSignature(ff.family, font.weight, ff.style, variationSettings)
+            onSuccess(ff, id)
         }, function(e) {
             onError(ff.family, file, e)
         })

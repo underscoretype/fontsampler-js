@@ -4,6 +4,7 @@
 
 - Fixed bug where same files in different Fontsamplers failed to load properly
 - Removed rangeslider dependency from Skin
+- Fixed a webkit load issue stemming from lack of FontFace.variationSettings support
 
 ## 0.1.2 (8 Mar 2024)
 

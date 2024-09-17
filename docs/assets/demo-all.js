@@ -5,6 +5,16 @@ window.addEventListener("load", function () {
 
     var fonts = [
         {
+            "name": "Inter Text Thin",
+            "files": ["./fonts/inter/InterVariable.woff2"],
+            "instance": { wght: 100, opsz: 14}
+        },
+        {
+            "name": "Inter Display Black",
+            "files": ["./fonts/inter/InterVariable.woff2"],
+            "instance": { wght: 900, opsz: 32}
+        },
+        {
             "name": "Work Sans Thin",
             "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
             "instance": { wght: 250 },
