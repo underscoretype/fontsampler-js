@@ -45,23 +45,23 @@ function Skin(FS) {
                     const w = slider.getBoundingClientRect().width,
                         x = Math.max(0, Math.min(w, e.layerX)),
                         percent = x / w,
-                        min = parseFloat(slider.min),
-                        max = parseFloat(slider.max),
-                        step = parseFloat(slider.step),
+                        min = parseFloat(slider.min) || 1, // _some_ defaults
+                        max = parseFloat(slider.max) || 1000, // _some_ defaults
+                        step = parseFloat(slider.step) || 1, // _some_ defaults
                         step_decimals = utils.countDecimals(slider.step),
                         range = min < max ? max - min : min - max;
-                        
-                        let key = slider.dataset.fsjs,
-                            value;
 
-                        value = Math.round((min + (percent * range)) / step) * step;
+                    let key = slider.dataset.fsjs,
+                        value;
 
-                        if (step_decimals > 0) {
-                            value = value.toPrecision(step_decimals)
-                        }
-                        
+                    value = Math.round((min + (percent * range)) / step) * step;
+                    
+                    if (step_decimals > 0) {
+                        value = value.toPrecision(step_decimals)
+                    }
+
                     // Catch special case for variable font axis sliders
-                    if (typeof(key) === "undefined") {
+                    if (typeof (key) === "undefined") {
                         let key = slider.dataset.axis;
                         opt[key] = value
                         FS.setValue("variation", opt)
@@ -81,7 +81,7 @@ function Skin(FS) {
                     mobile: true
                 })
                 dropdowns.push(dropdown)
-                
+
                 // listen for and trigger updates on native change event on select
                 selectInputs[i].dataset.i = i
                 selectInputs[i].addEventListener("change", function () {
@@ -97,21 +97,6 @@ function Skin(FS) {
             }
         }))
     }
-
-    function updateSlider(position /*, value*/ ) {
-        let key = this.element.dataset.fsjs,
-            opt = {};
-
-        // Catch special case for variable font axis sliders
-        if (typeof(key) === "undefined") {
-            key = this.element.dataset.axis
-            opt[key] = position
-            FS.setValue("variation", opt)
-        } else {
-            FS.setValue(key, position)
-        }
-    }
-
 }
 
 module.exports = Skin

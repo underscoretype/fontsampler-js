@@ -2446,6 +2446,9 @@ function UI(fs, fonts, options) {
     }
 
     function _updateSlider(key, value) {
+        if (isNaN(value)) {
+            return
+        }
         var element = getElement(key)
         if (parseFloat(element.value) !== parseFloat(value)) {
             element.value = value
