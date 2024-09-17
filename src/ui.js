@@ -266,7 +266,7 @@ function UI(fs, fonts, options) {
             if (opt.label && labelValue) {
                 // Select all on focus
                 labelValue.addEventListener("focus", function (e) {
-                    window.getSelection().selectAllChildren( e.currentTarget );
+                    window.getSelection().selectAllChildren(e.currentTarget);
                 })
 
                 // Limit typing input to apply only when within min max
@@ -275,7 +275,7 @@ function UI(fs, fonts, options) {
                     if (val > opt.min && val < opt.max) {
                         setValue(key, val)
                     }
-                    
+
                 })
 
                 // On blur clamp value to winthin min max
@@ -508,18 +508,29 @@ function UI(fs, fonts, options) {
     }
 
     function getDefaultVariations() {
-        var variations = false
-        if ("ui" in options && "variation" in options.config && "axes" in options.config.variation) {
-            variations = {}
-            for (var i in options.config.variation.axes) {
-                var o = options.config.variation.axes[i]
-                variations[o.tag] = o.init
-            }
-            return variations
-        } else {
+        let variations = {}
 
+        axes = getAxisKeys()
+        if (axes.length === 0) {
             return {}
         }
+        for (let a in axes) {
+            const axis = axes[a]
+            if (axis in options.config) {
+                const opt = options.config[axis];
+
+                if ("init" in opt) {
+                    variations[axis] = opt.init
+                } else if ("min" in opt) {
+                    variations[axis] = opt.min
+                } else if ("max" in opt) {
+                    variations[axis] = opt.max
+                } else {
+                    variations[axis] = 0
+                }
+            }
+        }
+        return variations
     }
 
     function getElement(key, node) {
@@ -957,11 +968,65 @@ function UI(fs, fonts, options) {
         input.style["font-feature-settings"] = val
     }
 
+    function variationCssToObject(css) {
+        // console.log("variationCssToObject", css)
+        if (!css) {
+            return {}
+        }
+        let parts = [],
+            obj = {};
+
+        if (css.indexOf(",") === -1) {
+            parts = [css]
+        } else {
+            parts = css.split(",")
+        }
+
+        parts.forEach((p) => {
+            // remove all quotes
+            p = p.replace(/'|"/gm, "")
+
+            // get first 4 letters
+            let axis = p.match(/([A-z]{4})/)[0]
+
+            // get numeric value
+            let value = p.replace(/[^\-0-9.,]*/, "")
+
+            obj[axis] = value
+        })
+
+        return obj
+    }
+
+    function variationObjectToCss(obj) {
+        let values = []
+        Object.keys(obj).forEach((axis) => {
+            values.push("'" + axis + "' " + obj[axis])
+        })
+        return values.join(", ")
+    }
+
+    function getInputVariations(node) {
+        let cs = getComputedStyle(node),
+            current = variationCssToObject(cs.getPropertyValue("font-variation-settings"));
+
+        return current;
+    }
+
     function setInputVariation(variations) {
         var parsed = []
-        for (var key in variations) {
-            if (variations.hasOwnProperty(key) && key && typeof (key) !== "undefined") {
-                parsed.push('"' + key + '" ' + (variations[key]))
+
+        // Whatever the passed in variations, make sure to also default values
+        // for any axes not passed in.
+        const defaults = getDefaultVariations()
+        const current = getInputVariations(input)
+        const merged = Object.assign(defaults, current, variations)
+
+        // Now loop all variations, defaults and passed in ones, and compile
+        // a CSS string
+        for (var key in merged) {
+            if (merged.hasOwnProperty(key) && key && typeof (key) !== "undefined") {
+                parsed.push('"' + key + '" ' + (merged[key]))
             }
         }
         val = parsed.join(",")

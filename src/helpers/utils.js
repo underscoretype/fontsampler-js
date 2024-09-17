@@ -59,8 +59,13 @@ function arrayUnique(a) {
  * @returns 
  */
 function countDecimals(value) {
-    if ((value % 1) != 0)
-        return value.toString().split(".")[1].length;
+    try {
+        if ((value % 1) != 0) {
+            return value.toString().split(".")[1].length;
+        }
+    } catch (e) {
+        return 0
+    }
     return 0;
 };
 
