@@ -612,7 +612,7 @@ module.exports = {
  * A configurable standalone webfont type tester for displaying and manipulating sample text.
  * 
  * @author Johannes Neumeier <hello@underscoretype.com>
- * @copyright 2019-2022 Johannes Neumeier
+ * @copyright 2019-2024 Johannes Neumeier
  * @license GNU GPLv3
  */
 var extend = _dereq_("../node_modules/extend")
