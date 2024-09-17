@@ -45,7 +45,7 @@ function GlobalLoader() {
         let id = ffSignature(font.family, font.weight, font.style, font.instance || "normal")
 
         if (id in done === true) {
-            console.debug("GlobalLoader.onFontDone: ID already in done")
+            console.debug("GlobalLoader.onFontDone: ID already in done", id)
             // Font is loaded already, just trigger the callback according to the result of the
             // load.
             if (done[id].isLoaded === true) {
@@ -55,14 +55,14 @@ function GlobalLoader() {
             }
             
         } else if (queue.indexOf(id) !== -1) {
-            console.debug("GlobalLoader.onFontDone: ID queued")
+            console.debug("GlobalLoader.onFontDone: ID queued", id)
             // Font in load queue but not loaded, let the original loading happen and add this
             // call to the callbacks for once it loads.
             callbacks[id].success.push(success)
             callbacks[id].error.push(error)
 
         } else {
-            console.debug("GlobalLoader.onFontDone: ID neither done yet nor queued, add to callbacks")
+            console.debug("GlobalLoader.onFontDone: ID neither done yet nor queued, add to callbacks", id)
             // Default case for a new font, add callbacks, then proceed to load it.
             queue.push(id)
             callbacks[id] = {
@@ -99,6 +99,7 @@ function GlobalLoader() {
 
         if (id in callbacks && "success" in callbacks[id]) {
             for (var i = 0; i < callbacks[id].success.length; i++) {
+                console.debug("GlobalLoader, success callback", callbacks[id].success[i], fontface)
                 callbacks[id].success[i](fontface)
             }
             callbacks[id] = {}
@@ -139,7 +140,7 @@ function GlobalLoader() {
         }
 
         // User supplied a cls and family to use for this font. Let's check
-        // if this class is defined and renders with a the same family.
+        // if this class is defined and renders with the given family name.
         if ("cls" in font) {
 
             const fontFaceSet = await document.fonts.ready,
@@ -208,7 +209,7 @@ function GlobalLoader() {
             
             // The provided 'cls' and 'family' match with a CSS font face declaration. To avoid 
             // double loading the file (with JS Fontface API) we perform some tests to determine if the font
-            // has in face loaded (with a timeout of 3000ms).
+            // has in fact loaded (with a timeout of 3000ms).
             // If nothing was matched, or if the cls based declaration did not in fact result in
             // a loaded font, fall through and use JS Fontface API.
             if (match.length > 0) {
@@ -227,7 +228,7 @@ function GlobalLoader() {
                     
                 let clsLoaded = false;
 
-                // fontfaceobserver uses this string... it may be more suitable than others
+                // fontfaceobserver uses this string... it may be more suitable than others, or not
                 plain.innerText = "BESbswy"
                 withCls.innerText = "BESbswy"
 

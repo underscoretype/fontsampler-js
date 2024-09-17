@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.1.3 (12 Sep 2024)
+
+- Fixed bug where same files in different Fontsamplers failed to load properly
+
 ## 0.1.2 (8 Mar 2024)
 
-- Implemented way to reuse CSS fontface declaration already on loading on the page
+- Implemented way to reuse CSS fontface declarations already on the page
 
 ## 0.1.1 (28 Jul 2023)
 

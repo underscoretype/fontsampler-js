@@ -65,11 +65,11 @@ function Fontsampler(_root, _fonts, _options) {
     ui = Interface(this, fonts, options)
 
 
-    function parseFonts(fonts) {
+    function parseFonts(font_definitions) {
         
         // Store each font, axes and parse instance definitions into obj form
-        for (var i = 0; i < fonts.length; i++) {
-            var font = fonts[i];
+        for (var i = 0; i < font_definitions.length; i++) {
+            var font = font_definitions[i];
 
             if ("instance" in font) {
                 font.instance = helpers.parseVariation(font.instance)
@@ -91,15 +91,21 @@ function Fontsampler(_root, _fonts, _options) {
                 }
             }
 
-            if (!("family" in font)) {
-                let family = file.substring(file.lastIndexOf("/") + 1);
+            if (!("family" in font) && font.files) {                
+                for (let i = 0; i < font.files.length; i++) {
+                    let f = font.files[i];
+                    let family = f.substring(f.lastIndexOf("/") + 1);
+                    family = family.substring(0, family.lastIndexOf("."))
 
-                family = family.substring(0, family.lastIndexOf("."))
-                font.family = family.replace(/\W/gm, "")
+                    if (family) {
+                        font.family = family.replace(/\W/gm, "")
+                        break
+                    }
+                }
             }
         }
 
-        return fonts
+        return font_definitions
     }
 
     /**
@@ -241,7 +247,7 @@ function Fontsampler(_root, _fonts, _options) {
             family = that.currentFont["font-family"]
             
         } else {
-            console.debug("Fontsampler.initFont without class", that.currentFont)
+            console.debug("Fontsampler.initFont without class", that.currentFont, fontface)
             that.currentFont.fontface = fontface
             ui.setInputCss("fontFamily", fontface.family)
             ui.setInputCss("fontStyle", fontface.style || "normal")
@@ -389,8 +395,15 @@ function Fontsampler(_root, _fonts, _options) {
             // The actual font load
             Fontloader.fromFiles(font, function(fontface) {
 
-                var fjson = JSON.stringify(fontface)
+                font.fontface = fontface
 
+                // Generate a unique string for this fontface, cache as loaded
+                var fjson = {};
+                for (let k in fontface) {
+                    fjson[k] = fontface[k]
+                }
+                fjson = JSON.stringify(fjson)
+                
                 if (that.loadedFonts.indexOf(fjson) === -1) {
                     that.loadedFonts.push(fjson)
                     _root.dispatchEvent(new CustomEvent(events.fontLoaded, { detail: fontface }))

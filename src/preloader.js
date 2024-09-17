@@ -36,7 +36,7 @@ function Preloader() {
 
     function loadNext() {
         if (queue.length > 0 && autoload) {
-            Fontloader.fromFiles(queue[0].files, function () {
+            Fontloader.fromFiles(queue[0], function () {
                 queue.shift()
 
                 if (queue.length === 0 && finishedCallback) {
