@@ -52,7 +52,8 @@ $elementMargin: 5px !default;
 
     // Overwrite included libraries’ and polyfill’s styling
     @import "_dropkick";
-    @import "_rangeslider";
+    // @import "_rangeslider";
+    @import "_fontsampler.sliders";
 
     .fsjs-disabled {
         .fsjs-label {

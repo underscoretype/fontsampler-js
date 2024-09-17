@@ -1,7 +1,7 @@
-var rangeSlider = require("../node_modules/rangeslider-pure/dist/range-slider")
-var Dropkick = require("../node_modules/dropkickjs/dist/dropkick").default
-var events = require("./constants/events")
-var dom = require("./helpers/dom")
+const Dropkick = require("../node_modules/dropkickjs/dist/dropkick").default
+const events = require("./constants/events")
+const dom = require("./helpers/dom")
+const utils = require("./helpers/utils")
 
 function Skin(FS) {
 
@@ -17,22 +17,67 @@ function Skin(FS) {
 
         dom.nodeAddClass(FS.root, "fsjs-skin")
 
-        var rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-ui='slider']")
+        const rangeInputs = FS.root.querySelectorAll("input[type=range][data-fsjs-ui='slider']")
         if (rangeInputs.length) {
-            rangeSlider.create(rangeInputs, {
-                polyfill: true,
-                // utilise the more granular events offered by the skin
-                // default html range inputs only trigger on change
-                onSlide: updateSlider,
-                onSlideEnd: updateSlider
+            // rangeSlider.create(rangeInputs, {
+            //     polyfill: true,
+            //     // utilise the more granular events offered by the skin
+            //     // default html range inputs only trigger on change
+            //     onSlide: updateSlider,
+            //     onSlideEnd: updateSlider
+            // })
+            rangeInputs.forEach(slider => {
+                let mouseDown = false;
+
+                slider.addEventListener("mousedown", function () {
+                    mouseDown = true
+                })
+
+                slider.addEventListener("mouseup", function () {
+                    mouseDown = false
+                })
+
+                slider.addEventListener("mousemove", function (e) {
+                    if (!mouseDown) {
+                        return
+                    }
+
+                    const w = slider.getBoundingClientRect().width,
+                        x = Math.max(0, Math.min(w, e.layerX)),
+                        percent = x / w,
+                        min = parseFloat(slider.min),
+                        max = parseFloat(slider.max),
+                        step = parseFloat(slider.step),
+                        step_decimals = utils.countDecimals(slider.step),
+                        range = min < max ? max - min : min - max;
+                        
+                        let key = slider.dataset.fsjs,
+                            value;
+
+                        value = Math.round((min + (percent * range)) / step) * step;
+
+                        if (step_decimals > 0) {
+                            value = value.toPrecision(step_decimals)
+                        }
+                        
+                    // Catch special case for variable font axis sliders
+                    if (typeof(key) === "undefined") {
+                        let key = slider.dataset.axis;
+                        opt[key] = value
+                        FS.setValue("variation", opt)
+                    } else {
+                        FS.setValue(key, value)
+                    }
+
+                })
             })
         }
 
-        var selectInputs = FS.root.querySelectorAll("select[data-fsjs-ui='dropdown']")
-        var dropdowns = []
+        const selectInputs = FS.root.querySelectorAll("select[data-fsjs-ui='dropdown']")
+        let dropdowns = []
         if (selectInputs.length) {
-            for (var i = 0; i < selectInputs.length; i++) {
-                var dropdown = new Dropkick(selectInputs[i], {
+            for (let i = 0; i < selectInputs.length; i++) {
+                let dropdown = new Dropkick(selectInputs[i], {
                     mobile: true
                 })
                 dropdowns.push(dropdown)
@@ -54,7 +99,7 @@ function Skin(FS) {
     }
 
     function updateSlider(position /*, value*/ ) {
-        var key = this.element.dataset.fsjs,
+        let key = this.element.dataset.fsjs,
             opt = {};
 
         // Catch special case for variable font axis sliders

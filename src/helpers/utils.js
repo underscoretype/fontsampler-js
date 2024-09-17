@@ -15,7 +15,7 @@ function clamp(value, min, max, fallback) {
     max = parseFloat(max)
 
     if (isNaN(value) || isNaN(min) || isNaN(max)) {
-        if (typeof(fallback) !== "undefined") {
+        if (typeof (fallback) !== "undefined") {
             value = fallback
         } else {
             return value
@@ -33,7 +33,7 @@ function clamp(value, min, max, fallback) {
  */
 function flattenDeep(array) {
     try {
-        return array.reduce(function(acc, current) {
+        return array.reduce(function (acc, current) {
             return Array.isArray(current) ? acc.concat(flattenDeep(current)) : acc.concat([current]);
         }, []);
     } catch (e) {
@@ -46,13 +46,27 @@ function arrayUnique(a) {
     if (!Array.isArray(a)) {
         return false
     }
-    return a.filter(function(value, index, self) {
+    return a.filter(function (value, index, self) {
         return self.indexOf(value) === index
     }, a)
 }
 
+
+/**
+ * Via https://stackoverflow.com/a/17369384/999162
+ * 
+ * @param {*} value 
+ * @returns 
+ */
+function countDecimals(value) {
+    if ((value % 1) != 0)
+        return value.toString().split(".")[1].length;
+    return 0;
+};
+
 module.exports = {
     flattenDeep: flattenDeep,
     arrayUnique: arrayUnique,
-    clamp: clamp
+    clamp: clamp,
+    countDecimals: countDecimals
 }

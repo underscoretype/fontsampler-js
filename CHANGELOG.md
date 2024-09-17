@@ -3,6 +3,7 @@
 ## 0.1.3 (12 Sep 2024)
 
 - Fixed bug where same files in different Fontsamplers failed to load properly
+- Removed rangeslider dependency from Skin
 
 ## 0.1.2 (8 Mar 2024)
 
