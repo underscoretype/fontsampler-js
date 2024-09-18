@@ -979,6 +979,8 @@ function UI(fs, fonts, options) {
         let cs = getComputedStyle(node),
             current = variationCssToObject(cs.getPropertyValue("font-variation-settings"));
 
+        delete current["norm"]
+
         return current;
     }
 

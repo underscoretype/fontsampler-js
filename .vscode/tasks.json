@@ -60,7 +60,7 @@
     {
       "label": "npm run sync docs",
       "type": "npm",
-      "script": "sync docs",
+      "script": "sync-docs",
       "runOptions": {
         "runOn": "folderOpen"
       }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5 (18 Sep 2024)
+
+- Smaller fixes
+
 ## 0.1.4 (18 Sep 2024)
 
 - Fix variable slider being reset by browser "norm" value for `variation`
