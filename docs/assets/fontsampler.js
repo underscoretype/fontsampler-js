@@ -2687,6 +2687,8 @@ function UI(fs, fonts, options) {
         let cs = getComputedStyle(node),
             current = variationCssToObject(cs.getPropertyValue("font-variation-settings"));
 
+        delete current["norm"]
+
         return current;
     }
 
@@ -2696,7 +2698,9 @@ function UI(fs, fonts, options) {
         // Whatever the passed in variations, make sure to also default values
         // for any axes not passed in.
         const defaults = getDefaultVariations()
+        console.log("defaults", defaults)
         const current = getInputVariations(input)
+        console.log("current", current)
         const merged = Object.assign(defaults, current, variations)
 
         // Now loop all variations, defaults and passed in ones, and compile
@@ -2707,6 +2711,8 @@ function UI(fs, fonts, options) {
             }
         }
         val = parsed.join(",")
+
+        console.log("VAL", val, input, variations)
 
         input.style["font-variation-settings"] = val
 

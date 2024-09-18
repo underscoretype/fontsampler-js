@@ -37,9 +37,9 @@ detailed examples.
 
 A minimal example:
 
-    <script src="../dist/fontsampler.js"></script>
-    <script src="../dist/fontsampler-skin.js"></script>
-    <link rel="stylesheet" href="../dist/fontsampler-skin.css">
+    <script src="assets/fontsampler.js"></script>
+    <script src="assets/fontsampler-skin.js"></script>
+    <link rel="stylesheet" href="assets/fontsampler-skin.css">
     …
     <div id="demo"></div>
     …

@@ -56,6 +56,14 @@
       "runOptions": {
         "runOn": "folderOpen"
       }
-    }
+    },
+    {
+      "label": "npm run sync docs",
+      "type": "npm",
+      "script": "sync docs",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    },
   ]
 }

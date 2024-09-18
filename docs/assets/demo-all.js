@@ -5,16 +5,6 @@ window.addEventListener("load", function () {
 
     var fonts = [
         {
-            "name": "Inter Text Thin",
-            "files": ["./fonts/inter/InterVariable.woff2"],
-            "instance": { wght: 100, opsz: 14}
-        },
-        {
-            "name": "Inter Display Black",
-            "files": ["./fonts/inter/InterVariable.woff2"],
-            "instance": { wght: 900, opsz: 32}
-        },
-        {
             "name": "Work Sans Thin",
             "files": ["./fonts/work-sans/WorkSans-Roman-VF.woff2"],
             "instance": { wght: 250 },
@@ -76,6 +66,16 @@ window.addEventListener("load", function () {
             "instance": { wght: 900 },
             "language": "en-GB",
             "features": ["rlig", "calt"]
+        },
+        {
+            "name": "Inter Text Thin",
+            "files": ["./fonts/inter/InterVariable.woff2"],
+            "instance": { wght: 100, opsz: 14}
+        },
+        {
+            "name": "Inter Display Black",
+            "files": ["./fonts/inter/InterVariable.woff2"],
+            "instance": { wght: 900, opsz: 32}
         },
         {
             "name": "Alegreya Regular", 
@@ -147,9 +147,9 @@ window.addEventListener("load", function () {
             letterspacing: {
                 unit: "em",
                 init: 0,
-                min: -1,
-                max: 1,
-                step: 0.05,
+                min: -0.1,
+                max: 0.1,
+                step: 0.001,
                 label: "Letterspacing"
             },
 

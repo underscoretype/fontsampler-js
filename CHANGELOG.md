@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.1.3 (12 Sep 2024)
+## 0.1.4 (18 Sep 2024)
+
+- Fix variable slider being reset by browser "norm" value for `variation`
+- Fixed docs syncing from github repo
+
+## 0.1.3 (17 Sep 2024)
 
 - Fixed bug where same files in different Fontsamplers failed to load properly
 - Removed rangeslider dependency from Skin

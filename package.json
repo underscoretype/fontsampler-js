@@ -1,6 +1,6 @@
 {
     "name": "fontsampler-js",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "description": "Render configurable webfont testers for woff / woff2 / variable fonts",
     "keywords": [
         "webfont",
@@ -31,7 +31,8 @@
         "js-skin": "watchify src/skin.js -o 'derequire > dist/fontsampler-skin.js' -v -s 'FontsamplerSkin'",
         "js-skin-compressed": "watchify src/skin.js -o 'derequire | uglifyjs > dist/fontsampler-skin.min.js' -v -s 'FontsamplerSkin'",
         "scss": "sass --watch scss/fontsampler-skin.scss:dist/fontsampler-skin.css",
-        "scss-compressed": "sass --watch --style compressed scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css"
+        "scss-compressed": "sass --watch --style compressed scss/fontsampler-skin.scss:dist/fontsampler-skin.min.css",
+        "sync-docs": "syndir dist docs/assets --watch"
     },
     "dependencies": {
         "dropkickjs": "^2.2.4",
@@ -46,6 +47,7 @@
         "jasmine": "^3.4.0",
         "jasmine-ts-console-reporter": "^3.1.1",
         "protractor": "^7.0.0",
+        "sync-directory": "^6.0.5",
         "uglifyjs": "^2.4.11",
         "watchify": "^4.0.0"
     }
